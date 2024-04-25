@@ -5,6 +5,10 @@ import at.asitplus.jsonpath.JsonPathFilterExpressionValue
 import at.asitplus.jsonpath.JsonPathFunctionExtension
 import kotlinx.serialization.json.JsonPrimitive
 
+/*
+specification: https://datatracker.ietf.org/doc/rfc9535/
+section: 2.4.6.  match() Function Extension
+ */
 data object MatchFunctionExtension : JsonPathFunctionExtension.LogicalTypeFunctionExtension(
     name = "match",
     argumentTypes = listOf(

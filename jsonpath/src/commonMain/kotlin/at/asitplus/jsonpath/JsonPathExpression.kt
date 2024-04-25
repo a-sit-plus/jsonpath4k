@@ -2,6 +2,7 @@ package at.asitplus.jsonpath
 
 import at.asitplus.wallet.lib.data.jsonpath.JsonPathSelector
 
+
 sealed interface JsonPathExpression {
 
     sealed class FilterExpression(

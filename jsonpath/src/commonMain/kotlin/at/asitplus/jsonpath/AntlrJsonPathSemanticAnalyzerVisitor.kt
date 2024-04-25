@@ -13,6 +13,9 @@ import kotlinx.serialization.json.longOrNull
 import org.antlr.v4.kotlinruntime.ParserRuleContext
 import org.antlr.v4.kotlinruntime.tree.TerminalNode
 
+/*
+This class builds an abstract syntax tree where the nodes contain the logic necessary to be evaluated against an input.
+ */
 class AntlrJsonPathSemanticAnalyzerVisitor(
     private val errorListener: AntlrJsonPathSemanticAnalyzerErrorListener?,
     private val functionExtensionRetriever: (String) -> JsonPathFunctionExtension<*>?,
@@ -197,7 +200,7 @@ class AntlrJsonPathSemanticAnalyzerVisitor(
             context = ctx,
             value = if (selectorExpressionChildren.size == children.size) {
                 JsonPathExpression.SelectorExpression(
-                    JsonPathSelector.UnionSelector(
+                    JsonPathSelector.BracketedSelector(
                         selectorExpressionChildren.map { it.selector }
                     )
                 )

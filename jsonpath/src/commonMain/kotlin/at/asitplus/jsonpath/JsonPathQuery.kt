@@ -34,7 +34,7 @@ class JsonPathSelectorQuery(
     }
 
     val isSingularQuery: Boolean
-        get() = selectors.all {
+        get() = selectors.all { // 2.3.5.1.  Syntax: https://datatracker.ietf.org/doc/rfc9535/
             when(it) {
                 JsonPathSelector.RootSelector,
                 JsonPathSelector.CurrentNodeSelector,

@@ -2,6 +2,10 @@ package at.asitplus.jsonpath
 
 import kotlinx.serialization.json.JsonElement
 
+/*
+specification: https://datatracker.ietf.org/doc/rfc9535/
+section: 2.4.1.  Type System for Function Expressions
+ */
 sealed interface JsonPathFilterExpressionValue {
     val expressionType: JsonPathFilterExpressionType
 

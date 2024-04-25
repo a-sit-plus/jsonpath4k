@@ -6,6 +6,10 @@ import at.asitplus.jsonpath.JsonPathFunctionExtension
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.json.JsonPrimitive
 
+/*
+specification: https://datatracker.ietf.org/doc/rfc9535/
+section: 2.4.5.  count() Function Extension
+ */
 @OptIn(ExperimentalSerializationApi::class)
 data object CountFunctionExtension : JsonPathFunctionExtension.ValueTypeFunctionExtension(
     name = "count",

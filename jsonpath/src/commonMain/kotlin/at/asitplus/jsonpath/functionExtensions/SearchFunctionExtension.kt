@@ -5,7 +5,10 @@ import at.asitplus.jsonpath.JsonPathFilterExpressionValue
 import at.asitplus.jsonpath.JsonPathFunctionExtension
 import kotlinx.serialization.json.JsonPrimitive
 
-
+/*
+specification: https://datatracker.ietf.org/doc/rfc9535/
+section: 2.4.7.  search() Function Extension
+ */
 data object SearchFunctionExtension : JsonPathFunctionExtension.LogicalTypeFunctionExtension(
     name = "search",
     argumentTypes = listOf(

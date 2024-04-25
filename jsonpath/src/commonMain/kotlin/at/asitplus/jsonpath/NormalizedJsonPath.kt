@@ -1,5 +1,9 @@
 package at.asitplus.jsonpath
 
+/*
+specification: https://datatracker.ietf.org/doc/rfc9535/
+section: 2.7.  Normalized Paths
+ */
 class NormalizedJsonPath(
     val segments: List<NormalizedJsonPathSegment> = listOf(),
 ) {

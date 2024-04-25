@@ -1,5 +1,9 @@
 package at.asitplus.jsonpath
 
+/*
+specification: https://datatracker.ietf.org/doc/rfc9535/
+section: 2.4.  Function Extensions
+ */
 sealed class JsonPathFunctionExtension<ReturnType : JsonPathFilterExpressionValue>(
     val name: String,
     val argumentTypes: List<JsonPathFilterExpressionType>,

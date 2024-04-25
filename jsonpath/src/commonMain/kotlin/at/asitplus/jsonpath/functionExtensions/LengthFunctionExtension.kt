@@ -9,6 +9,10 @@ import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
 
+/*
+specification: https://datatracker.ietf.org/doc/rfc9535/
+section: 2.4.4.  length() Function Extension
+ */
 @OptIn(ExperimentalSerializationApi::class)
 data object LengthFunctionExtension : JsonPathFunctionExtension.ValueTypeFunctionExtension(
     name = "length",
