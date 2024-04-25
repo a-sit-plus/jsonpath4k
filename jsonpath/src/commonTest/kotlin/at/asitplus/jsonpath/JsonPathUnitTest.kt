@@ -794,9 +794,9 @@ class JsonPathUnitTest : FreeSpec({
                 defaultJsonPathFunctionExtensionManager.addExtension(
                     object: JsonPathFunctionExtension.NodesTypeFunctionExtension(
                         name = "foo",
-                        argumentTypes = listOf(JsonPathExpressionType.NodesType),
+                        argumentTypes = listOf(JsonPathFilterExpressionType.NodesType),
                     ) {
-                        override fun invoke(arguments: List<JsonPathExpressionValue>): JsonPathExpressionValue.NodesTypeValue.FunctionExtensionResult {
+                        override fun invoke(arguments: List<JsonPathFilterExpressionValue>): JsonPathFilterExpressionValue.NodesTypeValue.FunctionExtensionResult {
                             TODO("Not yet implemented")
                         }
                     }
@@ -825,9 +825,9 @@ class JsonPathUnitTest : FreeSpec({
                     defaultJsonPathFunctionExtensionManager.putExtension(
                         object: JsonPathFunctionExtension.LogicalTypeFunctionExtension(
                             name = "bar",
-                            argumentTypes = listOf(JsonPathExpressionType.LogicalType),
+                            argumentTypes = listOf(JsonPathFilterExpressionType.LogicalType),
                         ) {
-                            override fun invoke(arguments: List<JsonPathExpressionValue>): JsonPathExpressionValue.LogicalTypeValue {
+                            override fun invoke(arguments: List<JsonPathFilterExpressionValue>): JsonPathFilterExpressionValue.LogicalTypeValue {
                                 TODO("Not yet implemented")
                             }
                         }
@@ -840,9 +840,9 @@ class JsonPathUnitTest : FreeSpec({
                     defaultJsonPathFunctionExtensionManager.putExtension(
                         object: JsonPathFunctionExtension.LogicalTypeFunctionExtension(
                             name = "bar",
-                            argumentTypes = listOf(JsonPathExpressionType.ValueType),
+                            argumentTypes = listOf(JsonPathFilterExpressionType.ValueType),
                         ) {
-                            override fun invoke(arguments: List<JsonPathExpressionValue>): JsonPathExpressionValue.LogicalTypeValue {
+                            override fun invoke(arguments: List<JsonPathFilterExpressionValue>): JsonPathFilterExpressionValue.LogicalTypeValue {
                                 TODO("Not yet implemented")
                             }
                         }
@@ -855,9 +855,9 @@ class JsonPathUnitTest : FreeSpec({
                     defaultJsonPathFunctionExtensionManager.putExtension(
                         object: JsonPathFunctionExtension.LogicalTypeFunctionExtension(
                             name = "bar",
-                            argumentTypes = listOf(JsonPathExpressionType.NodesType),
+                            argumentTypes = listOf(JsonPathFilterExpressionType.NodesType),
                         ) {
-                            override fun invoke(arguments: List<JsonPathExpressionValue>): JsonPathExpressionValue.LogicalTypeValue {
+                            override fun invoke(arguments: List<JsonPathFilterExpressionValue>): JsonPathFilterExpressionValue.LogicalTypeValue {
                                 TODO("Not yet implemented")
                             }
                         }
@@ -872,9 +872,9 @@ class JsonPathUnitTest : FreeSpec({
                     defaultJsonPathFunctionExtensionManager.putExtension(
                         object: JsonPathFunctionExtension.LogicalTypeFunctionExtension(
                             name = "bnl",
-                            argumentTypes = listOf(JsonPathExpressionType.LogicalType),
+                            argumentTypes = listOf(JsonPathFilterExpressionType.LogicalType),
                         ) {
-                            override fun invoke(arguments: List<JsonPathExpressionValue>): JsonPathExpressionValue.LogicalTypeValue {
+                            override fun invoke(arguments: List<JsonPathFilterExpressionValue>): JsonPathFilterExpressionValue.LogicalTypeValue {
                                 TODO("Not yet implemented")
                             }
                         }
@@ -887,9 +887,9 @@ class JsonPathUnitTest : FreeSpec({
                     defaultJsonPathFunctionExtensionManager.putExtension(
                         object: JsonPathFunctionExtension.LogicalTypeFunctionExtension(
                             name = "bnl",
-                            argumentTypes = listOf(JsonPathExpressionType.ValueType),
+                            argumentTypes = listOf(JsonPathFilterExpressionType.ValueType),
                         ) {
-                            override fun invoke(arguments: List<JsonPathExpressionValue>): JsonPathExpressionValue.LogicalTypeValue {
+                            override fun invoke(arguments: List<JsonPathFilterExpressionValue>): JsonPathFilterExpressionValue.LogicalTypeValue {
                                 TODO("Not yet implemented")
                             }
                         }
@@ -902,9 +902,9 @@ class JsonPathUnitTest : FreeSpec({
                     defaultJsonPathFunctionExtensionManager.putExtension(
                         object: JsonPathFunctionExtension.LogicalTypeFunctionExtension(
                             name = "bnl",
-                            argumentTypes = listOf(JsonPathExpressionType.NodesType),
+                            argumentTypes = listOf(JsonPathFilterExpressionType.NodesType),
                         ) {
-                            override fun invoke(arguments: List<JsonPathExpressionValue>): JsonPathExpressionValue.LogicalTypeValue {
+                            override fun invoke(arguments: List<JsonPathFilterExpressionValue>): JsonPathFilterExpressionValue.LogicalTypeValue {
                                 TODO("Not yet implemented")
                             }
                         }
@@ -918,9 +918,9 @@ class JsonPathUnitTest : FreeSpec({
                 defaultJsonPathFunctionExtensionManager.putExtension(
                     object: JsonPathFunctionExtension.LogicalTypeFunctionExtension(
                         name = "blt",
-                        argumentTypes = listOf(JsonPathExpressionType.LogicalType),
+                        argumentTypes = listOf(JsonPathFilterExpressionType.LogicalType),
                     ) {
-                        override fun invoke(arguments: List<JsonPathExpressionValue>): JsonPathExpressionValue.LogicalTypeValue {
+                        override fun invoke(arguments: List<JsonPathFilterExpressionValue>): JsonPathFilterExpressionValue.LogicalTypeValue {
                             TODO("Not yet implemented")
                         }
                     }
@@ -933,9 +933,9 @@ class JsonPathUnitTest : FreeSpec({
                 defaultJsonPathFunctionExtensionManager.putExtension(
                     object: JsonPathFunctionExtension.LogicalTypeFunctionExtension(
                         name = "blt",
-                        argumentTypes = listOf(JsonPathExpressionType.LogicalType),
+                        argumentTypes = listOf(JsonPathFilterExpressionType.LogicalType),
                     ) {
-                        override fun invoke(arguments: List<JsonPathExpressionValue>): JsonPathExpressionValue.LogicalTypeValue {
+                        override fun invoke(arguments: List<JsonPathFilterExpressionValue>): JsonPathFilterExpressionValue.LogicalTypeValue {
                             TODO("Not yet implemented")
                         }
                     }
@@ -948,9 +948,9 @@ class JsonPathUnitTest : FreeSpec({
                 defaultJsonPathFunctionExtensionManager.putExtension(
                     object: JsonPathFunctionExtension.LogicalTypeFunctionExtension(
                         name = "bal",
-                        argumentTypes = listOf(JsonPathExpressionType.ValueType),
+                        argumentTypes = listOf(JsonPathFilterExpressionType.ValueType),
                     ) {
-                        override fun invoke(arguments: List<JsonPathExpressionValue>): JsonPathExpressionValue.LogicalTypeValue {
+                        override fun invoke(arguments: List<JsonPathFilterExpressionValue>): JsonPathFilterExpressionValue.LogicalTypeValue {
                             TODO("Not yet implemented")
                         }
                     }

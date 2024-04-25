@@ -21,7 +21,7 @@ val napierAntlrJsonPathCompilerErrorListener : AntlrJsonPathCompilerErrorListene
 
         override fun invalidArglistForFunctionExtension(
             functionExtension: JsonPathFunctionExtension<*>,
-            coercedArgumentTypes: List<JsonPathExpressionType?>
+            coercedArgumentTypes: List<JsonPathExpression?>
         ) {
             Napier.e(
                 "Invalid arguments for function extension \"${functionExtension.name}\": Expected: <${
@@ -30,6 +30,10 @@ val napierAntlrJsonPathCompilerErrorListener : AntlrJsonPathCompilerErrorListene
                     )
                 }>, but received <${coercedArgumentTypes.joinToString(", ")}>"
             )
+        }
+
+        override fun invalidTestExpression(testContextString: String) {
+            Napier.e("Invalid test expression: $testContextString")
         }
 
         override fun syntaxError(

@@ -1,26 +1,26 @@
 package at.asitplus.jsonpath.functionExtensions
 
-import at.asitplus.jsonpath.JsonPathExpressionType
-import at.asitplus.jsonpath.JsonPathExpressionValue
+import at.asitplus.jsonpath.JsonPathFilterExpressionType
+import at.asitplus.jsonpath.JsonPathFilterExpressionValue
 import at.asitplus.jsonpath.JsonPathFunctionExtension
 
 
 data object ValueFunctionExtension : JsonPathFunctionExtension.ValueTypeFunctionExtension(
     name = "value",
     argumentTypes = listOf(
-        JsonPathExpressionType.NodesType,
+        JsonPathFilterExpressionType.NodesType,
     )
 ) {
-    override fun invoke(arguments: List<JsonPathExpressionValue>): JsonPathExpressionValue.ValueTypeValue {
+    override fun invoke(arguments: List<JsonPathFilterExpressionValue>): JsonPathFilterExpressionValue.ValueTypeValue {
         super.validateArgumentTypes(arguments)
         return implementation(
-            nodesTypeValue = arguments[0] as JsonPathExpressionValue.NodesTypeValue
+            nodesTypeValue = arguments[0] as JsonPathFilterExpressionValue.NodesTypeValue
         )
     }
 
-    private fun implementation(nodesTypeValue: JsonPathExpressionValue.NodesTypeValue): JsonPathExpressionValue.ValueTypeValue {
+    private fun implementation(nodesTypeValue: JsonPathFilterExpressionValue.NodesTypeValue): JsonPathFilterExpressionValue.ValueTypeValue {
         return if (nodesTypeValue.nodeList.size == 1) {
-            JsonPathExpressionValue.ValueTypeValue.JsonValue(nodesTypeValue.nodeList[0])
-        } else JsonPathExpressionValue.ValueTypeValue.Nothing
+            JsonPathFilterExpressionValue.ValueTypeValue.JsonValue(nodesTypeValue.nodeList[0])
+        } else JsonPathFilterExpressionValue.ValueTypeValue.Nothing
     }
 }

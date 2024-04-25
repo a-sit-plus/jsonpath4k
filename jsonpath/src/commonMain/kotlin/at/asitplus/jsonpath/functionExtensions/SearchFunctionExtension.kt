@@ -1,7 +1,7 @@
 package at.asitplus.jsonpath.functionExtensions
 
-import at.asitplus.jsonpath.JsonPathExpressionType
-import at.asitplus.jsonpath.JsonPathExpressionValue
+import at.asitplus.jsonpath.JsonPathFilterExpressionType
+import at.asitplus.jsonpath.JsonPathFilterExpressionValue
 import at.asitplus.jsonpath.JsonPathFunctionExtension
 import kotlinx.serialization.json.JsonPrimitive
 
@@ -9,44 +9,44 @@ import kotlinx.serialization.json.JsonPrimitive
 data object SearchFunctionExtension : JsonPathFunctionExtension.LogicalTypeFunctionExtension(
     name = "search",
     argumentTypes = listOf(
-        JsonPathExpressionType.ValueType,
-        JsonPathExpressionType.ValueType,
+        JsonPathFilterExpressionType.ValueType,
+        JsonPathFilterExpressionType.ValueType,
     )
 ) {
-    override fun invoke(arguments: List<JsonPathExpressionValue>): JsonPathExpressionValue.LogicalTypeValue {
+    override fun invoke(arguments: List<JsonPathFilterExpressionValue>): JsonPathFilterExpressionValue.LogicalTypeValue {
         super.validateArgumentTypes(arguments)
         return implementation(
-            stringArgument = arguments[0] as JsonPathExpressionValue.ValueTypeValue,
-            regexArgument = arguments[1] as JsonPathExpressionValue.ValueTypeValue,
+            stringArgument = arguments[0] as JsonPathFilterExpressionValue.ValueTypeValue,
+            regexArgument = arguments[1] as JsonPathFilterExpressionValue.ValueTypeValue,
         )
     }
 
     private fun implementation(
-        stringArgument: JsonPathExpressionValue.ValueTypeValue,
-        regexArgument: JsonPathExpressionValue.ValueTypeValue,
-    ): JsonPathExpressionValue.LogicalTypeValue {
-        if(stringArgument !is JsonPathExpressionValue.ValueTypeValue.JsonValue) {
-            return JsonPathExpressionValue.LogicalTypeValue(false)
+        stringArgument: JsonPathFilterExpressionValue.ValueTypeValue,
+        regexArgument: JsonPathFilterExpressionValue.ValueTypeValue,
+    ): JsonPathFilterExpressionValue.LogicalTypeValue {
+        if(stringArgument !is JsonPathFilterExpressionValue.ValueTypeValue.JsonValue) {
+            return JsonPathFilterExpressionValue.LogicalTypeValue(false)
         }
-        if(regexArgument !is JsonPathExpressionValue.ValueTypeValue.JsonValue) {
-            return JsonPathExpressionValue.LogicalTypeValue(false)
+        if(regexArgument !is JsonPathFilterExpressionValue.ValueTypeValue.JsonValue) {
+            return JsonPathFilterExpressionValue.LogicalTypeValue(false)
         }
 
         val stringElement = stringArgument.jsonElement
         val regexElement = regexArgument.jsonElement
 
         if (stringElement !is JsonPrimitive) {
-            return JsonPathExpressionValue.LogicalTypeValue(false)
+            return JsonPathFilterExpressionValue.LogicalTypeValue(false)
         }
         if (regexElement !is JsonPrimitive) {
-            return JsonPathExpressionValue.LogicalTypeValue(false)
+            return JsonPathFilterExpressionValue.LogicalTypeValue(false)
         }
 
         if (stringElement.isString != true) {
-            return JsonPathExpressionValue.LogicalTypeValue(false)
+            return JsonPathFilterExpressionValue.LogicalTypeValue(false)
         }
         if (regexElement.isString != true) {
-            return JsonPathExpressionValue.LogicalTypeValue(false)
+            return JsonPathFilterExpressionValue.LogicalTypeValue(false)
         }
 
         val isMatch = try {
@@ -57,6 +57,6 @@ data object SearchFunctionExtension : JsonPathFunctionExtension.LogicalTypeFunct
             false
         }
 
-        return JsonPathExpressionValue.LogicalTypeValue(isMatch)
+        return JsonPathFilterExpressionValue.LogicalTypeValue(isMatch)
     }
 }

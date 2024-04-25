@@ -1,7 +1,5 @@
 package at.asitplus.jsonpath
 
-import at.asitplus.wallet.lib.data.jsonpath.AntlrJsonPathCompiler
-
 interface JsonPathCompiler {
     fun compile(jsonPath: String): JsonPathQuery
 }

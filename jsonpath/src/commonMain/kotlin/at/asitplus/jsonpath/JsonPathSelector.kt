@@ -1,5 +1,6 @@
 package at.asitplus.wallet.lib.data.jsonpath
 
+import at.asitplus.jsonpath.JsonPathEvaluationContext
 import at.asitplus.jsonpath.NodeList
 import at.asitplus.jsonpath.NodeListEntry
 import at.asitplus.jsonpath.NormalizedJsonPath
@@ -32,13 +33,27 @@ sealed interface JsonPathSelector {
             return listOf(
                 NodeListEntry(
                     normalizedJsonPath = NormalizedJsonPath(),
+                    value = rootNode
+                )
+            )
+        }
+    }
+
+    data object CurrentNodeSelector : JsonPathSelector {
+        override fun invoke(
+            currentNode: JsonElement,
+            rootNode: JsonElement,
+        ): NodeList {
+            return listOf(
+                NodeListEntry(
+                    normalizedJsonPath = NormalizedJsonPath(),
                     value = currentNode
                 )
             )
         }
     }
 
-    class MemberSelector(val memberName: String) : JsonPathSelector {
+    data class MemberSelector(val memberName: String) : JsonPathSelector {
         override fun invoke(
             currentNode: JsonElement,
             rootNode: JsonElement,
@@ -58,7 +73,7 @@ sealed interface JsonPathSelector {
         }
     }
 
-    class IndexSelector(val index: Int) : JsonPathSelector {
+    data class IndexSelector(val index: Int) : JsonPathSelector {
         override fun invoke(
             currentNode: JsonElement,
             rootNode: JsonElement,
@@ -113,7 +128,7 @@ sealed interface JsonPathSelector {
         }
     }
 
-    class UnionSelector(val selectors: List<JsonPathSelector>) : JsonPathSelector {
+    data class UnionSelector(val selectors: List<JsonPathSelector>) : JsonPathSelector {
         override fun invoke(
             currentNode: JsonElement,
             rootNode: JsonElement,
@@ -127,7 +142,7 @@ sealed interface JsonPathSelector {
         }
     }
 
-    class SliceSelector(
+    data class SliceSelector(
         val startInclusive: Int? = null,
         val endExclusive: Int? = null,
         val step: Int? = null,
@@ -200,7 +215,9 @@ sealed interface JsonPathSelector {
         }
     }
 
-    data object DescendantSelector : JsonPathSelector {
+    data class DescendantSelector(
+        val selector: JsonPathSelector,
+    ) : JsonPathSelector {
         override fun invoke(
             currentNode: JsonElement,
             rootNode: JsonElement,
@@ -210,10 +227,20 @@ sealed interface JsonPathSelector {
             return when (currentNode) {
                 is JsonPrimitive -> listOf()
 
-                is JsonArray -> RootSelector.invoke(
+                is JsonArray -> CurrentNodeSelector.invoke(
                     currentNode = currentNode,
                     rootNode = rootNode,
-                ) + currentNode.flatMapIndexed { index, childNode ->
+                ).flatMap { descendant ->
+                    selector.invoke(
+                        currentNode = descendant.value,
+                        rootNode = rootNode,
+                    ).map {
+                        NodeListEntry(
+                            normalizedJsonPath = descendant.normalizedJsonPath + it.normalizedJsonPath,
+                            value = it.value,
+                        )
+                    }
+                } + currentNode.flatMapIndexed { index, childNode ->
                     invoke(
                         currentNode = childNode,
                         rootNode = rootNode
@@ -225,10 +252,20 @@ sealed interface JsonPathSelector {
                     }
                 }
 
-                is JsonObject -> RootSelector.invoke(
+                is JsonObject -> CurrentNodeSelector.invoke(
                     currentNode = currentNode,
                     rootNode = rootNode,
-                ) + currentNode.flatMap { entry ->
+                ).flatMap { descendant ->
+                    selector.invoke(
+                        currentNode = descendant.value,
+                        rootNode = rootNode,
+                    ).map {
+                        NodeListEntry(
+                            normalizedJsonPath = descendant.normalizedJsonPath + it.normalizedJsonPath,
+                            value = it.value,
+                        )
+                    }
+                } + currentNode.flatMap { entry ->
                     invoke(entry.value, rootNode).map {
                         NodeListEntry(
                             normalizedJsonPath = NormalizedJsonPath(NameSegment(entry.key)) + it.normalizedJsonPath,
@@ -240,8 +277,8 @@ sealed interface JsonPathSelector {
         }
     }
 
-    class FilterSelector(
-        private val filterPredicate: FilterPredicate,
+    data class FilterSelector(
+        private val filterPredicate: (JsonPathEvaluationContext) -> Boolean,
     ) : JsonPathSelector {
         override fun invoke(
             currentNode: JsonElement,
@@ -265,17 +302,12 @@ sealed interface JsonPathSelector {
                 }
             }.filter {
                 filterPredicate.invoke(
-                    currentNode = it.value,
-                    rootNode = rootNode,
+                    JsonPathEvaluationContext(
+                        currentNode = it.value,
+                        rootNode = rootNode,
+                    )
                 )
             }
         }
     }
-}
-
-interface FilterPredicate {
-    fun invoke(
-        currentNode: JsonElement,
-        rootNode: JsonElement,
-    ): Boolean
 }

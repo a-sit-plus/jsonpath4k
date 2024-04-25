@@ -1,7 +1,7 @@
 package at.asitplus.jsonpath.functionExtensions
 
-import at.asitplus.jsonpath.JsonPathExpressionType
-import at.asitplus.jsonpath.JsonPathExpressionValue
+import at.asitplus.jsonpath.JsonPathFilterExpressionType
+import at.asitplus.jsonpath.JsonPathFilterExpressionValue
 import at.asitplus.jsonpath.JsonPathFunctionExtension
 import com.strumenta.antlrkotlin.runtime.ext.codePointIndices
 import kotlinx.serialization.ExperimentalSerializationApi
@@ -13,34 +13,34 @@ import kotlinx.serialization.json.JsonPrimitive
 data object LengthFunctionExtension : JsonPathFunctionExtension.ValueTypeFunctionExtension(
     name = "length",
     argumentTypes = listOf(
-        JsonPathExpressionType.ValueType,
+        JsonPathFilterExpressionType.ValueType,
     )
 ) {
-    override fun invoke(arguments: List<JsonPathExpressionValue>): JsonPathExpressionValue.ValueTypeValue {
+    override fun invoke(arguments: List<JsonPathFilterExpressionValue>): JsonPathFilterExpressionValue.ValueTypeValue {
         super.validateArgumentTypes(arguments)
         return implementation(
-            arguments[0] as JsonPathExpressionValue.ValueTypeValue
+            arguments[0] as JsonPathFilterExpressionValue.ValueTypeValue
         )
     }
 
-    private fun implementation(argument: JsonPathExpressionValue.ValueTypeValue): JsonPathExpressionValue.ValueTypeValue {
-        if (argument !is JsonPathExpressionValue.ValueTypeValue.JsonValue) {
-            return JsonPathExpressionValue.ValueTypeValue.Nothing
+    private fun implementation(argument: JsonPathFilterExpressionValue.ValueTypeValue): JsonPathFilterExpressionValue.ValueTypeValue {
+        if (argument !is JsonPathFilterExpressionValue.ValueTypeValue.JsonValue) {
+            return JsonPathFilterExpressionValue.ValueTypeValue.Nothing
         }
         return when (argument.jsonElement) {
-            is JsonArray -> JsonPathExpressionValue.ValueTypeValue.JsonValue(
+            is JsonArray -> JsonPathFilterExpressionValue.ValueTypeValue.JsonValue(
                 JsonPrimitive(argument.jsonElement.size.toUInt())
             )
 
-            is JsonObject -> JsonPathExpressionValue.ValueTypeValue.JsonValue(
+            is JsonObject -> JsonPathFilterExpressionValue.ValueTypeValue.JsonValue(
                 JsonPrimitive(argument.jsonElement.size.toUInt())
             )
 
             is JsonPrimitive -> if (argument.jsonElement.isString) {
-                JsonPathExpressionValue.ValueTypeValue.JsonValue(
+                JsonPathFilterExpressionValue.ValueTypeValue.JsonValue(
                     JsonPrimitive(argument.jsonElement.content.codePointIndices().size.toUInt())
                 )
-            } else JsonPathExpressionValue.ValueTypeValue.Nothing
+            } else JsonPathFilterExpressionValue.ValueTypeValue.Nothing
         }
     }
 }

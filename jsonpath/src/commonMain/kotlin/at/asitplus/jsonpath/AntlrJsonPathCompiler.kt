@@ -1,36 +1,63 @@
-package at.asitplus.wallet.lib.data.jsonpath
+package at.asitplus.jsonpath
 
-import at.asitplus.jsonpath.AntlrJsonPathCompilerErrorListener
-import at.asitplus.jsonpath.JsonPathCompiler
-import at.asitplus.jsonpath.JsonPathFunctionExtension
-import at.asitplus.jsonpath.JsonPathQuery
 import at.asitplus.parser.generated.JsonPathLexer
 import at.asitplus.parser.generated.JsonPathParser
+import kotlinx.serialization.json.JsonElement
 import org.antlr.v4.kotlinruntime.CharStreams
 import org.antlr.v4.kotlinruntime.CommonTokenStream
+import org.antlr.v4.kotlinruntime.ListTokenSource
 
 class AntlrJsonPathCompiler(
     private var functionExtensionRetriever: (String) -> JsonPathFunctionExtension<*>?,
     private var errorListener: AntlrJsonPathCompilerErrorListener? = null,
 ) : JsonPathCompiler {
     override fun compile(jsonPath: String): JsonPathQuery {
-        val lexer = JsonPathLexer(CharStreams.fromString(jsonPath))
-        errorListener?.let {
-            lexer.addErrorListener(it)
-        }
-        val commonTokenStream = CommonTokenStream(lexer)
-        val parser = JsonPathParser(commonTokenStream)
-        errorListener?.let {
-            parser.addErrorListener(it)
+        val lexerErrorDetector = AntlrSyntaxErrorDetector()
+        val tokens = JsonPathLexer(CharStreams.fromString(jsonPath)).apply {
+            addErrorListener(lexerErrorDetector)
+            errorListener?.let {
+                addErrorListener(it)
+            }
+        }.allTokens
+
+        if(lexerErrorDetector.isError) {
+            throw JsonPathLexerException()
         }
 
-        val selectors = AntlrJsonPathSelectorEvaluationVisitor(
-            compiler = this,
+        val parserErrorDetector = AntlrSyntaxErrorDetector()
+        val commonTokenStream = CommonTokenStream(ListTokenSource(tokens))
+        val jsonPathQueryContext = JsonPathParser(commonTokenStream).apply {
+            addErrorListener(parserErrorDetector)
+            errorListener?.let {
+                addErrorListener(it)
+            }
+        }.jsonpath_query()
+
+        if(parserErrorDetector.isError) {
+            throw JsonPathParserException()
+        }
+
+        val abstractSyntaxTree = AntlrJsonPathSemanticAnalyzerVisitor(
             errorListener = errorListener,
             functionExtensionRetriever = functionExtensionRetriever,
-        ).visit(parser.jsonpath_query()) ?: listOf()
+        ).visit(jsonPathQueryContext)
+        val rootValueType = abstractSyntaxTree?.value
 
-        return JsonPathQuery(selectors)
+        if(rootValueType is JsonPathExpression.ErrorType) {
+            throw JsonPathTypeCheckerException("Type errors have occured: $abstractSyntaxTree")
+        }
+        if(rootValueType !is JsonPathExpression.FilterExpression.NodesExpression.FilterQueryExpression) {
+            throw JsonPathTypeCheckerException("Invalid root value type: $rootValueType: $abstractSyntaxTree")
+        }
+
+        return object : JsonPathQuery {
+            override fun invoke(currentNode: JsonElement, rootNode: JsonElement): NodeList {
+                return rootValueType.jsonPathQuery.invoke(
+                    currentNode = currentNode,
+                    rootNode = rootNode,
+                )
+            }
+        }
     }
 
     fun setErrorListener(errorListener: AntlrJsonPathCompilerErrorListener?) {

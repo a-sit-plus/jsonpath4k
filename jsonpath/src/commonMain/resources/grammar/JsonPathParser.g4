@@ -22,13 +22,13 @@ selector            : name_selector |
 name_selector       : stringLiteral;
 
 
-index_selector      : INT;                        // decimal integer
+index_selector      : int;                        // decimal integer
 
 slice_selector      : (start ws)? COLON ws (end ws)? (COLON (ws step )?)?;
 
-start               : INT;       // included in selection
-end                 : INT;       // not included in selection
-step                : INT;       // default: 1
+start               : int;       // included in selection
+end                 : int;       // not included in selection
+step                : int;       // default: 1
 
 // used in filter, but executed in normal mode
 filter_query        : rel_query | jsonpath_query;
@@ -62,8 +62,10 @@ paren_expr          : (LOGICAL_NOT_OP ws)? BRACKET_OPEN ws logical_expr ws BRACK
 test_expr           : (LOGICAL_NOT_OP ws)?
                       (filter_query | // existence/non-existence
                        function_expr); // LogicalType or NodesType
-comparison_expr     : comparable ws comparisonOp ws comparable;
-literal             : number | stringLiteral |
+comparison_expr     : firstComparable ws comparisonOp ws secondComparable;
+firstComparable: comparable;
+secondComparable: comparable;
+literal             : int | number | stringLiteral |
                       true | false | null;
 comparable          : literal |
                       singular_query | // singular query value
@@ -85,8 +87,9 @@ ws: BLANK*;
 wildcardSelector: WILDCARD_SELECTOR;
 memberNameShorthand: MEMBER_NAME_SHORTHAND;
 
-number: NUMBER | INT; // integer is matched before number, but it is also a valid number literal
 stringLiteral: STRING_LITERAL;
+number: NUMBER; // integer is matched before number, but it is also a valid number literal
+int: INT; // integer is matched before number, but it is also a valid number literal
 true: TRUE;
 false: FALSE;
 null: NULL;
@@ -96,3 +99,4 @@ comparisonOp
     | COMPARISON_OP_SMALLER_THAN | COMPARISON_OP_GREATER_THAN
     | COMPARISON_OP_SMALLER_THAN_OR_EQUALS | COMPARISON_OP_GREATER_THAN_OR_EQUALS
     ;
+

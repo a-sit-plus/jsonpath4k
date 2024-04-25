@@ -1,6 +1,6 @@
 package at.asitplus.jsonpath
 
-enum class JsonPathExpressionType {
+enum class JsonPathFilterExpressionType {
     ValueType,
     LogicalType,
     NodesType;

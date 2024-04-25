@@ -3,10 +3,14 @@ package at.asitplus.jsonpath
 import at.asitplus.wallet.lib.data.jsonpath.JsonPathSelector
 import kotlinx.serialization.json.JsonElement
 
-class JsonPathQuery(
+interface JsonPathQuery {
+    fun invoke(currentNode: JsonElement, rootNode: JsonElement = currentNode): NodeList
+}
+
+class JsonPathSelectorQuery(
     val selectors: List<JsonPathSelector>,
-) {
-    fun invoke(currentNode: JsonElement, rootNode: JsonElement = currentNode): NodeList {
+) : JsonPathQuery {
+    override fun invoke(currentNode: JsonElement, rootNode: JsonElement): NodeList {
         var matches = listOf(
             NodeListEntry(
                 normalizedJsonPath = NormalizedJsonPath(),
@@ -33,6 +37,7 @@ class JsonPathQuery(
         get() = selectors.all {
             when(it) {
                 JsonPathSelector.RootSelector,
+                JsonPathSelector.CurrentNodeSelector,
                 is JsonPathSelector.MemberSelector,
                 is JsonPathSelector.IndexSelector -> true
                 else -> false

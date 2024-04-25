@@ -28,7 +28,7 @@ class UnexpectedTokenException(ctx: ParserRuleContext) : JsonPathRuntimeExceptio
     }"
 )
 
-class InvalidTestExpressionValueException(expression: ParserRuleContext, value: JsonPathExpressionValue?) : JsonPathRuntimeException(
+class InvalidTestExpressionValueException(expression: ParserRuleContext, value: JsonPathFilterExpressionValue?) : JsonPathRuntimeException(
     "Invalid test expression value at position ${expression.position?.let { "${it.start.line}:${it.start.column}" }}: ${
         Rfc9535Utils.escapeToDoubleQuoted(
             expression.toString()
@@ -36,7 +36,7 @@ class InvalidTestExpressionValueException(expression: ParserRuleContext, value: 
     } results in: ${Rfc9535Utils.escapeToDoubleQuoted(value.toString())}"
 )
 
-class InvalidComparableValueException(expression: ParserRuleContext, value: JsonPathExpressionValue) : JsonPathRuntimeException(
+class InvalidComparableValueException(expression: ParserRuleContext, value: JsonPathFilterExpressionValue) : JsonPathRuntimeException(
     "Invalid expression value at position ${expression.position?.let { "${it.start.line}:${it.start.column}" }}: ${
         Rfc9535Utils.escapeToDoubleQuoted(
             expression.toString()

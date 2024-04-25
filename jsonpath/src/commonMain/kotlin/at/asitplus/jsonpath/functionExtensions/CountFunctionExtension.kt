@@ -1,7 +1,7 @@
 package at.asitplus.wallet.lib.data.jsonpath.functionExtensions
 
-import at.asitplus.jsonpath.JsonPathExpressionValue
-import at.asitplus.jsonpath.JsonPathExpressionType
+import at.asitplus.jsonpath.JsonPathFilterExpressionValue
+import at.asitplus.jsonpath.JsonPathFilterExpressionType
 import at.asitplus.jsonpath.JsonPathFunctionExtension
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.json.JsonPrimitive
@@ -10,18 +10,18 @@ import kotlinx.serialization.json.JsonPrimitive
 data object CountFunctionExtension : JsonPathFunctionExtension.ValueTypeFunctionExtension(
     name = "count",
     argumentTypes = listOf(
-        JsonPathExpressionType.NodesType,
+        JsonPathFilterExpressionType.NodesType,
     )
 ) {
-    override fun invoke(arguments: List<JsonPathExpressionValue>): JsonPathExpressionValue.ValueTypeValue {
+    override fun invoke(arguments: List<JsonPathFilterExpressionValue>): JsonPathFilterExpressionValue.ValueTypeValue {
         super.validateArgumentTypes(arguments)
         return implementation(
-            arguments[0] as JsonPathExpressionValue.NodesTypeValue
+            arguments[0] as JsonPathFilterExpressionValue.NodesTypeValue
         )
     }
 
-    private fun implementation(nodesTypeValue: JsonPathExpressionValue.NodesTypeValue): JsonPathExpressionValue.ValueTypeValue {
-        return JsonPathExpressionValue.ValueTypeValue.JsonValue(
+    private fun implementation(nodesTypeValue: JsonPathFilterExpressionValue.NodesTypeValue): JsonPathFilterExpressionValue.ValueTypeValue {
+        return JsonPathFilterExpressionValue.ValueTypeValue.JsonValue(
             JsonPrimitive(nodesTypeValue.nodeList.size.toUInt())
         )
     }

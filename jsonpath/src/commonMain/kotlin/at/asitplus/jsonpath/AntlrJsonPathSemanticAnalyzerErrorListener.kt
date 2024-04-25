@@ -1,6 +1,6 @@
 package at.asitplus.jsonpath
 
-interface AntlrJsonPathTypeCheckerErrorListener {
+interface AntlrJsonPathSemanticAnalyzerErrorListener {
     fun unknownFunctionExtension(functionExtensionName: String)
 
     // section 2.4.3: Well-Typedness of Function Expressions
@@ -11,6 +11,10 @@ interface AntlrJsonPathTypeCheckerErrorListener {
 
     fun invalidArglistForFunctionExtension(
         functionExtension: JsonPathFunctionExtension<*>,
-        coercedArgumentTypes: List<JsonPathExpressionType?>
+        coercedArgumentTypes: List<JsonPathExpression?>
+    )
+
+    fun invalidTestExpression(
+        testContextString: String
     )
 }
