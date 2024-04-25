@@ -1,0 +1,5 @@
+package at.asitplus.jsonpath
+
+import org.antlr.v4.kotlinruntime.ANTLRErrorListener
+
+interface AntlrJsonPathCompilerErrorListener : AntlrJsonPathTypeCheckerErrorListener, ANTLRErrorListener
