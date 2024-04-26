@@ -1,0 +1,22 @@
+name: Build JVM artifacts
+on: workflow_dispatch
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          submodules: recursive
+      - uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+      - name: Build jar
+        run: ./gradlew assemble
+      - name: Upload jar jsonpath
+        uses: actions/upload-artifact@v3
+        with:
+          name: jsonpath
+          path: |
+            jsonpath/build/libs/*jar
