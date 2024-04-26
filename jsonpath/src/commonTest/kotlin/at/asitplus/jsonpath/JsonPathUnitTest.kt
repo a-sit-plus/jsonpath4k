@@ -55,9 +55,8 @@ class JsonPathUnitTest : FreeSpec({
             )
 
             "$.store.book[*].author" {
-                val nodeList =
-                    defaultJsonPathCompiler.compile(this.testScope.testCase.name.originalName)
-                        .invoke(bookStore).map { it.value }
+                val nodeList = JsonPath(this.testScope.testCase.name.originalName)
+                    .query(bookStore).map { it.value }
                 nodeList shouldHaveSize 4
                 val bookArray =
                     bookStore.jsonObject["store"].shouldNotBeNull().jsonObject["book"].shouldNotBeNull().jsonArray
@@ -68,9 +67,8 @@ class JsonPathUnitTest : FreeSpec({
             }
 
             "$..author" {
-                val nodeList =
-                    defaultJsonPathCompiler.compile(this.testScope.testCase.name.originalName)
-                        .invoke(bookStore).map { it.value }
+                val nodeList = JsonPath(this.testScope.testCase.name.originalName)
+                    .query(bookStore).map { it.value }
                 nodeList shouldHaveSize 4
                 val bookArray =
                     bookStore.jsonObject["store"].shouldNotBeNull().jsonObject["book"].shouldNotBeNull().jsonArray
@@ -81,9 +79,8 @@ class JsonPathUnitTest : FreeSpec({
             }
 
             "\$.store.*" {
-                val nodeList =
-                    defaultJsonPathCompiler.compile(this.testScope.testCase.name.originalName)
-                        .invoke(bookStore).map { it.value }
+                val nodeList = JsonPath(this.testScope.testCase.name.originalName)
+                    .query(bookStore).map { it.value }
                 nodeList shouldHaveSize 2
                 val store =
                     bookStore.jsonObject["store"].shouldNotBeNull().jsonObject
@@ -92,9 +89,8 @@ class JsonPathUnitTest : FreeSpec({
             }
 
             "\$.store..price" {
-                val nodeList =
-                    defaultJsonPathCompiler.compile(this.testScope.testCase.name.originalName)
-                        .invoke(bookStore).map { it.value }
+                val nodeList = JsonPath(this.testScope.testCase.name.originalName)
+                    .query(bookStore).map { it.value }
                 nodeList shouldHaveSize 5
                 val store =
                     bookStore.jsonObject["store"].shouldNotBeNull().jsonObject
@@ -106,9 +102,8 @@ class JsonPathUnitTest : FreeSpec({
             }
 
             "\$..book[2]" {
-                val nodeList =
-                    defaultJsonPathCompiler.compile(this.testScope.testCase.name.originalName)
-                        .invoke(bookStore).map { it.value }
+                val nodeList = JsonPath(this.testScope.testCase.name.originalName)
+                    .query(bookStore).map { it.value }
                 nodeList shouldHaveSize 1
                 bookStore.jsonObject["store"]
                     .shouldNotBeNull().jsonObject["book"]
@@ -117,9 +112,8 @@ class JsonPathUnitTest : FreeSpec({
             }
 
             "\$..book[2].author" {
-                val nodeList =
-                    defaultJsonPathCompiler.compile(this.testScope.testCase.name.originalName)
-                        .invoke(bookStore).map { it.value }
+                val nodeList = JsonPath(this.testScope.testCase.name.originalName)
+                    .query(bookStore).map { it.value }
                 nodeList shouldHaveSize 1
                 bookStore.jsonObject["store"]
                     .shouldNotBeNull().jsonObject["book"]
@@ -129,16 +123,14 @@ class JsonPathUnitTest : FreeSpec({
             }
 
             "\$..book[2].publisher" {
-                val nodeList =
-                    defaultJsonPathCompiler.compile(this.testScope.testCase.name.originalName)
-                        .invoke(bookStore).map { it.value }
+                val nodeList = JsonPath(this.testScope.testCase.name.originalName)
+                    .query(bookStore).map { it.value }
                 nodeList shouldHaveSize 0
             }
 
             "\$..book[-1]" {
-                val nodeList =
-                    defaultJsonPathCompiler.compile(this.testScope.testCase.name.originalName)
-                        .invoke(bookStore).map { it.value }
+                val nodeList = JsonPath(this.testScope.testCase.name.originalName)
+                    .query(bookStore).map { it.value }
                 nodeList shouldHaveSize 1
                 bookStore.jsonObject["store"]
                     .shouldNotBeNull().jsonObject["book"]
@@ -147,9 +139,8 @@ class JsonPathUnitTest : FreeSpec({
             }
 
             "\$..book[0,1]" {
-                val nodeList =
-                    defaultJsonPathCompiler.compile(this.testScope.testCase.name.originalName)
-                        .invoke(bookStore).map { it.value }
+                val nodeList = JsonPath(this.testScope.testCase.name.originalName)
+                    .query(bookStore).map { it.value }
                 nodeList shouldHaveSize 2
                 bookStore.jsonObject["store"]
                     .shouldNotBeNull().jsonObject["book"]
@@ -161,9 +152,8 @@ class JsonPathUnitTest : FreeSpec({
             }
 
             "\$..book[:2]" {
-                val nodeList =
-                    defaultJsonPathCompiler.compile(this.testScope.testCase.name.originalName)
-                        .invoke(bookStore).map { it.value }
+                val nodeList = JsonPath(this.testScope.testCase.name.originalName)
+                    .query(bookStore).map { it.value }
                 nodeList shouldHaveSize 2
                 bookStore.jsonObject["store"]
                     .shouldNotBeNull().jsonObject["book"]
@@ -175,9 +165,8 @@ class JsonPathUnitTest : FreeSpec({
             }
 
             "\$..book[?@.isbn]" {
-                val nodeList =
-                    defaultJsonPathCompiler.compile(this.testScope.testCase.name.originalName)
-                        .invoke(bookStore).map { it.value }
+                val nodeList = JsonPath(this.testScope.testCase.name.originalName)
+                    .query(bookStore).map { it.value }
                 nodeList shouldHaveSize 2
                 bookStore.jsonObject["store"]
                     .shouldNotBeNull().jsonObject["book"]
@@ -189,9 +178,8 @@ class JsonPathUnitTest : FreeSpec({
             }
 
             "\$..book[?@.price<10]" {
-                val nodeList =
-                    defaultJsonPathCompiler.compile(this.testScope.testCase.name.originalName)
-                        .invoke(bookStore).map { it.value }
+                val nodeList = JsonPath(this.testScope.testCase.name.originalName)
+                    .query(bookStore).map { it.value }
                 nodeList shouldHaveSize 2
                 bookStore.jsonObject["store"]
                     .shouldNotBeNull().jsonObject["book"]
@@ -203,9 +191,8 @@ class JsonPathUnitTest : FreeSpec({
             }
 
             "\$..*" {
-                val nodeList =
-                    defaultJsonPathCompiler.compile(this.testScope.testCase.name.originalName)
-                        .invoke(bookStore).map { it.value }
+                val nodeList = JsonPath(this.testScope.testCase.name.originalName)
+                    .query(bookStore).map { it.value }
                 bookStore.jsonObject["store"]
                     .shouldNotBeNull().shouldBeIn(nodeList).jsonObject.let { store ->
                         store["book"].shouldNotBeNull()
@@ -761,7 +748,7 @@ class JsonPathUnitTest : FreeSpec({
 
                     nodeList shouldHaveSize 10
                     jsonElement.jsonObject["a"].shouldNotBeNull().jsonArray.let { a ->
-                        for(index in 0..9) {
+                        for (index in 0..9) {
                             nodeList[index].shouldBe(a[index])
                         }
                     }
@@ -770,6 +757,24 @@ class JsonPathUnitTest : FreeSpec({
         }
 
         "2.4. Function Extensions" - {
+            // making sure that the dependencies are reset to their default for the next test
+            val defaultCompilerBuilderBackup = JsonPathDependencyManager.compiler.value
+            val defaultFunctionExtensionRepositoryBackup =
+                JsonPathDependencyManager.functionExtensionRepository.value
+            beforeEach {
+                // prepare a dummy repository to be modified by the tests
+                JsonPathDependencyManager.functionExtensionRepository.value =
+                    JsonPathFunctionExtensionMapRepository(
+                        JsonPathDependencyManager.functionExtensionRepository.value.export()
+                            .toMutableMap()
+                    )
+            }
+            afterEach {
+                JsonPathDependencyManager.apply {
+                    compiler.value = defaultCompilerBuilderBackup
+                    functionExtensionRepository.value = defaultFunctionExtensionRepositoryBackup
+                }
+            }
             "\$[?length(@) < 3]" {
                 shouldNotThrowAny {
                     JsonPath(this.testScope.testCase.name.originalName)
@@ -791,16 +796,21 @@ class JsonPathUnitTest : FreeSpec({
                 }
             }
             "\$[?count(foo(@.*)) == 1]" {
-                defaultJsonPathFunctionExtensionManager.addExtension(
-                    object: JsonPathFunctionExtension.NodesTypeFunctionExtension(
-                        name = "foo",
-                        argumentTypes = listOf(JsonPathFilterExpressionType.NodesType),
-                    ) {
-                        override fun invoke(arguments: List<JsonPathFilterExpressionValue>): JsonPathFilterExpressionValue.NodesTypeValue.FunctionExtensionResult {
-                            TODO("Not yet implemented")
+                JsonPathDependencyManager.functionExtensionRepository.value.apply {
+                    this.addExtension(
+                        object : JsonPathFunctionExtension.NodesTypeFunctionExtension(
+                            name = "foo",
+                            argumentTypes = listOf(JsonPathFilterExpressionType.NodesType),
+                        ) {
+                            override fun invoke(arguments: List<JsonPathFilterExpressionValue>): JsonPathFilterExpressionValue.NodesTypeValue.FunctionExtensionResult {
+                                return JsonPathFilterExpressionValue.NodesTypeValue.FunctionExtensionResult(
+                                    listOf()
+                                )
+                            }
                         }
-                    }
-                )
+                    )
+                }
+
                 shouldNotThrowAny {
                     JsonPath(this.testScope.testCase.name.originalName)
                 }
@@ -822,46 +832,55 @@ class JsonPathUnitTest : FreeSpec({
             }
             "\$[?bar(@.a)]" - {
                 "logical type argument" {
-                    defaultJsonPathFunctionExtensionManager.putExtension(
-                        object: JsonPathFunctionExtension.LogicalTypeFunctionExtension(
-                            name = "bar",
-                            argumentTypes = listOf(JsonPathFilterExpressionType.LogicalType),
-                        ) {
-                            override fun invoke(arguments: List<JsonPathFilterExpressionValue>): JsonPathFilterExpressionValue.LogicalTypeValue {
-                                TODO("Not yet implemented")
+                    JsonPathDependencyManager.functionExtensionRepository.value.apply {
+                        this.addExtension(
+                            object : JsonPathFunctionExtension.LogicalTypeFunctionExtension(
+                                name = "bar",
+                                argumentTypes = listOf(JsonPathFilterExpressionType.LogicalType),
+                            ) {
+                                override fun invoke(arguments: List<JsonPathFilterExpressionValue>): JsonPathFilterExpressionValue.LogicalTypeValue {
+                                    return JsonPathFilterExpressionValue.LogicalTypeValue(true)
+                                }
                             }
-                        }
-                    )
+                        )
+                    }
+
                     shouldNotThrowAny {
                         JsonPath(this.testScope.testCase.parent!!.name.originalName)
                     }
                 }
                 "value type argument" {
-                    defaultJsonPathFunctionExtensionManager.putExtension(
-                        object: JsonPathFunctionExtension.LogicalTypeFunctionExtension(
-                            name = "bar",
-                            argumentTypes = listOf(JsonPathFilterExpressionType.ValueType),
-                        ) {
-                            override fun invoke(arguments: List<JsonPathFilterExpressionValue>): JsonPathFilterExpressionValue.LogicalTypeValue {
-                                TODO("Not yet implemented")
+                    JsonPathDependencyManager.functionExtensionRepository.value.apply {
+                        this.addExtension(
+                            object : JsonPathFunctionExtension.LogicalTypeFunctionExtension(
+                                name = "bar",
+                                argumentTypes = listOf(JsonPathFilterExpressionType.ValueType),
+                            ) {
+                                override fun invoke(arguments: List<JsonPathFilterExpressionValue>): JsonPathFilterExpressionValue.LogicalTypeValue {
+                                    return JsonPathFilterExpressionValue.LogicalTypeValue(true)
+                                }
                             }
-                        }
-                    )
+                        )
+                    }
+
                     shouldNotThrowAny {
                         JsonPath(this.testScope.testCase.parent!!.name.originalName)
                     }
                 }
                 "nodes type argument" {
-                    defaultJsonPathFunctionExtensionManager.putExtension(
-                        object: JsonPathFunctionExtension.LogicalTypeFunctionExtension(
-                            name = "bar",
-                            argumentTypes = listOf(JsonPathFilterExpressionType.NodesType),
-                        ) {
-                            override fun invoke(arguments: List<JsonPathFilterExpressionValue>): JsonPathFilterExpressionValue.LogicalTypeValue {
-                                TODO("Not yet implemented")
+                    JsonPathDependencyManager.functionExtensionRepository.value.apply {
+                        this.addExtension(
+                            object : JsonPathFunctionExtension.LogicalTypeFunctionExtension(
+                                name = "bar",
+                                argumentTypes = listOf(JsonPathFilterExpressionType.NodesType),
+                            ) {
+                                override fun invoke(arguments: List<JsonPathFilterExpressionValue>): JsonPathFilterExpressionValue.LogicalTypeValue {
+                                    return JsonPathFilterExpressionValue.LogicalTypeValue(true)
+                                }
                             }
-                        }
-                    )
+                        )
+                    }
+
                     shouldNotThrowAny {
                         JsonPath(this.testScope.testCase.parent!!.name.originalName)
                     }
@@ -869,92 +888,110 @@ class JsonPathUnitTest : FreeSpec({
             }
             "\$[?bnl(@.*)]" - {
                 "logical type argument" {
-                    defaultJsonPathFunctionExtensionManager.putExtension(
-                        object: JsonPathFunctionExtension.LogicalTypeFunctionExtension(
-                            name = "bnl",
-                            argumentTypes = listOf(JsonPathFilterExpressionType.LogicalType),
-                        ) {
-                            override fun invoke(arguments: List<JsonPathFilterExpressionValue>): JsonPathFilterExpressionValue.LogicalTypeValue {
-                                TODO("Not yet implemented")
+                    JsonPathDependencyManager.functionExtensionRepository.value.apply {
+                        this.addExtension(
+                            object : JsonPathFunctionExtension.LogicalTypeFunctionExtension(
+                                name = "bnl",
+                                argumentTypes = listOf(JsonPathFilterExpressionType.LogicalType),
+                            ) {
+                                override fun invoke(arguments: List<JsonPathFilterExpressionValue>): JsonPathFilterExpressionValue.LogicalTypeValue {
+                                    return JsonPathFilterExpressionValue.LogicalTypeValue(true)
+                                }
                             }
-                        }
-                    )
+                        )
+                    }
+
                     shouldNotThrowAny {
                         JsonPath(this.testScope.testCase.parent!!.name.originalName)
                     }
                 }
                 "value type argument" {
-                    defaultJsonPathFunctionExtensionManager.putExtension(
-                        object: JsonPathFunctionExtension.LogicalTypeFunctionExtension(
-                            name = "bnl",
-                            argumentTypes = listOf(JsonPathFilterExpressionType.ValueType),
-                        ) {
-                            override fun invoke(arguments: List<JsonPathFilterExpressionValue>): JsonPathFilterExpressionValue.LogicalTypeValue {
-                                TODO("Not yet implemented")
+                    JsonPathDependencyManager.functionExtensionRepository.value.apply {
+                        this.addExtension(
+                            object : JsonPathFunctionExtension.LogicalTypeFunctionExtension(
+                                name = "bnl",
+                                argumentTypes = listOf(JsonPathFilterExpressionType.ValueType),
+                            ) {
+                                override fun invoke(arguments: List<JsonPathFilterExpressionValue>): JsonPathFilterExpressionValue.LogicalTypeValue {
+                                    return JsonPathFilterExpressionValue.LogicalTypeValue(true)
+                                }
                             }
-                        }
-                    )
+                        )
+                    }
+
                     shouldThrow<JsonPathTypeCheckerException> {
                         JsonPath(this.testScope.testCase.parent!!.name.originalName)
                     }
                 }
                 "nodes type argument" {
-                    defaultJsonPathFunctionExtensionManager.putExtension(
-                        object: JsonPathFunctionExtension.LogicalTypeFunctionExtension(
-                            name = "bnl",
-                            argumentTypes = listOf(JsonPathFilterExpressionType.NodesType),
-                        ) {
-                            override fun invoke(arguments: List<JsonPathFilterExpressionValue>): JsonPathFilterExpressionValue.LogicalTypeValue {
-                                TODO("Not yet implemented")
+                    JsonPathDependencyManager.functionExtensionRepository.value.apply {
+                        this.addExtension(
+                            object : JsonPathFunctionExtension.LogicalTypeFunctionExtension(
+                                name = "bnl",
+                                argumentTypes = listOf(JsonPathFilterExpressionType.NodesType),
+                            ) {
+                                override fun invoke(arguments: List<JsonPathFilterExpressionValue>): JsonPathFilterExpressionValue.LogicalTypeValue {
+                                    return JsonPathFilterExpressionValue.LogicalTypeValue(true)
+                                }
                             }
-                        }
-                    )
+                        )
+                    }
+
                     shouldNotThrowAny {
                         JsonPath(this.testScope.testCase.parent!!.name.originalName)
                     }
                 }
             }
             "\$[?blt(1==1)]" {
-                defaultJsonPathFunctionExtensionManager.putExtension(
-                    object: JsonPathFunctionExtension.LogicalTypeFunctionExtension(
-                        name = "blt",
-                        argumentTypes = listOf(JsonPathFilterExpressionType.LogicalType),
-                    ) {
-                        override fun invoke(arguments: List<JsonPathFilterExpressionValue>): JsonPathFilterExpressionValue.LogicalTypeValue {
-                            TODO("Not yet implemented")
+                JsonPathDependencyManager.functionExtensionRepository.value.apply {
+                    this.addExtension(
+                        object : JsonPathFunctionExtension.LogicalTypeFunctionExtension(
+                            name = "blt",
+                            argumentTypes = listOf(JsonPathFilterExpressionType.LogicalType),
+                        ) {
+                            override fun invoke(arguments: List<JsonPathFilterExpressionValue>): JsonPathFilterExpressionValue.LogicalTypeValue {
+                                return JsonPathFilterExpressionValue.LogicalTypeValue(true)
+                            }
                         }
-                    }
-                )
+                    )
+                }
+
                 shouldNotThrowAny {
                     JsonPath(this.testScope.testCase.name.originalName)
                 }
             }
             "\$[?blt(1)]" {
-                defaultJsonPathFunctionExtensionManager.putExtension(
-                    object: JsonPathFunctionExtension.LogicalTypeFunctionExtension(
-                        name = "blt",
-                        argumentTypes = listOf(JsonPathFilterExpressionType.LogicalType),
-                    ) {
-                        override fun invoke(arguments: List<JsonPathFilterExpressionValue>): JsonPathFilterExpressionValue.LogicalTypeValue {
-                            TODO("Not yet implemented")
+                JsonPathDependencyManager.functionExtensionRepository.value.apply {
+                    this.addExtension(
+                        object : JsonPathFunctionExtension.LogicalTypeFunctionExtension(
+                            name = "blt",
+                            argumentTypes = listOf(JsonPathFilterExpressionType.LogicalType),
+                        ) {
+                            override fun invoke(arguments: List<JsonPathFilterExpressionValue>): JsonPathFilterExpressionValue.LogicalTypeValue {
+                                return JsonPathFilterExpressionValue.LogicalTypeValue(true)
+                            }
                         }
-                    }
-                )
+                    )
+                }
+
                 shouldThrow<JsonPathTypeCheckerException> {
                     JsonPath(this.testScope.testCase.name.originalName)
                 }
             }
             "\$[?bal(1)]" {
-                defaultJsonPathFunctionExtensionManager.putExtension(
-                    object: JsonPathFunctionExtension.LogicalTypeFunctionExtension(
-                        name = "bal",
-                        argumentTypes = listOf(JsonPathFilterExpressionType.ValueType),
-                    ) {
-                        override fun invoke(arguments: List<JsonPathFilterExpressionValue>): JsonPathFilterExpressionValue.LogicalTypeValue {
-                            TODO("Not yet implemented")
+                JsonPathDependencyManager.functionExtensionRepository.value.apply {
+                    this.addExtension(
+                        object : JsonPathFunctionExtension.LogicalTypeFunctionExtension(
+                            name = "bal",
+                            argumentTypes = listOf(JsonPathFilterExpressionType.ValueType),
+                        ) {
+                            override fun invoke(arguments: List<JsonPathFilterExpressionValue>): JsonPathFilterExpressionValue.LogicalTypeValue {
+                                return JsonPathFilterExpressionValue.LogicalTypeValue(true)
+                            }
                         }
-                    }
-                )
+                    )
+                }
+
                 shouldNotThrowAny {
                     JsonPath(this.testScope.testCase.name.originalName)
                 }

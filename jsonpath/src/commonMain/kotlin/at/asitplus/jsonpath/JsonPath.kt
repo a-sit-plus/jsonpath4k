@@ -4,7 +4,7 @@ import kotlinx.serialization.json.JsonElement
 
 class JsonPath(
     jsonPath: String,
-    compiler: JsonPathCompiler = defaultJsonPathCompiler,
+    compiler: JsonPathCompiler = JsonPathDependencyManager.compiler.value,
 ) {
     private val query = compiler.compile(jsonPath)
 
