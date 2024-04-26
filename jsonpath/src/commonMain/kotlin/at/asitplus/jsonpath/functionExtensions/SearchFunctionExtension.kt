@@ -28,38 +28,35 @@ data object SearchFunctionExtension : JsonPathFunctionExtension.LogicalTypeFunct
         stringArgument: JsonPathFilterExpressionValue.ValueTypeValue,
         regexArgument: JsonPathFilterExpressionValue.ValueTypeValue,
     ): JsonPathFilterExpressionValue.LogicalTypeValue {
-        if(stringArgument !is JsonPathFilterExpressionValue.ValueTypeValue.JsonValue) {
-            return JsonPathFilterExpressionValue.LogicalTypeValue(false)
-        }
-        if(regexArgument !is JsonPathFilterExpressionValue.ValueTypeValue.JsonValue) {
-            return JsonPathFilterExpressionValue.LogicalTypeValue(false)
-        }
-
-        val stringElement = stringArgument.jsonElement
-        val regexElement = regexArgument.jsonElement
-
-        if (stringElement !is JsonPrimitive) {
-            return JsonPathFilterExpressionValue.LogicalTypeValue(false)
-        }
-        if (regexElement !is JsonPrimitive) {
-            return JsonPathFilterExpressionValue.LogicalTypeValue(false)
-        }
-
-        if (stringElement.isString != true) {
-            return JsonPathFilterExpressionValue.LogicalTypeValue(false)
-        }
-        if (regexElement.isString != true) {
+        val stringValue = unpackArgumentToStringValue(stringArgument)
+        val regexValue = unpackArgumentToStringValue(stringArgument)
+        if(stringValue == null || regexValue == null) {
             return JsonPathFilterExpressionValue.LogicalTypeValue(false)
         }
 
         val isMatch = try {
             // TODO: check assumption that Regex supports RFC9485:
             //  https://www.rfc-editor.org/rfc/rfc9485.html
-            Regex(regexElement.content).containsMatchIn(stringElement.content)
+            Regex(regexValue).containsMatchIn(stringValue)
         } catch (throwable: Throwable) {
             false
         }
 
         return JsonPathFilterExpressionValue.LogicalTypeValue(isMatch)
+    }
+    private fun unpackArgumentToStringValue(
+        valueArgument: JsonPathFilterExpressionValue.ValueTypeValue,
+    ): String? {
+        if (valueArgument !is JsonPathFilterExpressionValue.ValueTypeValue.JsonValue) {
+            return null
+        }
+
+        val valueElement = valueArgument.jsonElement
+
+        if (valueElement !is JsonPrimitive || !valueElement.isString) {
+            return null
+        }
+
+        return valueElement.content
     }
 }
