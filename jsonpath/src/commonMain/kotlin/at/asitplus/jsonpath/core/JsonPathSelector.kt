@@ -1,11 +1,7 @@
-package at.asitplus.wallet.lib.data.jsonpath
+package at.asitplus.jsonpath.core
 
-import at.asitplus.jsonpath.JsonPathEvaluationContext
-import at.asitplus.jsonpath.NodeList
-import at.asitplus.jsonpath.NodeListEntry
-import at.asitplus.jsonpath.NormalizedJsonPath
-import at.asitplus.jsonpath.NormalizedJsonPathSegment.IndexSegment
-import at.asitplus.jsonpath.NormalizedJsonPathSegment.NameSegment
+import at.asitplus.jsonpath.core.NormalizedJsonPathSegment.IndexSegment
+import at.asitplus.jsonpath.core.NormalizedJsonPathSegment.NameSegment
 import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonObject
@@ -311,7 +307,7 @@ sealed interface JsonPathSelector {
      * section: 2.3.5.  Filter Selector
      */
     data class FilterSelector(
-        private val filterPredicate: (JsonPathEvaluationContext) -> Boolean,
+        private val filterPredicate: FilterPredicate,
     ) : JsonPathSelector {
         override fun invoke(
             currentNode: JsonElement,
@@ -335,12 +331,17 @@ sealed interface JsonPathSelector {
                 }
             }.filter {
                 filterPredicate.invoke(
-                    JsonPathEvaluationContext(
-                        currentNode = it.value,
-                        rootNode = rootNode,
-                    )
+                    currentNode = it.value,
+                    rootNode = rootNode,
                 )
             }
         }
     }
+}
+
+interface FilterPredicate {
+    fun invoke(
+        currentNode: JsonElement,
+        rootNode: JsonElement,
+    ): Boolean
 }

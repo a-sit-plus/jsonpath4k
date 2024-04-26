@@ -1,18 +1,19 @@
 package at.asitplus.jsonpath
 
-import at.asitplus.jsonpath.functionExtensions.LengthFunctionExtension
-import at.asitplus.jsonpath.functionExtensions.MatchFunctionExtension
-import at.asitplus.jsonpath.functionExtensions.SearchFunctionExtension
-import at.asitplus.jsonpath.functionExtensions.ValueFunctionExtension
+import at.asitplus.jsonpath.implementation.AntlrJsonPathCompiler
+import at.asitplus.jsonpath.implementation.AntlrJsonPathCompilerErrorListener
+import at.asitplus.jsonpath.implementation.JsonPathExpression
+import at.asitplus.jsonpath.core.JsonPathCompiler
+import at.asitplus.jsonpath.core.JsonPathFunctionExtension
+import at.asitplus.jsonpath.core.functionExtensions.LengthFunctionExtension
+import at.asitplus.jsonpath.core.functionExtensions.MatchFunctionExtension
+import at.asitplus.jsonpath.core.functionExtensions.SearchFunctionExtension
+import at.asitplus.jsonpath.core.functionExtensions.ValueFunctionExtension
 import at.asitplus.wallet.lib.data.jsonpath.functionExtensions.CountFunctionExtension
-import com.strumenta.antlrkotlin.runtime.BitSet
 import io.github.aakira.napier.Napier
 import org.antlr.v4.kotlinruntime.BaseErrorListener
-import org.antlr.v4.kotlinruntime.Parser
 import org.antlr.v4.kotlinruntime.RecognitionException
 import org.antlr.v4.kotlinruntime.Recognizer
-import org.antlr.v4.kotlinruntime.atn.ATNConfigSet
-import org.antlr.v4.kotlinruntime.dfa.DFA
 
 object JsonPathDependencyManager {
     /**

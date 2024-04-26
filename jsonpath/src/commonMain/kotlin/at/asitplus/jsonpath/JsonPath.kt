@@ -1,5 +1,7 @@
 package at.asitplus.jsonpath
 
+import at.asitplus.jsonpath.core.JsonPathCompiler
+import at.asitplus.jsonpath.core.NodeList
 import kotlinx.serialization.json.JsonElement
 
 class JsonPath(

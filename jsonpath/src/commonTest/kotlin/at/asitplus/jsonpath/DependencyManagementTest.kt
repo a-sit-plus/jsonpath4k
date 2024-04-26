@@ -1,7 +1,8 @@
 package at.asitplus.jsonpath
 
+import at.asitplus.jsonpath.core.JsonPathFilterExpressionValue
+import at.asitplus.jsonpath.core.JsonPathFunctionExtension
 import io.kotest.assertions.throwables.shouldNotThrowAny
-import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.core.spec.style.FreeSpec
 import io.kotest.matchers.collections.shouldBeIn
 import io.kotest.matchers.collections.shouldHaveSize

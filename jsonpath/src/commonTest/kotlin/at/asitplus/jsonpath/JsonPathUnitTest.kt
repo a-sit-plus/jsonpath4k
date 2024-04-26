@@ -1,5 +1,9 @@
 package at.asitplus.jsonpath
 
+import at.asitplus.jsonpath.core.JsonPathFilterExpressionType
+import at.asitplus.jsonpath.core.JsonPathFilterExpressionValue
+import at.asitplus.jsonpath.core.JsonPathFunctionExtension
+import at.asitplus.jsonpath.implementation.JsonPathTypeCheckerException
 import io.kotest.assertions.throwables.shouldNotThrowAny
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.core.spec.style.FreeSpec

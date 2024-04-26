@@ -1,9 +1,8 @@
-package at.asitplus.jsonpath.functionExtensions
+package at.asitplus.jsonpath.core.functionExtensions
 
-import at.asitplus.jsonpath.JsonPathFilterExpressionType
-import at.asitplus.jsonpath.JsonPathFilterExpressionValue
-import at.asitplus.jsonpath.JsonPathFunctionExtension
-import com.strumenta.antlrkotlin.runtime.ext.codePointIndices
+import at.asitplus.jsonpath.core.JsonPathFilterExpressionType
+import at.asitplus.jsonpath.core.JsonPathFilterExpressionValue
+import at.asitplus.jsonpath.core.JsonPathFunctionExtension
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonObject
@@ -43,7 +42,15 @@ data object LengthFunctionExtension : JsonPathFunctionExtension.ValueTypeFunctio
 
             is JsonPrimitive -> if (argument.jsonElement.isString) {
                 JsonPathFilterExpressionValue.ValueTypeValue.JsonValue(
-                    JsonPrimitive(argument.jsonElement.content.codePointIndices().size.toUInt())
+                    JsonPrimitive(
+                        run {
+                            val codePoints =
+                                argument.jsonElement.content.count() + argument.jsonElement.content.count {
+                                    it.code > 0xffff
+                                }
+                            codePoints.toUInt()
+                        }
+                    )
                 )
             } else JsonPathFilterExpressionValue.ValueTypeValue.Nothing
         }

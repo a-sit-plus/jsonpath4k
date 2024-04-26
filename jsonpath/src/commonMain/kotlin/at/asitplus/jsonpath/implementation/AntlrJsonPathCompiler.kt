@@ -1,5 +1,9 @@
-package at.asitplus.jsonpath
+package at.asitplus.jsonpath.implementation
 
+import at.asitplus.jsonpath.core.JsonPathCompiler
+import at.asitplus.jsonpath.core.JsonPathFunctionExtension
+import at.asitplus.jsonpath.core.JsonPathQuery
+import at.asitplus.jsonpath.core.NodeList
 import at.asitplus.parser.generated.JsonPathLexer
 import at.asitplus.parser.generated.JsonPathParser
 import kotlinx.serialization.json.JsonElement

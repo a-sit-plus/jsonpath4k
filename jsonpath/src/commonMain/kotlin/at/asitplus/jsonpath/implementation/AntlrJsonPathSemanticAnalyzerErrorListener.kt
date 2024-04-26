@@ -1,4 +1,6 @@
-package at.asitplus.jsonpath
+package at.asitplus.jsonpath.implementation
+
+import at.asitplus.jsonpath.core.JsonPathFunctionExtension
 
 interface AntlrJsonPathSemanticAnalyzerErrorListener {
     fun unknownFunctionExtension(functionExtensionName: String)

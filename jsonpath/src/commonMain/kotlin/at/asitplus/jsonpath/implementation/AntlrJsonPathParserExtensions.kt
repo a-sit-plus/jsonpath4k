@@ -1,5 +1,6 @@
-package at.asitplus.jsonpath
+package at.asitplus.jsonpath.implementation
 
+import at.asitplus.jsonpath.core.Rfc9535Utils
 import at.asitplus.parser.generated.JsonPathParser
 
 fun JsonPathParser.StringLiteralContext.toUnescapedString(): String {

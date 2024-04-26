@@ -1,9 +1,14 @@
-package at.asitplus.jsonpath
+package at.asitplus.jsonpath.implementation
 
+import at.asitplus.jsonpath.core.FilterPredicate
+import at.asitplus.jsonpath.core.JsonPathFilterExpressionType
+import at.asitplus.jsonpath.core.JsonPathFilterExpressionValue
+import at.asitplus.jsonpath.core.JsonPathFunctionExtension
 import at.asitplus.parser.generated.JsonPathParser
 import at.asitplus.parser.generated.JsonPathParserBaseVisitor
-import at.asitplus.wallet.lib.data.jsonpath.JsonPathSelector
+import at.asitplus.jsonpath.core.JsonPathSelector
 import kotlinx.serialization.json.JsonArray
+import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonNull
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
@@ -217,9 +222,19 @@ class AntlrJsonPathSemanticAnalyzerVisitor(
             context = ctx,
             value = if (logicalExpressionNode.value is JsonPathExpression.FilterExpression.LogicalExpression) {
                 JsonPathExpression.SelectorExpression(
-                    JsonPathSelector.FilterSelector { context ->
-                        logicalExpressionNode.value.evaluate(context).isTrue
-                    }
+                    JsonPathSelector.FilterSelector(
+                        object : FilterPredicate {
+                            override fun invoke(
+                                currentNode: JsonElement,
+                                rootNode: JsonElement
+                            ): Boolean = logicalExpressionNode.value.evaluate(
+                                JsonPathExpressionEvaluationContext(
+                                    currentNode = currentNode,
+                                    rootNode = rootNode,
+                                )
+                            ).isTrue
+                        }
+                    )
                 )
             } else JsonPathExpression.ErrorType,
             children = listOf(logicalExpressionNode)
@@ -545,8 +560,8 @@ class AntlrJsonPathSemanticAnalyzerVisitor(
     }
 
     private fun evaluateComparison(
-        firstComparable: (JsonPathEvaluationContext) -> JsonPathFilterExpressionValue.ValueTypeValue,
-        secondComparable: (JsonPathEvaluationContext) -> JsonPathFilterExpressionValue.ValueTypeValue,
+        firstComparable: (JsonPathExpressionEvaluationContext) -> JsonPathFilterExpressionValue.ValueTypeValue,
+        secondComparable: (JsonPathExpressionEvaluationContext) -> JsonPathFilterExpressionValue.ValueTypeValue,
         comparisonOpContext: JsonPathParser.ComparisonOpContext,
     ): JsonPathExpression = comparisonOpContext.let {
         when {

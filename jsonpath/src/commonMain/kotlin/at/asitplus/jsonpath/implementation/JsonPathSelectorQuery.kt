@@ -1,11 +1,12 @@
-package at.asitplus.jsonpath
+package at.asitplus.jsonpath.implementation
 
-import at.asitplus.wallet.lib.data.jsonpath.JsonPathSelector
+import at.asitplus.jsonpath.core.JsonPathQuery
+import at.asitplus.jsonpath.core.JsonPathSelector
+import at.asitplus.jsonpath.core.NodeList
+import at.asitplus.jsonpath.core.NodeListEntry
+import at.asitplus.jsonpath.core.NormalizedJsonPath
 import kotlinx.serialization.json.JsonElement
 
-interface JsonPathQuery {
-    fun invoke(currentNode: JsonElement, rootNode: JsonElement = currentNode): NodeList
-}
 
 class JsonPathSelectorQuery(
     val selectors: List<JsonPathSelector>,

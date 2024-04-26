@@ -1,4 +1,4 @@
-package at.asitplus.jsonpath
+package at.asitplus.jsonpath.core
 
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json

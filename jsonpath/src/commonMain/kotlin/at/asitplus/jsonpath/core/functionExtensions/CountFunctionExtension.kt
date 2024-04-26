@@ -1,8 +1,8 @@
 package at.asitplus.wallet.lib.data.jsonpath.functionExtensions
 
-import at.asitplus.jsonpath.JsonPathFilterExpressionValue
-import at.asitplus.jsonpath.JsonPathFilterExpressionType
-import at.asitplus.jsonpath.JsonPathFunctionExtension
+import at.asitplus.jsonpath.core.JsonPathFilterExpressionValue
+import at.asitplus.jsonpath.core.JsonPathFilterExpressionType
+import at.asitplus.jsonpath.core.JsonPathFunctionExtension
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.json.JsonPrimitive
 

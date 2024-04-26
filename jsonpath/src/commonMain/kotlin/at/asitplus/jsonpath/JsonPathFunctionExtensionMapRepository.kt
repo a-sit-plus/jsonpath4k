@@ -1,5 +1,7 @@
 package at.asitplus.jsonpath
 
+import at.asitplus.jsonpath.core.JsonPathFunctionExtension
+
 class JsonPathFunctionExtensionMapRepository(
     private val extensions: MutableMap<String, JsonPathFunctionExtension<*>> = mutableMapOf()
 ) : JsonPathFunctionExtensionRepository {

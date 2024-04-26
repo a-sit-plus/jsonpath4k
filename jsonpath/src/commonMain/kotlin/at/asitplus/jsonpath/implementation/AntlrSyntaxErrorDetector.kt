@@ -1,4 +1,4 @@
-package at.asitplus.jsonpath
+package at.asitplus.jsonpath.implementation
 
 import org.antlr.v4.kotlinruntime.BaseErrorListener
 import org.antlr.v4.kotlinruntime.RecognitionException

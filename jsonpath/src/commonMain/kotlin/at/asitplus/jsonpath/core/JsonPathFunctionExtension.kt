@@ -1,4 +1,4 @@
-package at.asitplus.jsonpath
+package at.asitplus.jsonpath.core
 
 /**
  * specification: https://datatracker.ietf.org/doc/rfc9535/

@@ -1,4 +1,4 @@
-package at.asitplus.jsonpath
+package at.asitplus.jsonpath.core
 
 object Rfc9535Utils {
     fun switchToDoubleQuotedString(string: String) = if (string.startsWith("\"")) {

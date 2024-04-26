@@ -1,5 +1,6 @@
 package at.asitplus.jsonpath
 
+import at.asitplus.jsonpath.core.Rfc9535Utils
 import io.kotest.core.spec.style.FreeSpec
 import io.kotest.matchers.shouldBe
 

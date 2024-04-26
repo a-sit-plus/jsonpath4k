@@ -1,4 +1,4 @@
-package at.asitplus.jsonpath
+package at.asitplus.jsonpath.core
 
 import kotlinx.serialization.json.JsonElement
 

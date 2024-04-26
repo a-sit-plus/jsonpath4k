@@ -1,41 +1,44 @@
-package at.asitplus.jsonpath
+package at.asitplus.jsonpath.implementation
 
-import at.asitplus.wallet.lib.data.jsonpath.JsonPathSelector
+import at.asitplus.jsonpath.core.JsonPathFilterExpressionType
+import at.asitplus.jsonpath.core.JsonPathFilterExpressionValue
+import at.asitplus.jsonpath.core.JsonPathQuery
+import at.asitplus.jsonpath.core.JsonPathSelector
 
 
 sealed interface JsonPathExpression {
 
     sealed class FilterExpression(
         val expressionType: JsonPathFilterExpressionType,
-        open val evaluate: (JsonPathEvaluationContext) -> JsonPathFilterExpressionValue,
+        open val evaluate: (JsonPathExpressionEvaluationContext) -> JsonPathFilterExpressionValue,
     ) : JsonPathExpression {
         data class ValueExpression(
-            override val evaluate: (JsonPathEvaluationContext) -> JsonPathFilterExpressionValue.ValueTypeValue
+            override val evaluate: (JsonPathExpressionEvaluationContext) -> JsonPathFilterExpressionValue.ValueTypeValue
         ) : FilterExpression(
             expressionType = JsonPathFilterExpressionType.ValueType,
             evaluate = evaluate
         )
 
         data class LogicalExpression(
-            override val evaluate: (JsonPathEvaluationContext) -> JsonPathFilterExpressionValue.LogicalTypeValue
+            override val evaluate: (JsonPathExpressionEvaluationContext) -> JsonPathFilterExpressionValue.LogicalTypeValue
         ) : FilterExpression(
             expressionType = JsonPathFilterExpressionType.LogicalType,
             evaluate = evaluate
         )
 
         sealed class NodesExpression(
-            override val evaluate: (JsonPathEvaluationContext) -> JsonPathFilterExpressionValue.NodesTypeValue
+            override val evaluate: (JsonPathExpressionEvaluationContext) -> JsonPathFilterExpressionValue.NodesTypeValue
         ) : FilterExpression(
             expressionType = JsonPathFilterExpressionType.NodesType,
             evaluate = evaluate
         ) {
             sealed class FilterQueryExpression(
                 open val jsonPathQuery: JsonPathQuery,
-                override val evaluate: (JsonPathEvaluationContext) -> JsonPathFilterExpressionValue.NodesTypeValue.FilterQueryResult
+                override val evaluate: (JsonPathExpressionEvaluationContext) -> JsonPathFilterExpressionValue.NodesTypeValue.FilterQueryResult
             ) : NodesExpression(evaluate) {
                 data class SingularQueryExpression(
                     override val jsonPathQuery: JsonPathQuery,
-                    override val evaluate: (JsonPathEvaluationContext) -> JsonPathFilterExpressionValue.NodesTypeValue.FilterQueryResult.SingularQueryResult = {
+                    override val evaluate: (JsonPathExpressionEvaluationContext) -> JsonPathFilterExpressionValue.NodesTypeValue.FilterQueryResult.SingularQueryResult = {
                         val nodeList = jsonPathQuery.invoke(
                             currentNode = it.currentNode,
                             rootNode = it.rootNode,
@@ -61,7 +64,7 @@ sealed interface JsonPathExpression {
 
                 data class NonSingularQueryExpression(
                     override val jsonPathQuery: JsonPathQuery,
-                    override val evaluate: (JsonPathEvaluationContext) -> JsonPathFilterExpressionValue.NodesTypeValue.FilterQueryResult.NonSingularQueryResult = {
+                    override val evaluate: (JsonPathExpressionEvaluationContext) -> JsonPathFilterExpressionValue.NodesTypeValue.FilterQueryResult.NonSingularQueryResult = {
                         val nodeList = jsonPathQuery.invoke(
                             currentNode = it.currentNode,
                             rootNode = it.rootNode,
@@ -79,7 +82,7 @@ sealed interface JsonPathExpression {
             }
 
             data class NodesFunctionExpression(
-                override val evaluate: (JsonPathEvaluationContext) -> JsonPathFilterExpressionValue.NodesTypeValue.FunctionExtensionResult
+                override val evaluate: (JsonPathExpressionEvaluationContext) -> JsonPathFilterExpressionValue.NodesTypeValue.FunctionExtensionResult
             ) : NodesExpression(evaluate)
         }
     }

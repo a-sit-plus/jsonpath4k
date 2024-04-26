@@ -1,5 +1,7 @@
-package at.asitplus.jsonpath
+package at.asitplus.jsonpath.implementation
 
+import at.asitplus.jsonpath.core.JsonPathFilterExpressionValue
+import at.asitplus.jsonpath.core.Rfc9535Utils
 import kotlinx.serialization.json.JsonObject
 import org.antlr.v4.kotlinruntime.ParserRuleContext
 
@@ -46,7 +48,11 @@ class InvalidComparableValueException(expression: ParserRuleContext, value: Json
 )
 
 class MissingKeyException(jsonObject: JsonObject, key: String) : JsonPathRuntimeException(
-    "Missing key ${Rfc9535Utils.escapeToDoubleQuoted(key)} at object ${Rfc9535Utils.escapeToDoubleQuoted(jsonObject.toString())}"
+    "Missing key ${Rfc9535Utils.escapeToDoubleQuoted(key)} at object ${
+        Rfc9535Utils.escapeToDoubleQuoted(
+            jsonObject.toString()
+        )
+    }"
 )
 
 class UnknownFunctionExtensionException(functionExtensionName: String) : JsonPathRuntimeException(
