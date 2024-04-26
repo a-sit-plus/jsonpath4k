@@ -13,9 +13,10 @@ import kotlinx.serialization.json.JsonPrimitive
 import kotlin.math.max
 import kotlin.math.min
 
-/*
-specification: https://datatracker.ietf.org/doc/rfc9535/
-section: 2.3.  Selectors
+/**
+ * specification: https://datatracker.ietf.org/doc/rfc9535/
+ * date: 2024-02
+ * section: 2.3.  Selectors
  */
 sealed interface JsonPathSelector {
     fun invoke(
@@ -51,9 +52,10 @@ sealed interface JsonPathSelector {
         }
     }
 
-    /*
-    specification: https://datatracker.ietf.org/doc/rfc9535/
-    section: 2.3.1.  Name Selector
+    /**
+     * specification: https://datatracker.ietf.org/doc/rfc9535/
+     * date: 2024-02
+     * section: 2.3.1.  Name Selector
      */
     data class MemberSelector(val memberName: String) : JsonPathSelector {
         override fun invoke(
@@ -75,9 +77,10 @@ sealed interface JsonPathSelector {
         }
     }
 
-    /*
-    specification: https://datatracker.ietf.org/doc/rfc9535/
-    section: 2.3.3.  Index Selector
+    /**
+     * specification: https://datatracker.ietf.org/doc/rfc9535/
+     * date: 2024-02
+     * section: 2.3.3.  Index Selector
      */
     data class IndexSelector(val index: Int) : JsonPathSelector {
         override fun invoke(
@@ -109,9 +112,10 @@ sealed interface JsonPathSelector {
         }
     }
 
-    /*
-    specification: https://datatracker.ietf.org/doc/rfc9535/
-    section: 2.3.2.  Wildcard Selector
+    /**
+     * specification: https://datatracker.ietf.org/doc/rfc9535/
+     * date: 2024-02
+     * section: 2.3.2.  Wildcard Selector
      */
     data object WildCardSelector : JsonPathSelector {
         override fun invoke(
@@ -138,9 +142,10 @@ sealed interface JsonPathSelector {
         }
     }
     
-    /*
-    specification: https://datatracker.ietf.org/doc/rfc9535/
-    section: 2.3.2.  Wildcard Selector
+    /**
+     * specification: https://datatracker.ietf.org/doc/rfc9535/
+     * date: 2024-02
+     * section: 2.3.2.  Wildcard Selector
      */
     data class BracketedSelector(val selectors: List<JsonPathSelector>) : JsonPathSelector {
         override fun invoke(
@@ -156,9 +161,10 @@ sealed interface JsonPathSelector {
         }
     }
 
-    /*
-    specification: https://datatracker.ietf.org/doc/rfc9535/
-    section: 2.3.4.  Array Slice Selector
+    /**
+     * specification: https://datatracker.ietf.org/doc/rfc9535/
+     * date: 2024-02
+     * section: 2.3.4.  Array Slice Selector
      */
     data class SliceSelector(
         val startInclusive: Int? = null,
@@ -232,9 +238,10 @@ sealed interface JsonPathSelector {
         }
     }
 
-    /*
-    specification: https://datatracker.ietf.org/doc/rfc9535/
-    section: 2.5.2.  Descendant Segment
+    /**
+     * specification: https://datatracker.ietf.org/doc/rfc9535/
+     * date: 2024-02
+     * section: 2.5.2.  Descendant Segment
      */
     data class DescendantSelector(
         val selector: JsonPathSelector,
@@ -298,9 +305,10 @@ sealed interface JsonPathSelector {
         }
     }
 
-    /*
-    specification: https://datatracker.ietf.org/doc/rfc9535/
-    section: 2.3.5.  Filter Selector
+    /**
+     * specification: https://datatracker.ietf.org/doc/rfc9535/
+     * date: 2024-02
+     * section: 2.3.5.  Filter Selector
      */
     data class FilterSelector(
         private val filterPredicate: (JsonPathEvaluationContext) -> Boolean,

@@ -13,15 +13,17 @@ import kotlinx.serialization.json.longOrNull
 import org.antlr.v4.kotlinruntime.ParserRuleContext
 import org.antlr.v4.kotlinruntime.tree.TerminalNode
 
-/*
-This class builds an abstract syntax tree where the nodes contain the logic necessary to be evaluated against an input.
+/**
+ * specification: https://datatracker.ietf.org/doc/rfc9535/
+ * date: 2024-02
+ * section 2.4.3: Well-Typedness of Function Expressions
+ *
+ * This class builds an abstract syntax tree where the nodes contain the logic necessary to be evaluated against an input.
  */
 class AntlrJsonPathSemanticAnalyzerVisitor(
     private val errorListener: AntlrJsonPathSemanticAnalyzerErrorListener?,
     private val functionExtensionRetriever: (String) -> JsonPathFunctionExtension<*>?,
 ) : JsonPathParserBaseVisitor<AbstractSyntaxTree<out JsonPathExpression>>() {
-    // see section 2.4.3: Well-Typedness of Function Expressions
-    // - https://datatracker.ietf.org/doc/rfc9535/
     override fun defaultResult(): AbstractSyntaxTree<JsonPathExpression> {
         return AbstractSyntaxTree(context = null, value = JsonPathExpression.NoType)
     }
@@ -305,13 +307,21 @@ class AntlrJsonPathSemanticAnalyzerVisitor(
                 children = listOf(filterQueryTree)
             )
         } ?: ctx.function_expr()?.let { functionExpressionContext ->
+            /**
+             * specification: https://datatracker.ietf.org/doc/rfc9535/
+             * date: 2024-02
+             * section 2.4.3: Well-Typedness of Function Expressions
+             *
+             *        As a test-expr in a logical expression:
+             *           The function's declared result type is LogicalType or (giving
+             *           rise to conversion as per Section 2.4.2) NodesType.
+             */
             val child = visitFunction_expr(functionExpressionContext)
             val functionResultValue = child.value
             AbstractSyntaxTree(
                 context = ctx,
                 value = when (functionResultValue) {
                     is JsonPathExpression.FilterExpression.ValueExpression -> {
-                        // ValueType may not be used in a test expression
                         JsonPathExpression.ErrorType.also {
                             errorListener?.invalidFunctionExtensionForTestExpression(
                                 functionExpressionContext.FUNCTION_NAME().text,
@@ -365,6 +375,18 @@ class AntlrJsonPathSemanticAnalyzerVisitor(
         val coercedArgumentTypes =
             functionArgumentNodes.map { it.value }.mapIndexed { index, argumentNode ->
                 when (extension.argumentTypes.getOrNull(index)) {
+                    /**
+                     * specification: https://datatracker.ietf.org/doc/rfc9535/
+                     * date: 2024-02
+                     * section 2.4.3: Well-Typedness of Function Expressions
+                     *
+                     *       *  When the declared type of the parameter is LogicalType and the
+                     *           argument is one of the following:
+                     *
+                     *           -  A function expression with declared result type NodesType.
+                     *              In this case, the argument is converted to LogicalType as
+                     *              per Section 2.4.2.
+                     */
                     JsonPathFilterExpressionType.LogicalType -> when (argumentNode) {
                         is JsonPathExpression.FilterExpression.NodesExpression -> {
                             JsonPathExpression.FilterExpression.LogicalExpression {
@@ -379,6 +401,24 @@ class AntlrJsonPathSemanticAnalyzerVisitor(
 
                     JsonPathFilterExpressionType.NodesType -> argumentNode
 
+                    /**
+                     * specification: https://datatracker.ietf.org/doc/rfc9535/
+                     * date: 2024-02
+                     * section 2.4.3: Well-Typedness of Function Expressions
+                     *
+                     *        *  When the declared type of the parameter is ValueType and the
+                     *           argument is one of the following:
+                     *
+                     *           -  A value expressed as a literal.
+                     *
+                     *           -  A singular query.  In this case:
+                     *
+                     *              o  If the query results in a nodelist consisting of a
+                     *                 single node, the argument is the value of the node.
+                     *
+                     *              o  If the query results in an empty nodelist, the argument
+                     *                 is the special result Nothing.
+                     */
                     JsonPathFilterExpressionType.ValueType -> when (argumentNode) {
                         is JsonPathExpression.FilterExpression.NodesExpression.FilterQueryExpression.SingularQueryExpression -> {
                             argumentNode.toValueTypeValue()
@@ -450,8 +490,6 @@ class AntlrJsonPathSemanticAnalyzerVisitor(
     }
 
     override fun visitComparison_expr(ctx: JsonPathParser.Comparison_exprContext): AbstractSyntaxTree<JsonPathExpression> {
-        // evaluate all comparables in order to find as many errors as possible
-        // otherwise, a comparison always returns a boolean anyway
         val firstComparable = visitComparable(ctx.firstComparable().comparable())
         val secondComparable = visitComparable(ctx.secondComparable().comparable())
         val children = listOf(firstComparable, secondComparable)
@@ -474,6 +512,14 @@ class AntlrJsonPathSemanticAnalyzerVisitor(
             when {
                 value is JsonPathExpression.ErrorType -> {}
                 functionExpressionContext != null -> {
+                    /**
+                     * specification: https://datatracker.ietf.org/doc/rfc9535/
+                     * date: 2024-02
+                     * section 2.4.3: Well-Typedness of Function Expressions
+                     *
+                     *        As a comparable in a comparison:
+                     *           The function's declared result type is ValueType.
+                     */
                     if (value !is JsonPathExpression.FilterExpression.ValueExpression) {
                         errorListener?.invalidFunctionExtensionForComparable(
                             functionExpressionContext.FUNCTION_NAME().text,

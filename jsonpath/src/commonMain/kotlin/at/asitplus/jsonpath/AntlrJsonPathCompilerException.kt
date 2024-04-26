@@ -3,9 +3,10 @@ package at.asitplus.jsonpath
 import kotlinx.serialization.json.JsonObject
 import org.antlr.v4.kotlinruntime.ParserRuleContext
 
-// specification: https://datatracker.ietf.org/doc/rfc9535/
-
-
+/**
+ * specification: https://datatracker.ietf.org/doc/rfc9535/
+ * date: 2024-02
+ */
 open class JsonPathCompilerException(message: String) : Exception(message)
 
 class JsonPathLexerException : JsonPathCompilerException(

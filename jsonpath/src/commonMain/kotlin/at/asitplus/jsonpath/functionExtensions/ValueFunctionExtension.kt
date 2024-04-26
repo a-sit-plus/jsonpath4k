@@ -4,9 +4,10 @@ import at.asitplus.jsonpath.JsonPathFilterExpressionType
 import at.asitplus.jsonpath.JsonPathFilterExpressionValue
 import at.asitplus.jsonpath.JsonPathFunctionExtension
 
-/*
-specification: https://datatracker.ietf.org/doc/rfc9535/
-section: 2.4.8.  value() Function Extension
+/**
+ * specification: https://datatracker.ietf.org/doc/rfc9535/
+ * date: 2024-02
+ * section: 2.4.8.  value() Function Extension
  */
 data object ValueFunctionExtension : JsonPathFunctionExtension.ValueTypeFunctionExtension(
     name = "value",
