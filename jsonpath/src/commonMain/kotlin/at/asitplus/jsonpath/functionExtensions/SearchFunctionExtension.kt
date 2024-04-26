@@ -30,7 +30,7 @@ data object SearchFunctionExtension : JsonPathFunctionExtension.LogicalTypeFunct
         regexArgument: JsonPathFilterExpressionValue.ValueTypeValue,
     ): JsonPathFilterExpressionValue.LogicalTypeValue {
         val stringValue = unpackArgumentToStringValue(stringArgument)
-        val regexValue = unpackArgumentToStringValue(stringArgument)
+        val regexValue = unpackArgumentToStringValue(regexArgument)
         if(stringValue == null || regexValue == null) {
             return JsonPathFilterExpressionValue.LogicalTypeValue(false)
         }
