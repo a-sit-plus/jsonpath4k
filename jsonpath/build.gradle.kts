@@ -1,14 +1,24 @@
 
 import com.strumenta.antlrkotlin.gradle.AntlrKotlinTask
+import org.jetbrains.dokka.gradle.DokkaTask
+import org.jetbrains.dokka.gradle.DokkaTaskPartial
 import org.jetbrains.kotlin.gradle.dsl.KotlinCompile
 import org.jetbrains.kotlin.gradle.plugin.mpp.MetadataDependencyTransformationTask
 
 plugins {
-    alias(libs.plugins.kotlin.multiplatform)
+    alias(libs.plugins.jetbrains.kotlin.multiplatform)
     alias(libs.plugins.kotest.multiplatform)
-    alias(libs.plugins.kotlinx.serialization)
+    alias(libs.plugins.jetbrains.kotlinx.serialization)
     alias(libs.plugins.antlr.kotlin.plugin)
+    alias(libs.plugins.jetbrains.dokka)
+    id("maven-publish")
+    id("signing")
 }
+
+/* required for maven publication */
+val artifactVersion: String by extra
+group = "at.asitplus.jsonpath"
+version = artifactVersion
 
 kotlin {
     jvm()
@@ -23,7 +33,7 @@ kotlin {
             }
             dependencies {
                 implementation(libs.antlr.kotlin)
-                implementation(libs.kotlinx.serialization)
+                implementation(libs.jetbrains.kotlinx.serialization)
                 implementation(libs.napier)
             }
         }
@@ -34,11 +44,105 @@ kotlin {
                 implementation(libs.kotest.assertions.core)
                 implementation(libs.kotest.framework.engine)
                 implementation(libs.kotest.framework.datatest)
+                implementation(libs.jetbrains.kotlinx.serialization)
+            }
+        }
+
+        jvmTest {
+            dependencies {
                 implementation(libs.kotest.runner.junit5)
-                implementation(libs.kotlinx.serialization)
             }
         }
     }
+}
+
+/**
+ * taken from vclib conventions plugin at https://github.com/a-sit-plus/gradle-conventions-plugin
+ */
+fun Project.setupDokka(
+    outputDir: String = layout.buildDirectory.dir("dokka").get().asFile.canonicalPath,
+    baseUrl: String,
+    multiModuleDoc: Boolean = false,
+    remoteLineSuffix: String = "#L"
+): TaskProvider<Jar> {
+    val dokkaHtml = (tasks["dokkaHtml"] as DokkaTask).apply { outputDirectory.set(file(outputDir)) }
+
+    val deleteDokkaOutput = tasks.register<Delete>("deleteDokkaOutputDirectory") {
+        delete(outputDir)
+    }
+    val sourceLinktToConfigure = if (multiModuleDoc) (tasks["dokkaHtmlPartial"] as DokkaTaskPartial) else dokkaHtml
+    sourceLinktToConfigure.dokkaSourceSets.configureEach {
+        sourceLink {
+            localDirectory.set(file("src/$name/kotlin"))
+            remoteUrl.set(uri("$baseUrl/${project.name}/src/$name/kotlin").toURL())
+            this@sourceLink.remoteLineSuffix.set(remoteLineSuffix)
+        }
+    }
+
+    return tasks.register<Jar>("javadocJar") {
+        dependsOn(deleteDokkaOutput, dokkaHtml)
+        archiveClassifier.set("javadoc")
+        from(outputDir)
+    }
+}
+
+val javadocJar = setupDokka(
+    baseUrl = "https://github.com/a-sit-plus/jsonpath/tree/main/",
+    multiModuleDoc = false
+)
+
+publishing {
+    publications {
+        withType<MavenPublication> {
+            artifact(javadocJar)
+            pom {
+                name.set("JsonPath")
+                description.set("Kotlin Multiplatform library for using Json Paths as specified in [RFC9535](https://datatracker.ietf.org/doc/rfc9535/)")
+                url.set("https://github.com/a-sit-plus/jsonpath")
+                licenses {
+                    license {
+                        name.set("The Apache License, Version 2.0")
+                        url.set("http://www.apache.org/licenses/LICENSE-2.0.txt")
+                    }
+                }
+                developers {
+                    developer {
+                        id.set("nodh")
+                        name.set("Christian Kollmann")
+                        email.set("christian.kollmann@a-sit.at")
+                    }
+                    developer {
+                        id.set("acrusage")
+                        name.set("Stefan Kreiner")
+                        email.set("stefan.kreiner@a-sit.at")
+                    }
+                }
+                scm {
+                    connection.set("scm:git:git@github.com:a-sit-plus/jsonpath.git")
+                    developerConnection.set("scm:git:git@github.com:a-sit-plus/jsonpath.git")
+                    url.set("https://github.com/a-sit-plus/jsonpath")
+                }
+            }
+        }
+    }
+    repositories {
+        mavenLocal {
+            signing.isRequired = false
+        }
+        maven {
+            url = uri(layout.projectDirectory.dir("..").dir("repo"))
+            name = "local"
+            signing.isRequired = false
+        }
+    }
+}
+
+signing {
+    val signingKeyId: String? by project
+    val signingKey: String? by project
+    val signingPassword: String? by project
+    useInMemoryPgpKeys(signingKeyId, signingKey, signingPassword)
+    sign(publishing.publications)
 }
 
 val generateKotlinGrammarSource = tasks.register<AntlrKotlinTask>("generateKotlinGrammarSource") {
