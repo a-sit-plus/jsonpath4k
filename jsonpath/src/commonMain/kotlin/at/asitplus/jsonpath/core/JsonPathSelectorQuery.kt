@@ -4,22 +4,19 @@ import at.asitplus.jsonpath.core.JsonPathQuery
 import at.asitplus.jsonpath.core.JsonPathSelector
 import at.asitplus.jsonpath.core.NodeList
 import at.asitplus.jsonpath.core.NodeListEntry
-import at.asitplus.jsonpath.core.NormalizedJsonPath
 import kotlinx.serialization.json.JsonElement
 
 
 class JsonPathSelectorQuery(
-    val selectors: List<JsonPathSelector>,
+    private val selectors: List<JsonPathSelector>,
 ) : JsonPathQuery {
     override fun invoke(currentNode: JsonElement, rootNode: JsonElement): NodeList {
-        var matches = listOf(
-            NodeListEntry(
-                normalizedJsonPath = NormalizedJsonPath(),
-                value = currentNode,
-            )
-        )
-        selectors.forEach { selector ->
-            matches = matches.flatMap { match ->
+        var matches = selectors.firstOrNull()?.invoke(
+            currentNode = currentNode,
+            rootNode = rootNode,
+        ) ?: listOf()
+        selectors.forEachIndexed { index, selector ->
+            matches = if(index == 0) matches else matches.flatMap { match ->
                 selector.invoke(
                     currentNode = match.value,
                     rootNode = rootNode,

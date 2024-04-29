@@ -1,7 +1,10 @@
 package at.asitplus.jsonpath
 
+import at.asitplus.jsonpath.core.JsonPathCompiler
 import at.asitplus.jsonpath.core.JsonPathFilterExpressionValue
 import at.asitplus.jsonpath.core.JsonPathFunctionExtension
+import at.asitplus.jsonpath.core.JsonPathQuery
+import at.asitplus.jsonpath.implementation.JsonPathSelectorQuery
 import io.kotest.assertions.throwables.shouldNotThrowAny
 import io.kotest.core.spec.style.FreeSpec
 import io.kotest.matchers.collections.shouldBeIn
@@ -24,7 +27,8 @@ class DependencyManagementTest : FreeSpec({
             JsonPathFunctionExtensionMapRepository(
                 JsonPathDependencyManager.functionExtensionRepository.export().toMutableMap()
             )
-        defaultTestFunctionExtensionRepository = JsonPathDependencyManager.functionExtensionRepository
+        defaultTestFunctionExtensionRepository =
+            JsonPathDependencyManager.functionExtensionRepository
     }
     afterEach {
         JsonPathDependencyManager.apply {
@@ -67,5 +71,16 @@ class DependencyManagementTest : FreeSpec({
                 jsonElement["a"].shouldNotBeNull().shouldBeIn(nodeList.map { it.value })
             }
         }
+    }
+
+    "changing the compiler also changes the compiler used in the next JsonPath" {
+        val incorrectEmptyQueryCompiler = object : JsonPathCompiler {
+            override fun compile(jsonPath: String): JsonPathQuery {
+                return JsonPathSelectorQuery(listOf())
+            }
+        }
+        JsonPathDependencyManager.compiler = incorrectEmptyQueryCompiler
+        val emptyQueryResult = JsonPath("$").query(buildJsonObject {})
+        emptyQueryResult.shouldHaveSize(0) // the compiler always yields an empty query
     }
 })
