@@ -1,6 +1,7 @@
 
 import com.strumenta.antlrkotlin.gradle.AntlrKotlinTask
 import org.jetbrains.kotlin.gradle.dsl.KotlinCompile
+import org.jetbrains.kotlin.gradle.plugin.mpp.MetadataDependencyTransformationTask
 
 plugins {
     alias(libs.plugins.kotlin.multiplatform)
@@ -42,6 +43,8 @@ kotlin {
 
 val generateKotlinGrammarSource = tasks.register<AntlrKotlinTask>("generateKotlinGrammarSource") {
     dependsOn("cleanGenerateKotlinGrammarSource")
+    dependsOn(tasks.withType<ProcessResources>())
+    dependsOn(tasks.withType<MetadataDependencyTransformationTask>())
 
     // ANTLR .g4 files are under {example-project}/antlr
     // Only include *.g4 files. This allows tools (e.g., IDE plugins)
@@ -66,10 +69,7 @@ val generateKotlinGrammarSource = tasks.register<AntlrKotlinTask>("generateKotli
 tasks.withType<KotlinCompile<*>> {
     dependsOn(generateKotlinGrammarSource)
 }
-tasks.withType<AntlrKotlinTask> {
-    dependsOn(tasks.named("jvmProcessResources"))
-    dependsOn(tasks.named("iosX64ProcessResources"))
-}
-tasks.withType<Test>().configureEach {
+
+tasks.named<Test>("jvmTest") {
     useJUnitPlatform()
 }
