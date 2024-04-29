@@ -12,8 +12,8 @@ import org.jetbrains.kotlin.gradle.plugin.mpp.apple.XCFrameworkConfig
 
 plugins {
     alias(libs.plugins.jetbrains.kotlin.multiplatform)
-    alias(libs.plugins.kotest.multiplatform)
     alias(libs.plugins.jetbrains.kotlinx.serialization)
+    alias(libs.plugins.kotest.multiplatform)
     alias(libs.plugins.antlr.kotlin.plugin)
     alias(libs.plugins.jetbrains.dokka)
     id("maven-publish")
@@ -84,14 +84,19 @@ publishing {
                 }
                 developers {
                     developer {
+                        id.set("acrusage")
+                        name.set("Stefan Kreiner")
+                        email.set("stefan.kreiner@iaik.tugraz.at")
+                    }
+                    developer {
                         id.set("nodh")
                         name.set("Christian Kollmann")
                         email.set("christian.kollmann@a-sit.at")
                     }
                     developer {
-                        id.set("acrusage")
-                        name.set("Stefan Kreiner")
-                        email.set("stefan.kreiner@a-sit.at")
+                        id.set("JesusMcCloud")
+                        name.set("Bernd Prünster")
+                        email.set("bernd.pruenster@a-sit.at")
                     }
                 }
                 scm {
@@ -126,6 +131,7 @@ val generateKotlinGrammarSource = tasks.register<AntlrKotlinTask>("generateKotli
     dependsOn("cleanGenerateKotlinGrammarSource")
     dependsOn(tasks.withType<ProcessResources>())
     dependsOn(tasks.withType<MetadataDependencyTransformationTask>())
+    dependsOn(tasks.named<Task>("buildKotlinToolingMetadata"))
 
     // compiling any *.g4 files within the project
     source = fileTree(layout.projectDirectory) {
@@ -152,7 +158,15 @@ tasks.withType<KotlinCompile<*>> {
 tasks.named<Test>("jvmTest") {
     useJUnitPlatform()
 }
-
+tasks.named<Task>("jvmSourcesJar") {
+    dependsOn(generateKotlinGrammarSource)
+}
+tasks.named<Task>("dokkaHtml") {
+    dependsOn(generateKotlinGrammarSource)
+}
+tasks.named<Task>("sourcesJar") {
+    dependsOn(generateKotlinGrammarSource)
+}
 
 
 

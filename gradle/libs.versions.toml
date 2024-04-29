@@ -1,15 +1,16 @@
 [versions]
-antlr-kotlin-version = "1.0.0-RC3"
+antlr-kotlin = "1.0.0-RC3"
 kotest = "5.8.1"
 jetbrains-kotlin = "1.9.23"
 jetbrains-kotlinx-serialization = "1.6.3"
 jetbrains-dokka = "1.9.20"
-napier-version = "2.7.1"
+napier = "2.7.1"
+gradle-nexus-publish = "1.3.0"
 
 
 [libraries]
-antlr-kotlin = { group = "com.strumenta", name = "antlr-kotlin-runtime", version.ref = "antlr-kotlin-version" }
-napier = { module = "io.github.aakira:napier", version.ref = "napier-version" }
+antlr-kotlin = { group = "com.strumenta", name = "antlr-kotlin-runtime", version.ref = "antlr-kotlin" }
+napier = { module = "io.github.aakira:napier", version.ref = "napier" }
 
 kotest-common = { module = "io.kotest:kotest-common", version.ref = "kotest" }
 kotest-property = { module = "io.kotest:kotest-property", version.ref = "kotest" }
@@ -22,8 +23,9 @@ jetbrains-kotlinx-serialization = { module = "org.jetbrains.kotlinx:kotlinx-seri
 
 
 [plugins]
-antlr-kotlin-plugin = { id = "com.strumenta.antlr-kotlin", version.ref = "antlr-kotlin-version" }
+antlr-kotlin-plugin = { id = "com.strumenta.antlr-kotlin", version.ref = "antlr-kotlin" }
 kotest-multiplatform = { id = "io.kotest.multiplatform", version.ref = "kotest" }
 jetbrains-kotlin-multiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "jetbrains-kotlin" }
 jetbrains-kotlinx-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "jetbrains-kotlin" }
 jetbrains-dokka = { id = "org.jetbrains.dokka", version.ref = "jetbrains-dokka" }
+gradle-nexus-publish = { id = "io.github.gradle-nexus.publish-plugin", version.ref = "gradle-nexus-publish" }
