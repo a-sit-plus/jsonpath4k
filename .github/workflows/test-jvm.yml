@@ -19,5 +19,5 @@ jobs:
         if: success() || failure()
         with:
           name: jsonpath Tests
-          path: jsonpath/build/test-results/**/TEST*.xml,vclib-aries/build/test-results/**/TEST*.xml,vclib-openid/build/test-results/**/TEST*.xml
+          path: jsonpath/build/test-results/**/TEST*.xml
           reporter: java-junit
