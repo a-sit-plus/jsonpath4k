@@ -3,7 +3,12 @@ import com.strumenta.antlrkotlin.gradle.AntlrKotlinTask
 import org.jetbrains.dokka.gradle.DokkaTask
 import org.jetbrains.dokka.gradle.DokkaTaskPartial
 import org.jetbrains.kotlin.gradle.dsl.KotlinCompile
+import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
+import org.jetbrains.kotlin.gradle.dsl.kotlinExtension
+import org.jetbrains.kotlin.gradle.plugin.mpp.BitcodeEmbeddingMode
+import org.jetbrains.kotlin.gradle.plugin.mpp.KotlinNativeTarget
 import org.jetbrains.kotlin.gradle.plugin.mpp.MetadataDependencyTransformationTask
+import org.jetbrains.kotlin.gradle.plugin.mpp.apple.XCFrameworkConfig
 
 plugins {
     alias(libs.plugins.jetbrains.kotlin.multiplatform)
@@ -56,35 +61,7 @@ kotlin {
     }
 }
 
-/**
- * taken from vclib conventions plugin at https://github.com/a-sit-plus/gradle-conventions-plugin
- */
-fun Project.setupDokka(
-    outputDir: String = layout.buildDirectory.dir("dokka").get().asFile.canonicalPath,
-    baseUrl: String,
-    multiModuleDoc: Boolean = false,
-    remoteLineSuffix: String = "#L"
-): TaskProvider<Jar> {
-    val dokkaHtml = (tasks["dokkaHtml"] as DokkaTask).apply { outputDirectory.set(file(outputDir)) }
-
-    val deleteDokkaOutput = tasks.register<Delete>("deleteDokkaOutputDirectory") {
-        delete(outputDir)
-    }
-    val sourceLinktToConfigure = if (multiModuleDoc) (tasks["dokkaHtmlPartial"] as DokkaTaskPartial) else dokkaHtml
-    sourceLinktToConfigure.dokkaSourceSets.configureEach {
-        sourceLink {
-            localDirectory.set(file("src/$name/kotlin"))
-            remoteUrl.set(uri("$baseUrl/${project.name}/src/$name/kotlin").toURL())
-            this@sourceLink.remoteLineSuffix.set(remoteLineSuffix)
-        }
-    }
-
-    return tasks.register<Jar>("javadocJar") {
-        dependsOn(deleteDokkaOutput, dokkaHtml)
-        archiveClassifier.set("javadoc")
-        from(outputDir)
-    }
-}
+exportIosFramework("JsonPath")
 
 val javadocJar = setupDokka(
     baseUrl = "https://github.com/a-sit-plus/jsonpath/tree/main/",
@@ -150,9 +127,7 @@ val generateKotlinGrammarSource = tasks.register<AntlrKotlinTask>("generateKotli
     dependsOn(tasks.withType<ProcessResources>())
     dependsOn(tasks.withType<MetadataDependencyTransformationTask>())
 
-    // ANTLR .g4 files are under {example-project}/antlr
-    // Only include *.g4 files. This allows tools (e.g., IDE plugins)
-    // to generate temporary files inside the base path
+    // compiling any *.g4 files within the project
     source = fileTree(layout.projectDirectory) {
         include("**/*.g4")
     }
@@ -176,4 +151,67 @@ tasks.withType<KotlinCompile<*>> {
 
 tasks.named<Test>("jvmTest") {
     useJUnitPlatform()
+}
+
+
+
+
+/**
+ * taken from vclib conventions plugin at https://github.com/a-sit-plus/gradle-conventions-plugin
+ */
+fun Project.exportIosFramework(
+    name: String,
+    vararg additionalExports: Any
+) = exportIosFramework(name, bitcodeEmbeddingMode = BitcodeEmbeddingMode.BITCODE, additionalExports = additionalExports)
+
+fun Project.exportIosFramework(
+    name: String,
+    bitcodeEmbeddingMode: BitcodeEmbeddingMode,
+    vararg additionalExports: Any
+) {
+    val iosTargets = kotlinExtension.let {
+        if (it is KotlinMultiplatformExtension) {
+            it.targets.filterIsInstance<KotlinNativeTarget>().filter { it.name.startsWith("ios") }
+        } else throw StopExecutionException("No iOS Targets found! Declare them explicitly before calling exportIosFramework!")
+    }
+
+    extensions.getByType<KotlinMultiplatformExtension>().apply {
+        XCFrameworkConfig(project, name).also { xcf ->
+            logger.lifecycle("  \u001B[1mXCFrameworks will be exported for the following iOS targets: ${iosTargets.joinToString { it.name }}\u001B[0m")
+            iosTargets.forEach {
+                it.binaries.framework {
+                    baseName = name
+                    embedBitcode(bitcodeEmbeddingMode)
+                    additionalExports.forEach { export(it) }
+                    xcf.add(this)
+                }
+            }
+        }
+    }
+}
+fun Project.setupDokka(
+    outputDir: String = layout.buildDirectory.dir("dokka").get().asFile.canonicalPath,
+    baseUrl: String,
+    multiModuleDoc: Boolean = false,
+    remoteLineSuffix: String = "#L"
+): TaskProvider<Jar> {
+    val dokkaHtml = (tasks["dokkaHtml"] as DokkaTask).apply { outputDirectory.set(file(outputDir)) }
+
+    val deleteDokkaOutput = tasks.register<Delete>("deleteDokkaOutputDirectory") {
+        delete(outputDir)
+    }
+    val sourceLinktToConfigure = if (multiModuleDoc) (tasks["dokkaHtmlPartial"] as DokkaTaskPartial) else dokkaHtml
+    sourceLinktToConfigure.dokkaSourceSets.configureEach {
+        sourceLink {
+            localDirectory.set(file("src/$name/kotlin"))
+            remoteUrl.set(uri("$baseUrl/${project.name}/src/$name/kotlin").toURL())
+            this@sourceLink.remoteLineSuffix.set(remoteLineSuffix)
+        }
+    }
+
+    return tasks.register<Jar>("javadocJar") {
+        dependsOn(deleteDokkaOutput, dokkaHtml)
+        archiveClassifier.set("javadoc")
+        from(outputDir)
+    }
 }

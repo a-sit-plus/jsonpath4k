@@ -4,6 +4,7 @@ kotest = "5.8.1"
 jetbrains-kotlin = "1.9.23"
 jetbrains-kotlinx-serialization = "1.6.3"
 jetbrains-dokka = "1.9.20"
+napier-version = "2.7.1"
 
 
 [libraries]
