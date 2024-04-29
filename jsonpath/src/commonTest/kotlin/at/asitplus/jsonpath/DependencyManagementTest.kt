@@ -13,23 +13,23 @@ import kotlinx.serialization.json.buildJsonObject
 @Suppress("unused")
 class DependencyManagementTest : FreeSpec({
     // making sure that the dependencies are reset to their default for the next test
-    val defaultCompilerBuilderBackup = JsonPathDependencyManager.compiler.value
+    val defaultCompilerBuilderBackup = JsonPathDependencyManager.compiler
     var defaultTestFunctionExtensionRepository =
-        JsonPathDependencyManager.functionExtensionRepository.value
+        JsonPathDependencyManager.functionExtensionRepository
     val defaultFunctionExtensionRepositoryBackup =
-        JsonPathDependencyManager.functionExtensionRepository.value
+        JsonPathDependencyManager.functionExtensionRepository
     beforeEach {
         // prepare a dummy repository to be modified by the tests
-        JsonPathDependencyManager.functionExtensionRepository.value =
+        JsonPathDependencyManager.functionExtensionRepository =
             JsonPathFunctionExtensionMapRepository(
-                JsonPathDependencyManager.functionExtensionRepository.value.export().toMutableMap()
+                JsonPathDependencyManager.functionExtensionRepository.export().toMutableMap()
             )
-        defaultTestFunctionExtensionRepository = JsonPathDependencyManager.functionExtensionRepository.value
+        defaultTestFunctionExtensionRepository = JsonPathDependencyManager.functionExtensionRepository
     }
     afterEach {
         JsonPathDependencyManager.apply {
-            compiler.value = defaultCompilerBuilderBackup
-            functionExtensionRepository.value = defaultFunctionExtensionRepositoryBackup
+            compiler = defaultCompilerBuilderBackup
+            functionExtensionRepository = defaultFunctionExtensionRepositoryBackup
         }
     }
 
@@ -37,7 +37,7 @@ class DependencyManagementTest : FreeSpec({
         "compiler that was built when the repository supported a function extension before it was removed should succeed compilation before and query afterwards" {
             val jsonPathStatement = "$[?foo()]"
 
-            JsonPathDependencyManager.functionExtensionRepository.value.apply {
+            JsonPathDependencyManager.functionExtensionRepository.apply {
                 addExtension(
                     object : JsonPathFunctionExtension.LogicalTypeFunctionExtension(
                         name = "foo",
@@ -54,7 +54,7 @@ class DependencyManagementTest : FreeSpec({
             }
 
             // this basically removes the foo-extension by changing to the default extension repository
-            JsonPathDependencyManager.functionExtensionRepository.value =
+            JsonPathDependencyManager.functionExtensionRepository =
                 defaultTestFunctionExtensionRepository
 
             shouldNotThrowAny {

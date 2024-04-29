@@ -762,21 +762,21 @@ class JsonPathUnitTest : FreeSpec({
 
         "2.4. Function Extensions" - {
             // making sure that the dependencies are reset to their default for the next test
-            val defaultCompilerBuilderBackup = JsonPathDependencyManager.compiler.value
+            val defaultCompilerBuilderBackup = JsonPathDependencyManager.compiler
             val defaultFunctionExtensionRepositoryBackup =
-                JsonPathDependencyManager.functionExtensionRepository.value
+                JsonPathDependencyManager.functionExtensionRepository
             beforeEach {
                 // prepare a dummy repository to be modified by the tests
-                JsonPathDependencyManager.functionExtensionRepository.value =
+                JsonPathDependencyManager.functionExtensionRepository =
                     JsonPathFunctionExtensionMapRepository(
-                        JsonPathDependencyManager.functionExtensionRepository.value.export()
+                        JsonPathDependencyManager.functionExtensionRepository.export()
                             .toMutableMap()
                     )
             }
             afterEach {
                 JsonPathDependencyManager.apply {
-                    compiler.value = defaultCompilerBuilderBackup
-                    functionExtensionRepository.value = defaultFunctionExtensionRepositoryBackup
+                    compiler = defaultCompilerBuilderBackup
+                    functionExtensionRepository = defaultFunctionExtensionRepositoryBackup
                 }
             }
             "\$[?length(@) < 3]" {
@@ -800,7 +800,7 @@ class JsonPathUnitTest : FreeSpec({
                 }
             }
             "\$[?count(foo(@.*)) == 1]" {
-                JsonPathDependencyManager.functionExtensionRepository.value.apply {
+                JsonPathDependencyManager.functionExtensionRepository.apply {
                     this.addExtension(
                         object : JsonPathFunctionExtension.NodesTypeFunctionExtension(
                             name = "foo",
@@ -836,7 +836,7 @@ class JsonPathUnitTest : FreeSpec({
             }
             "\$[?bar(@.a)]" - {
                 "logical type argument" {
-                    JsonPathDependencyManager.functionExtensionRepository.value.apply {
+                    JsonPathDependencyManager.functionExtensionRepository.apply {
                         this.addExtension(
                             object : JsonPathFunctionExtension.LogicalTypeFunctionExtension(
                                 name = "bar",
@@ -854,7 +854,7 @@ class JsonPathUnitTest : FreeSpec({
                     }
                 }
                 "value type argument" {
-                    JsonPathDependencyManager.functionExtensionRepository.value.apply {
+                    JsonPathDependencyManager.functionExtensionRepository.apply {
                         this.addExtension(
                             object : JsonPathFunctionExtension.LogicalTypeFunctionExtension(
                                 name = "bar",
@@ -872,7 +872,7 @@ class JsonPathUnitTest : FreeSpec({
                     }
                 }
                 "nodes type argument" {
-                    JsonPathDependencyManager.functionExtensionRepository.value.apply {
+                    JsonPathDependencyManager.functionExtensionRepository.apply {
                         this.addExtension(
                             object : JsonPathFunctionExtension.LogicalTypeFunctionExtension(
                                 name = "bar",
@@ -892,7 +892,7 @@ class JsonPathUnitTest : FreeSpec({
             }
             "\$[?bnl(@.*)]" - {
                 "logical type argument" {
-                    JsonPathDependencyManager.functionExtensionRepository.value.apply {
+                    JsonPathDependencyManager.functionExtensionRepository.apply {
                         this.addExtension(
                             object : JsonPathFunctionExtension.LogicalTypeFunctionExtension(
                                 name = "bnl",
@@ -910,7 +910,7 @@ class JsonPathUnitTest : FreeSpec({
                     }
                 }
                 "value type argument" {
-                    JsonPathDependencyManager.functionExtensionRepository.value.apply {
+                    JsonPathDependencyManager.functionExtensionRepository.apply {
                         this.addExtension(
                             object : JsonPathFunctionExtension.LogicalTypeFunctionExtension(
                                 name = "bnl",
@@ -928,7 +928,7 @@ class JsonPathUnitTest : FreeSpec({
                     }
                 }
                 "nodes type argument" {
-                    JsonPathDependencyManager.functionExtensionRepository.value.apply {
+                    JsonPathDependencyManager.functionExtensionRepository.apply {
                         this.addExtension(
                             object : JsonPathFunctionExtension.LogicalTypeFunctionExtension(
                                 name = "bnl",
@@ -947,7 +947,7 @@ class JsonPathUnitTest : FreeSpec({
                 }
             }
             "\$[?blt(1==1)]" {
-                JsonPathDependencyManager.functionExtensionRepository.value.apply {
+                JsonPathDependencyManager.functionExtensionRepository.apply {
                     this.addExtension(
                         object : JsonPathFunctionExtension.LogicalTypeFunctionExtension(
                             name = "blt",
@@ -965,7 +965,7 @@ class JsonPathUnitTest : FreeSpec({
                 }
             }
             "\$[?blt(1)]" {
-                JsonPathDependencyManager.functionExtensionRepository.value.apply {
+                JsonPathDependencyManager.functionExtensionRepository.apply {
                     this.addExtension(
                         object : JsonPathFunctionExtension.LogicalTypeFunctionExtension(
                             name = "blt",
@@ -983,7 +983,7 @@ class JsonPathUnitTest : FreeSpec({
                 }
             }
             "\$[?bal(1)]" {
-                JsonPathDependencyManager.functionExtensionRepository.value.apply {
+                JsonPathDependencyManager.functionExtensionRepository.apply {
                     this.addExtension(
                         object : JsonPathFunctionExtension.LogicalTypeFunctionExtension(
                             name = "bal",
