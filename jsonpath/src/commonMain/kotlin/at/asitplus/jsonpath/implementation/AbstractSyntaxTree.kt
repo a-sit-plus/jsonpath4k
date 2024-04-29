@@ -4,7 +4,7 @@ import org.antlr.v4.kotlinruntime.ParserRuleContext
 import org.antlr.v4.kotlinruntime.Token
 import org.antlr.v4.kotlinruntime.ast.Position
 
-data class AbstractSyntaxTree<T>(
+internal data class AbstractSyntaxTree<T>(
     val context: String,
     val position: Position?,
     val value: T,

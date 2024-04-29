@@ -316,7 +316,7 @@ sealed interface JsonPathSelector {
             return when (currentNode) {
                 is JsonPrimitive -> listOf()
 
-                is JsonArray -> currentNode.flatMapIndexed { index, it ->
+                is JsonArray -> currentNode.flatMapIndexed { index, _ ->
                     IndexSelector(index).invoke(
                         currentNode = currentNode,
                         rootNode = rootNode,

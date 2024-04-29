@@ -25,7 +25,7 @@ import org.antlr.v4.kotlinruntime.tree.TerminalNode
  *
  * This class builds an abstract syntax tree where the nodes contain the logic necessary to be evaluated against an input.
  */
-class AntlrJsonPathSemanticAnalyzerVisitor(
+internal class AntlrJsonPathSemanticAnalyzerVisitor(
     private val errorListener: AntlrJsonPathSemanticAnalyzerErrorListener?,
     private val functionExtensionRetriever: (String) -> JsonPathFunctionExtension<*>?,
 ) : JsonPathParserBaseVisitor<AbstractSyntaxTree<out JsonPathExpression>>() {
@@ -823,7 +823,7 @@ class AntlrJsonPathSemanticAnalyzerVisitor(
 }
 
 
-class QueryNodeBuilder(
+internal class QueryNodeBuilder(
     private val context: ParserRuleContext,
     private val contextSelectorNode: AbstractSyntaxTree<out JsonPathExpression>,
     private val selectorSegmentTrees: List<AbstractSyntaxTree<out JsonPathExpression>>

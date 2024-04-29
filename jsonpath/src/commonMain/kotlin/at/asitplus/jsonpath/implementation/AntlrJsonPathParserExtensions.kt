@@ -3,7 +3,7 @@ package at.asitplus.jsonpath.implementation
 import at.asitplus.jsonpath.core.Rfc9535Utils
 import at.asitplus.parser.generated.JsonPathParser
 
-fun JsonPathParser.StringLiteralContext.toUnescapedString(): String {
+internal fun JsonPathParser.StringLiteralContext.toUnescapedString(): String {
     return Rfc9535Utils.unpackStringLiteral(this.text)
 }
 

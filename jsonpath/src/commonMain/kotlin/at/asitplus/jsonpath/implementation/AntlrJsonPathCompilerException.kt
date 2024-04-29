@@ -9,7 +9,7 @@ import org.antlr.v4.kotlinruntime.ParserRuleContext
  * specification: https://datatracker.ietf.org/doc/rfc9535/
  * date: 2024-02
  */
-open class JsonPathCompilerException(message: String) : Exception(message)
+sealed class JsonPathCompilerException(message: String) : Exception(message)
 
 class JsonPathLexerException : JsonPathCompilerException(
     "Lexer errors have occured. See the output of the error listener for more details"
