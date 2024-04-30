@@ -6,7 +6,7 @@ import at.asitplus.jsonpath.core.JsonPathQuery
 import at.asitplus.jsonpath.core.JsonPathSelector
 
 
-sealed interface JsonPathExpression {
+internal sealed interface JsonPathExpression {
 
     sealed class FilterExpression(
         val expressionType: JsonPathFilterExpressionType,

@@ -1,6 +1,7 @@
 package at.asitplus.jsonpath
 
 import at.asitplus.jsonpath.core.JsonPathCompiler
+import at.asitplus.jsonpath.core.JsonPathFilterExpressionType
 import at.asitplus.jsonpath.core.JsonPathFunctionExtension
 import at.asitplus.jsonpath.core.functionExtensions.LengthFunctionExtension
 import at.asitplus.jsonpath.core.functionExtensions.MatchFunctionExtension
@@ -8,7 +9,6 @@ import at.asitplus.jsonpath.core.functionExtensions.SearchFunctionExtension
 import at.asitplus.jsonpath.core.functionExtensions.ValueFunctionExtension
 import at.asitplus.jsonpath.implementation.AntlrJsonPathCompiler
 import at.asitplus.jsonpath.implementation.AntlrJsonPathCompilerErrorListener
-import at.asitplus.jsonpath.implementation.JsonPathExpression
 import at.asitplus.wallet.lib.data.jsonpath.functionExtensions.CountFunctionExtension
 import io.github.aakira.napier.Napier
 import org.antlr.v4.kotlinruntime.BaseErrorListener
@@ -53,7 +53,7 @@ object JsonPathDependencyManager {
 
                 override fun invalidArglistForFunctionExtension(
                     functionExtension: JsonPathFunctionExtension<*>,
-                    coercedArgumentTypes: List<JsonPathExpression?>
+                    coercedArgumentTypes: List<JsonPathFilterExpressionType?>
                 ) {
                     Napier.e(
                         "Invalid arguments for function extension \"${functionExtension.name}\": Expected: <${

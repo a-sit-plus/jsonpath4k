@@ -1,5 +1,6 @@
 package at.asitplus.jsonpath.implementation
 
+import at.asitplus.jsonpath.core.JsonPathFilterExpressionType
 import at.asitplus.jsonpath.core.JsonPathFunctionExtension
 
 interface AntlrJsonPathSemanticAnalyzerErrorListener {
@@ -16,7 +17,7 @@ interface AntlrJsonPathSemanticAnalyzerErrorListener {
 
     fun invalidArglistForFunctionExtension(
         functionExtension: JsonPathFunctionExtension<*>,
-        coercedArgumentTypes: List<JsonPathExpression?>
+        coercedArgumentTypes: List<JsonPathFilterExpressionType?>
     )
 
     fun invalidTestExpression(
