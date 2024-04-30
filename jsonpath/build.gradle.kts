@@ -25,6 +25,10 @@ val artifactVersion: String by extra
 group = "at.asitplus.jsonpath"
 version = artifactVersion
 
+repositories {
+    mavenCentral()
+}
+
 kotlin {
     jvm()
     iosArm64()
