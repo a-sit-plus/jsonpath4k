@@ -1,10 +1,10 @@
-
 import com.strumenta.antlrkotlin.gradle.AntlrKotlinTask
 import org.jetbrains.dokka.gradle.DokkaTask
 import org.jetbrains.dokka.gradle.DokkaTaskPartial
 import org.jetbrains.kotlin.gradle.dsl.KotlinCompile
 import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
 import org.jetbrains.kotlin.gradle.dsl.kotlinExtension
+import org.jetbrains.kotlin.gradle.plugin.KotlinSourceSet
 import org.jetbrains.kotlin.gradle.plugin.mpp.BitcodeEmbeddingMode
 import org.jetbrains.kotlin.gradle.plugin.mpp.KotlinNativeTarget
 import org.jetbrains.kotlin.gradle.plugin.mpp.MetadataDependencyTransformationTask
@@ -22,8 +22,40 @@ plugins {
 
 /* required for maven publication */
 val artifactVersion: String by extra
-group = "at.asitplus.jsonpath"
+group = "at.asitplus"
 version = artifactVersion
+
+//work around https://youtrack.jetbrains.com/issue/KT-65315
+fun NamedDomainObjectContainer<KotlinSourceSet>.shiftResources() {
+    kotlin.runCatching {
+        getByName("commonMain") {
+            logger.lifecycle("")
+            logger.lifecycle("> Working around KT-65315 by moving resources to platform targets")
+
+            val configuredRsrcs = resources.srcDirs
+
+            this@shiftResources.filterNot {
+                it.name == "commonMain" || it.name.endsWith(
+                    "Test"
+                )
+            }.forEach {
+                logger.info(
+                    "   * SourceSet ${it.name} now now also contains ${
+                        configuredRsrcs.joinToString {
+                            it.canonicalPath.substring(project.projectDir.canonicalPath.length)
+                        }
+                    }"
+                )
+                it.resources.srcDirs(*configuredRsrcs.toTypedArray())
+            }
+            logger.info("  Clearing commonMain srcSet")
+            resources.setSrcDirs(emptyList<File>())
+        }
+
+
+    }
+}
+
 
 kotlin {
     jvm()
@@ -60,6 +92,11 @@ kotlin {
         }
     }
 }
+
+
+//work around https://youtrack.jetbrains.com/issue/KT-65315
+kotlin.sourceSets.shiftResources()
+
 
 exportIosFramework("JsonPath")
 
@@ -151,24 +188,6 @@ val generateKotlinGrammarSource = tasks.register<AntlrKotlinTask>("generateKotli
     outputDirectory = layout.buildDirectory.dir(outDir).get().asFile
 }
 
-tasks.withType<KotlinCompile<*>> {
-    dependsOn(generateKotlinGrammarSource)
-}
-
-tasks.named<Test>("jvmTest") {
-    useJUnitPlatform()
-}
-tasks.named<Task>("jvmSourcesJar") {
-    dependsOn(generateKotlinGrammarSource)
-}
-tasks.named<Task>("dokkaHtml") {
-    dependsOn(generateKotlinGrammarSource)
-}
-tasks.named<Task>("sourcesJar") {
-    dependsOn(generateKotlinGrammarSource)
-}
-
-
 
 /**
  * taken from vclib conventions plugin at https://github.com/a-sit-plus/gradle-conventions-plugin
@@ -203,6 +222,7 @@ fun Project.exportIosFramework(
         }
     }
 }
+
 fun Project.setupDokka(
     outputDir: String = layout.buildDirectory.dir("dokka").get().asFile.canonicalPath,
     baseUrl: String,
@@ -228,4 +248,46 @@ fun Project.setupDokka(
         archiveClassifier.set("javadoc")
         from(outputDir)
     }
+}
+
+
+
+afterEvaluate {
+
+    tasks.filter { it.name.endsWith("DependenciesMetadata") }.forEach {
+        logger.lifecycle("> Making tasks ${it.name} depend on ${generateKotlinGrammarSource.name}")
+
+        it.dependsOn(generateKotlinGrammarSource)
+    }
+
+    tasks.withType<KotlinCompile<*>> {
+        dependsOn(generateKotlinGrammarSource)
+    }
+
+    tasks.withType<Test> {
+        useJUnitPlatform()
+    }
+    tasks.filter { it.name.contains("ourcesJar") }.forEach {
+        it.dependsOn(generateKotlinGrammarSource)
+    }
+    tasks.named<Task>("dokkaHtml") {
+        dependsOn(generateKotlinGrammarSource)
+    }
+
+    /**
+     * Makes all publishing tasks depend on all signing tasks. Hampers parallelization, but works around dodgy task dependencies
+     * which (more often than anticipated) makes the build process stumble over its own feet.
+     */
+
+    tasks.withType<Sign>().also { signingTasks ->
+        if (signingTasks.isNotEmpty()) {
+            logger.lifecycle("> Making signing tasks of project \u001B[1m$name\u001B[0m run after publish tasks")
+            tasks.withType<AbstractPublishToMaven>().configureEach {
+                mustRunAfter(*signingTasks.toTypedArray())
+                logger.lifecycle("  * $name must now run after ${signingTasks.joinToString { it.name }}")
+            }
+            logger.lifecycle("")
+        }
+    }
+
 }
