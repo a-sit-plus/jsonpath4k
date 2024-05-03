@@ -1,5 +1,5 @@
 // Generated from C:/Users/stefan.kreiner/Documents/git/com.github/a-sit-plus/jsonpath/jsonpath/build/processedResources/iosArm64/main/grammar/JsonPathParser.g4 by ANTLR 4.13.1
-package at.asitplus.parsers.generated
+package at.asitplus.parser.generated
 
 import org.antlr.v4.kotlinruntime.tree.AbstractParseTreeVisitor
 
@@ -11,7 +11,8 @@ import org.antlr.v4.kotlinruntime.tree.AbstractParseTreeVisitor
  * @param T The return type of the visit operation.
  *   Use [Unit] for operations with no return type
  */
-public open class JsonPathParserBaseVisitor<T> : AbstractParseTreeVisitor<T>(), JsonPathParserVisitor<T> {
+public open class JsonPathParserBaseVisitor<T> : AbstractParseTreeVisitor<T>(),
+    JsonPathParserVisitor<T> {
     /**
      * The default implementation returns the result of calling [visitChildren] on [ctx].
      */

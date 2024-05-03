@@ -1,5 +1,5 @@
 // Generated from C:/Users/stefan.kreiner/Documents/git/com.github/a-sit-plus/jsonpath/jsonpath/build/processedResources/iosArm64/main/grammar/JsonPathParser.g4 by ANTLR 4.13.1
-package at.asitplus.parsers.generated
+package at.asitplus.parser.generated
 
 import com.strumenta.antlrkotlin.runtime.JsName
 import org.antlr.v4.kotlinruntime.*
@@ -328,11 +328,14 @@ public open class JsonPathParser(input: TokenStream) : Parser(input) {
     public open class SegmentContext : ParserRuleContext {
         override val ruleIndex: Int = Rules.Segment
 
-        public fun bracketed_selection(): Bracketed_selectionContext? = getRuleContext(Bracketed_selectionContext::class, 0)
+        public fun bracketed_selection(): Bracketed_selectionContext? = getRuleContext(
+            Bracketed_selectionContext::class, 0)
         public fun SHORTHAND_SELECTOR(): TerminalNode? = getToken(Tokens.SHORTHAND_SELECTOR, 0)
-        public fun shorthand_segment(): Shorthand_segmentContext? = getRuleContext(Shorthand_segmentContext::class, 0)
+        public fun shorthand_segment(): Shorthand_segmentContext? = getRuleContext(
+            Shorthand_segmentContext::class, 0)
         public fun DESCENDANT_SELECTOR(): TerminalNode? = getToken(Tokens.DESCENDANT_SELECTOR, 0)
-        public fun descendant_segment(): Descendant_segmentContext? = getRuleContext(Descendant_segmentContext::class, 0)
+        public fun descendant_segment(): Descendant_segmentContext? = getRuleContext(
+            Descendant_segmentContext::class, 0)
 
         public constructor(parent: ParserRuleContext?, invokingState: Int) : super(parent, invokingState) {
         }
@@ -376,7 +379,9 @@ public open class JsonPathParser(input: TokenStream) : Parser(input) {
                     this.state = 107
                     bracketed_selection()
 
-                }Tokens.SHORTHAND_SELECTOR -> /*LL1AltBlock*/ {
+                }
+
+                Tokens.SHORTHAND_SELECTOR -> /*LL1AltBlock*/ {
                     enterOuterAlt(_localctx, 2)
                     this.state = 108
                     match(Tokens.SHORTHAND_SELECTOR)
@@ -384,7 +389,9 @@ public open class JsonPathParser(input: TokenStream) : Parser(input) {
                     this.state = 109
                     shorthand_segment()
 
-                }Tokens.DESCENDANT_SELECTOR -> /*LL1AltBlock*/ {
+                }
+
+                Tokens.DESCENDANT_SELECTOR -> /*LL1AltBlock*/ {
                     enterOuterAlt(_localctx, 3)
                     this.state = 110
                     match(Tokens.DESCENDANT_SELECTOR)
@@ -411,8 +418,10 @@ public open class JsonPathParser(input: TokenStream) : Parser(input) {
     public open class Shorthand_segmentContext : ParserRuleContext {
         override val ruleIndex: Int = Rules.Shorthand_segment
 
-        public fun wildcardSelector(): WildcardSelectorContext? = getRuleContext(WildcardSelectorContext::class, 0)
-        public fun memberNameShorthand(): MemberNameShorthandContext? = getRuleContext(MemberNameShorthandContext::class, 0)
+        public fun wildcardSelector(): WildcardSelectorContext? = getRuleContext(
+            WildcardSelectorContext::class, 0)
+        public fun memberNameShorthand(): MemberNameShorthandContext? = getRuleContext(
+            MemberNameShorthandContext::class, 0)
 
         public constructor(parent: ParserRuleContext?, invokingState: Int) : super(parent, invokingState) {
         }
@@ -456,7 +465,9 @@ public open class JsonPathParser(input: TokenStream) : Parser(input) {
                     this.state = 114
                     wildcardSelector()
 
-                }Tokens.MEMBER_NAME_SHORTHAND -> /*LL1AltBlock*/ {
+                }
+
+                Tokens.MEMBER_NAME_SHORTHAND -> /*LL1AltBlock*/ {
                     enterOuterAlt(_localctx, 2)
                     this.state = 115
                     memberNameShorthand()
@@ -480,9 +491,12 @@ public open class JsonPathParser(input: TokenStream) : Parser(input) {
     public open class Descendant_segmentContext : ParserRuleContext {
         override val ruleIndex: Int = Rules.Descendant_segment
 
-        public fun bracketed_selection(): Bracketed_selectionContext? = getRuleContext(Bracketed_selectionContext::class, 0)
-        public fun wildcardSelector(): WildcardSelectorContext? = getRuleContext(WildcardSelectorContext::class, 0)
-        public fun memberNameShorthand(): MemberNameShorthandContext? = getRuleContext(MemberNameShorthandContext::class, 0)
+        public fun bracketed_selection(): Bracketed_selectionContext? = getRuleContext(
+            Bracketed_selectionContext::class, 0)
+        public fun wildcardSelector(): WildcardSelectorContext? = getRuleContext(
+            WildcardSelectorContext::class, 0)
+        public fun memberNameShorthand(): MemberNameShorthandContext? = getRuleContext(
+            MemberNameShorthandContext::class, 0)
 
         public constructor(parent: ParserRuleContext?, invokingState: Int) : super(parent, invokingState) {
         }
@@ -526,12 +540,16 @@ public open class JsonPathParser(input: TokenStream) : Parser(input) {
                     this.state = 118
                     bracketed_selection()
 
-                }Tokens.WILDCARD_SELECTOR -> /*LL1AltBlock*/ {
+                }
+
+                Tokens.WILDCARD_SELECTOR -> /*LL1AltBlock*/ {
                     enterOuterAlt(_localctx, 2)
                     this.state = 119
                     wildcardSelector()
 
-                }Tokens.MEMBER_NAME_SHORTHAND -> /*LL1AltBlock*/ {
+                }
+
+                Tokens.MEMBER_NAME_SHORTHAND -> /*LL1AltBlock*/ {
                     enterOuterAlt(_localctx, 3)
                     this.state = 120
                     memberNameShorthand()
@@ -655,10 +673,12 @@ public open class JsonPathParser(input: TokenStream) : Parser(input) {
         override val ruleIndex: Int = Rules.Selector
 
         public fun name_selector(): Name_selectorContext? = getRuleContext(Name_selectorContext::class, 0)
-        public fun wildcardSelector(): WildcardSelectorContext? = getRuleContext(WildcardSelectorContext::class, 0)
+        public fun wildcardSelector(): WildcardSelectorContext? = getRuleContext(
+            WildcardSelectorContext::class, 0)
         public fun slice_selector(): Slice_selectorContext? = getRuleContext(Slice_selectorContext::class, 0)
         public fun index_selector(): Index_selectorContext? = getRuleContext(Index_selectorContext::class, 0)
-        public fun filter_selector(): Filter_selectorContext? = getRuleContext(Filter_selectorContext::class, 0)
+        public fun filter_selector(): Filter_selectorContext? = getRuleContext(
+            Filter_selectorContext::class, 0)
 
         public constructor(parent: ParserRuleContext?, invokingState: Int) : super(parent, invokingState) {
         }
@@ -1171,7 +1191,9 @@ public open class JsonPathParser(input: TokenStream) : Parser(input) {
                     this.state = 176
                     rel_query()
 
-                }Tokens.ROOT_IDENTIFIER -> /*LL1AltBlock*/ {
+                }
+
+                Tokens.ROOT_IDENTIFIER -> /*LL1AltBlock*/ {
                     enterOuterAlt(_localctx, 2)
                     this.state = 177
                     jsonpath_query()
@@ -1195,7 +1217,8 @@ public open class JsonPathParser(input: TokenStream) : Parser(input) {
     public open class Rel_queryContext : ParserRuleContext {
         override val ruleIndex: Int = Rules.Rel_query
 
-        public fun currentNodeIdentifier(): CurrentNodeIdentifierContext = getRuleContext(CurrentNodeIdentifierContext::class, 0)!!
+        public fun currentNodeIdentifier(): CurrentNodeIdentifierContext = getRuleContext(
+            CurrentNodeIdentifierContext::class, 0)!!
         public fun segments(): SegmentsContext = getRuleContext(SegmentsContext::class, 0)!!
 
         public constructor(parent: ParserRuleContext?, invokingState: Int) : super(parent, invokingState) {
@@ -1254,8 +1277,10 @@ public open class JsonPathParser(input: TokenStream) : Parser(input) {
     public open class Singular_queryContext : ParserRuleContext {
         override val ruleIndex: Int = Rules.Singular_query
 
-        public fun rel_singular_query(): Rel_singular_queryContext? = getRuleContext(Rel_singular_queryContext::class, 0)
-        public fun abs_singular_query(): Abs_singular_queryContext? = getRuleContext(Abs_singular_queryContext::class, 0)
+        public fun rel_singular_query(): Rel_singular_queryContext? = getRuleContext(
+            Rel_singular_queryContext::class, 0)
+        public fun abs_singular_query(): Abs_singular_queryContext? = getRuleContext(
+            Abs_singular_queryContext::class, 0)
 
         public constructor(parent: ParserRuleContext?, invokingState: Int) : super(parent, invokingState) {
         }
@@ -1299,7 +1324,9 @@ public open class JsonPathParser(input: TokenStream) : Parser(input) {
                     this.state = 183
                     rel_singular_query()
 
-                }Tokens.ROOT_IDENTIFIER -> /*LL1AltBlock*/ {
+                }
+
+                Tokens.ROOT_IDENTIFIER -> /*LL1AltBlock*/ {
                     enterOuterAlt(_localctx, 2)
                     this.state = 184
                     abs_singular_query()
@@ -1323,8 +1350,10 @@ public open class JsonPathParser(input: TokenStream) : Parser(input) {
     public open class Rel_singular_queryContext : ParserRuleContext {
         override val ruleIndex: Int = Rules.Rel_singular_query
 
-        public fun currentNodeIdentifier(): CurrentNodeIdentifierContext = getRuleContext(CurrentNodeIdentifierContext::class, 0)!!
-        public fun singular_query_segments(): Singular_query_segmentsContext = getRuleContext(Singular_query_segmentsContext::class, 0)!!
+        public fun currentNodeIdentifier(): CurrentNodeIdentifierContext = getRuleContext(
+            CurrentNodeIdentifierContext::class, 0)!!
+        public fun singular_query_segments(): Singular_query_segmentsContext = getRuleContext(
+            Singular_query_segmentsContext::class, 0)!!
 
         public constructor(parent: ParserRuleContext?, invokingState: Int) : super(parent, invokingState) {
         }
@@ -1383,7 +1412,8 @@ public open class JsonPathParser(input: TokenStream) : Parser(input) {
         override val ruleIndex: Int = Rules.Abs_singular_query
 
         public fun rootIdentifier(): RootIdentifierContext = getRuleContext(RootIdentifierContext::class, 0)!!
-        public fun singular_query_segments(): Singular_query_segmentsContext = getRuleContext(Singular_query_segmentsContext::class, 0)!!
+        public fun singular_query_segments(): Singular_query_segmentsContext = getRuleContext(
+            Singular_query_segmentsContext::class, 0)!!
 
         public constructor(parent: ParserRuleContext?, invokingState: Int) : super(parent, invokingState) {
         }
@@ -1443,8 +1473,10 @@ public open class JsonPathParser(input: TokenStream) : Parser(input) {
 
         public fun ws(): List<WsContext> = getRuleContexts(WsContext::class)
         public fun ws(i: Int): WsContext? = getRuleContext(WsContext::class, i)
-        public fun singular_query_segment(): List<Singular_query_segmentContext> = getRuleContexts(Singular_query_segmentContext::class)
-        public fun singular_query_segment(i: Int): Singular_query_segmentContext? = getRuleContext(Singular_query_segmentContext::class, i)
+        public fun singular_query_segment(): List<Singular_query_segmentContext> = getRuleContexts(
+            Singular_query_segmentContext::class)
+        public fun singular_query_segment(i: Int): Singular_query_segmentContext? = getRuleContext(
+            Singular_query_segmentContext::class, i)
 
         public constructor(parent: ParserRuleContext?, invokingState: Int) : super(parent, invokingState) {
         }
@@ -1587,7 +1619,8 @@ public open class JsonPathParser(input: TokenStream) : Parser(input) {
         public fun name_selector(): Name_selectorContext? = getRuleContext(Name_selectorContext::class, 0)
         public fun SQUARE_BRACKET_CLOSE(): TerminalNode? = getToken(Tokens.SQUARE_BRACKET_CLOSE, 0)
         public fun SHORTHAND_SELECTOR(): TerminalNode? = getToken(Tokens.SHORTHAND_SELECTOR, 0)
-        public fun memberNameShorthand(): MemberNameShorthandContext? = getRuleContext(MemberNameShorthandContext::class, 0)
+        public fun memberNameShorthand(): MemberNameShorthandContext? = getRuleContext(
+            MemberNameShorthandContext::class, 0)
 
         public constructor(parent: ParserRuleContext?, invokingState: Int) : super(parent, invokingState) {
         }
@@ -1637,7 +1670,9 @@ public open class JsonPathParser(input: TokenStream) : Parser(input) {
                     this.state = 207
                     match(Tokens.SQUARE_BRACKET_CLOSE)
 
-                }Tokens.SHORTHAND_SELECTOR -> /*LL1AltBlock*/ {
+                }
+
+                Tokens.SHORTHAND_SELECTOR -> /*LL1AltBlock*/ {
                     enterOuterAlt(_localctx, 2)
                     this.state = 209
                     match(Tokens.SHORTHAND_SELECTOR)
@@ -1845,8 +1880,10 @@ public open class JsonPathParser(input: TokenStream) : Parser(input) {
     public open class Logical_or_exprContext : ParserRuleContext {
         override val ruleIndex: Int = Rules.Logical_or_expr
 
-        public fun logical_and_expr(): List<Logical_and_exprContext> = getRuleContexts(Logical_and_exprContext::class)
-        public fun logical_and_expr(i: Int): Logical_and_exprContext? = getRuleContext(Logical_and_exprContext::class, i)
+        public fun logical_and_expr(): List<Logical_and_exprContext> = getRuleContexts(
+            Logical_and_exprContext::class)
+        public fun logical_and_expr(i: Int): Logical_and_exprContext? = getRuleContext(
+            Logical_and_exprContext::class, i)
         public fun ws(): List<WsContext> = getRuleContexts(WsContext::class)
         public fun ws(i: Int): WsContext? = getRuleContext(WsContext::class, i)
         public fun LOGICAL_OR_OP(): List<TerminalNode> = getTokens(Tokens.LOGICAL_OR_OP)
@@ -2016,7 +2053,8 @@ public open class JsonPathParser(input: TokenStream) : Parser(input) {
         override val ruleIndex: Int = Rules.Basic_expr
 
         public fun paren_expr(): Paren_exprContext? = getRuleContext(Paren_exprContext::class, 0)
-        public fun comparison_expr(): Comparison_exprContext? = getRuleContext(Comparison_exprContext::class, 0)
+        public fun comparison_expr(): Comparison_exprContext? = getRuleContext(
+            Comparison_exprContext::class, 0)
         public fun test_expr(): Test_exprContext? = getRuleContext(Test_exprContext::class, 0)
 
         public constructor(parent: ParserRuleContext?, invokingState: Int) : super(parent, invokingState) {
@@ -2234,7 +2272,9 @@ public open class JsonPathParser(input: TokenStream) : Parser(input) {
                     this.state = 264
                     filter_query()
 
-                }Tokens.FUNCTION_NAME -> /*LL1AltBlock*/ {
+                }
+
+                Tokens.FUNCTION_NAME -> /*LL1AltBlock*/ {
                     this.state = 265
                     function_expr()
 
@@ -2261,7 +2301,8 @@ public open class JsonPathParser(input: TokenStream) : Parser(input) {
         public fun ws(): List<WsContext> = getRuleContexts(WsContext::class)
         public fun ws(i: Int): WsContext? = getRuleContext(WsContext::class, i)
         public fun comparisonOp(): ComparisonOpContext = getRuleContext(ComparisonOpContext::class, 0)!!
-        public fun secondComparable(): SecondComparableContext = getRuleContext(SecondComparableContext::class, 0)!!
+        public fun secondComparable(): SecondComparableContext = getRuleContext(
+            SecondComparableContext::class, 0)!!
 
         public constructor(parent: ParserRuleContext?, invokingState: Int) : super(parent, invokingState) {
         }
@@ -2487,27 +2528,37 @@ public open class JsonPathParser(input: TokenStream) : Parser(input) {
                     this.state = 278
                     int()
 
-                }Tokens.NUMBER -> /*LL1AltBlock*/ {
+                }
+
+                Tokens.NUMBER -> /*LL1AltBlock*/ {
                     enterOuterAlt(_localctx, 2)
                     this.state = 279
                     number()
 
-                }Tokens.STRING_LITERAL -> /*LL1AltBlock*/ {
+                }
+
+                Tokens.STRING_LITERAL -> /*LL1AltBlock*/ {
                     enterOuterAlt(_localctx, 3)
                     this.state = 280
                     stringLiteral()
 
-                }Tokens.TRUE -> /*LL1AltBlock*/ {
+                }
+
+                Tokens.TRUE -> /*LL1AltBlock*/ {
                     enterOuterAlt(_localctx, 4)
                     this.state = 281
                     true_()
 
-                }Tokens.FALSE -> /*LL1AltBlock*/ {
+                }
+
+                Tokens.FALSE -> /*LL1AltBlock*/ {
                     enterOuterAlt(_localctx, 5)
                     this.state = 282
                     false_()
 
-                }Tokens.NULL -> /*LL1AltBlock*/ {
+                }
+
+                Tokens.NULL -> /*LL1AltBlock*/ {
                     enterOuterAlt(_localctx, 6)
                     this.state = 283
                     null_()
@@ -2577,12 +2628,16 @@ public open class JsonPathParser(input: TokenStream) : Parser(input) {
                     this.state = 286
                     literal()
 
-                }Tokens.ROOT_IDENTIFIER, Tokens.CURRENT_NODE_IDENTIFIER -> /*LL1AltBlock*/ {
+                }
+
+                Tokens.ROOT_IDENTIFIER, Tokens.CURRENT_NODE_IDENTIFIER -> /*LL1AltBlock*/ {
                     enterOuterAlt(_localctx, 2)
                     this.state = 287
                     singular_query()
 
-                }Tokens.FUNCTION_NAME -> /*LL1AltBlock*/ {
+                }
+
+                Tokens.FUNCTION_NAME -> /*LL1AltBlock*/ {
                     enterOuterAlt(_localctx, 3)
                     this.state = 288
                     function_expr()
@@ -2611,8 +2666,10 @@ public open class JsonPathParser(input: TokenStream) : Parser(input) {
         public fun ws(): List<WsContext> = getRuleContexts(WsContext::class)
         public fun ws(i: Int): WsContext? = getRuleContext(WsContext::class, i)
         public fun BRACKET_CLOSE(): TerminalNode = getToken(Tokens.BRACKET_CLOSE, 0)!!
-        public fun function_argument(): List<Function_argumentContext> = getRuleContexts(Function_argumentContext::class)
-        public fun function_argument(i: Int): Function_argumentContext? = getRuleContext(Function_argumentContext::class, i)
+        public fun function_argument(): List<Function_argumentContext> = getRuleContexts(
+            Function_argumentContext::class)
+        public fun function_argument(i: Int): Function_argumentContext? = getRuleContext(
+            Function_argumentContext::class, i)
         public fun COMMA(): List<TerminalNode> = getTokens(Tokens.COMMA)
         public fun COMMA(i: Int): TerminalNode? = getToken(Tokens.COMMA, i)
 
