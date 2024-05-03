@@ -9,7 +9,7 @@ import at.asitplus.jsonpath.core.JsonPathFunctionExtension
  * date: 2024-02
  * section: 2.4.8.  value() Function Extension
  */
-data object ValueFunctionExtension : JsonPathFunctionExtension.ValueTypeFunctionExtension(
+internal data object ValueFunctionExtension : JsonPathFunctionExtension.ValueTypeFunctionExtension(
     name = "value",
     argumentTypes = listOf(
         JsonPathFilterExpressionType.NodesType,

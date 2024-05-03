@@ -53,14 +53,16 @@ object JsonPathDependencyManager {
 
                 override fun invalidArglistForFunctionExtension(
                     functionExtension: JsonPathFunctionExtension<*>,
-                    coercedArgumentTypes: List<JsonPathFilterExpressionType?>
+                    coercedArgumentTypes: List<Pair<JsonPathFilterExpressionType?, String>>
                 ) {
                     Napier.e(
                         "Invalid arguments for function extension \"${functionExtension.name}\": Expected: <${
                             functionExtension.argumentTypes.joinToString(
                                 ", "
                             )
-                        }>, but received <${coercedArgumentTypes.joinToString(", ")}>"
+                        }>, but received <${
+                            coercedArgumentTypes.map { it.first }.joinToString(", ")
+                        }>: <${coercedArgumentTypes.map { it.second }.joinToString(", ")}>"
                     )
                 }
 

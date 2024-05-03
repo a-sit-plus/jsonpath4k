@@ -12,7 +12,7 @@ import kotlinx.serialization.json.JsonPrimitive
  * section: 2.4.5.  count() Function Extension
  */
 @OptIn(ExperimentalSerializationApi::class)
-data object CountFunctionExtension : JsonPathFunctionExtension.ValueTypeFunctionExtension(
+internal data object CountFunctionExtension : JsonPathFunctionExtension.ValueTypeFunctionExtension(
     name = "count",
     argumentTypes = listOf(
         JsonPathFilterExpressionType.NodesType,

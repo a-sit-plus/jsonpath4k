@@ -1,6 +1,6 @@
 package at.asitplus.jsonpath.core
 
-object Rfc9535Utils {
+internal object Rfc9535Utils {
     fun switchToDoubleQuotedString(string: String) = if (string.startsWith("\"")) {
         string // treat as normal rfc8259 double quoted string
     } else {

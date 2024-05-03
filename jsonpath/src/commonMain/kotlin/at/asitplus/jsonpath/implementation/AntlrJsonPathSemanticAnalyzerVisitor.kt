@@ -4,9 +4,10 @@ import at.asitplus.jsonpath.core.FilterPredicate
 import at.asitplus.jsonpath.core.JsonPathFilterExpressionType
 import at.asitplus.jsonpath.core.JsonPathFilterExpressionValue
 import at.asitplus.jsonpath.core.JsonPathFunctionExtension
+import at.asitplus.jsonpath.core.JsonPathSelector
+import at.asitplus.jsonpath.core.JsonPathSelectorQuery
 import at.asitplus.parser.generated.JsonPathParser
 import at.asitplus.parser.generated.JsonPathParserBaseVisitor
-import at.asitplus.jsonpath.core.JsonPathSelector
 import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonNull
@@ -467,7 +468,11 @@ internal class AntlrJsonPathSemanticAnalyzerVisitor(
         if (isValidFunctionCall == false) {
             errorListener?.invalidArglistForFunctionExtension(
                 functionExtension = extension,
-                coercedArgumentTypes = coercedArgumentTypes,
+                coercedArgumentTypes = coercedArgumentTypes.zip(
+                    functionArgumentNodes.map {
+                        it.text
+                    }
+                )
             )
         }
 
@@ -555,7 +560,7 @@ internal class AntlrJsonPathSemanticAnalyzerVisitor(
                 JsonPathExpression.ErrorType
             } else if (secondValue !is JsonPathExpression.FilterExpression.ValueExpression) {
                 JsonPathExpression.ErrorType
-            } else evaluateComparison(
+            } else comparisonExpression(
                 firstComparable = firstValue.evaluate,
                 secondComparable = secondValue.evaluate,
                 ctx.comparisonOp(),
@@ -564,7 +569,7 @@ internal class AntlrJsonPathSemanticAnalyzerVisitor(
         )
     }
 
-    private fun evaluateComparison(
+    private fun comparisonExpression(
         firstComparable: (JsonPathExpressionEvaluationContext) -> JsonPathFilterExpressionValue.ValueTypeValue,
         secondComparable: (JsonPathExpressionEvaluationContext) -> JsonPathFilterExpressionValue.ValueTypeValue,
         comparisonOpContext: JsonPathParser.ComparisonOpContext,
