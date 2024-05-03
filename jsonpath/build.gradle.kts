@@ -29,43 +29,14 @@ repositories {
     mavenCentral()
 }
 
-//work around https://youtrack.jetbrains.com/issue/KT-65315
-fun NamedDomainObjectContainer<KotlinSourceSet>.shiftResources() {
-    kotlin.runCatching {
-        getByName("commonMain") {
-            logger.lifecycle("")
-            logger.lifecycle("> Working around KT-65315 by moving resources to platform targets")
-
-            val configuredRsrcs = resources.srcDirs
-
-            this@shiftResources.filterNot {
-                it.name == "commonMain" || it.name.endsWith(
-                    "Test"
-                )
-            }.forEach {
-                logger.info(
-                    "   * SourceSet ${it.name} now now also contains ${
-                        configuredRsrcs.joinToString {
-                            it.canonicalPath.substring(project.projectDir.canonicalPath.length)
-                        }
-                    }"
-                )
-                it.resources.srcDirs(*configuredRsrcs.toTypedArray())
-            }
-            logger.info("  Clearing commonMain srcSet")
-            resources.setSrcDirs(emptyList<File>())
-        }
-
-
-    }
-}
-
 
 kotlin {
     jvm()
     iosArm64()
     iosSimulatorArm64()
     iosX64()
+
+    jvmToolchain(17)
 
     sourceSets {
         commonMain {
@@ -96,7 +67,33 @@ kotlin {
 
 
 //work around https://youtrack.jetbrains.com/issue/KT-65315
-kotlin.sourceSets.shiftResources()
+kotlin.sourceSets.apply {
+    kotlin.runCatching {
+        getByName("commonMain") {
+            logger.lifecycle("")
+            logger.lifecycle("> Working around KT-65315 by moving resources to platform targets")
+
+            val configuredRsrcs = resources.srcDirs
+
+            this@apply.filterNot {
+                it.name == "commonMain" || it.name.endsWith(
+                    "Test"
+                )
+            }.forEach {
+                logger.info(
+                    "   * SourceSet ${it.name} now now also contains ${
+                        configuredRsrcs.joinToString {
+                            it.canonicalPath.substring(project.projectDir.canonicalPath.length)
+                        }
+                    }"
+                )
+                it.resources.srcDirs(*configuredRsrcs.toTypedArray())
+            }
+            logger.info("  Clearing commonMain srcSet")
+            resources.setSrcDirs(emptyList<File>())
+        }
+    }
+}
 
 
 exportIosFramework("JsonPath")
@@ -122,7 +119,7 @@ publishing {
                 }
                 developers {
                     developer {
-                        id.set("acrusage")
+                        id.set("acrusage") //may or may not work when publishing
                         name.set("Stefan Kreiner")
                         email.set("stefan.kreiner@iaik.tugraz.at")
                     }
