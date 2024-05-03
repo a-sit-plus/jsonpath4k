@@ -133,9 +133,6 @@ signing {
 
 val generateKotlinGrammarSource = tasks.register<AntlrKotlinTask>("generateKotlinGrammarSource") {
     dependsOn("cleanGenerateKotlinGrammarSource")
-    dependsOn(tasks.withType<ProcessResources>())
-    dependsOn(tasks.withType<MetadataDependencyTransformationTask>())
-    dependsOn(tasks.named<Task>("buildKotlinToolingMetadata"))
 
     // compiling any *.g4 files within the project
     source = fileTree(layout.projectDirectory) {
@@ -155,21 +152,8 @@ val generateKotlinGrammarSource = tasks.register<AntlrKotlinTask>("generateKotli
     outputDirectory = layout.buildDirectory.dir(outDir).get().asFile
 }
 
-tasks.withType<KotlinCompile<*>> {
-    dependsOn(generateKotlinGrammarSource)
-}
-
 tasks.named<Test>("jvmTest") {
     useJUnitPlatform()
-}
-tasks.named<Task>("jvmSourcesJar") {
-    dependsOn(generateKotlinGrammarSource)
-}
-tasks.named<Task>("dokkaHtml") {
-    dependsOn(generateKotlinGrammarSource)
-}
-tasks.named<Task>("sourcesJar") {
-    dependsOn(generateKotlinGrammarSource)
 }
 
 
