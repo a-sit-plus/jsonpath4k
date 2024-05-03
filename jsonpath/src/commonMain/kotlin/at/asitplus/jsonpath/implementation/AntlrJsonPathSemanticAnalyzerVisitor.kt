@@ -6,8 +6,8 @@ import at.asitplus.jsonpath.core.JsonPathFilterExpressionValue
 import at.asitplus.jsonpath.core.JsonPathFunctionExtension
 import at.asitplus.jsonpath.core.JsonPathSelector
 import at.asitplus.jsonpath.core.JsonPathSelectorQuery
-import at.asitplus.parser.generated.JsonPathParser
-import at.asitplus.parser.generated.JsonPathParserBaseVisitor
+import at.asitplus.jsonpath.generated.JsonPathParser
+import at.asitplus.jsonpath.generated.JsonPathParserBaseVisitor
 import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonNull

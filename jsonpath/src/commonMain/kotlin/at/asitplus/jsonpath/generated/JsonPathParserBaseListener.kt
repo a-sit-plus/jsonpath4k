@@ -1,5 +1,5 @@
 // Generated from C:/Users/stefan.kreiner/Documents/git/com.github/a-sit-plus/jsonpath/jsonpath/build/processedResources/iosArm64/main/grammar/JsonPathParser.g4 by ANTLR 4.13.1
-package at.asitplus.parser.generated
+package at.asitplus.jsonpath.generated
 
 import org.antlr.v4.kotlinruntime.ParserRuleContext
 import org.antlr.v4.kotlinruntime.tree.ErrorNode
