@@ -37,9 +37,6 @@ kotlin {
 
     sourceSets {
         commonMain {
-            kotlin {
-                srcDir(layout.buildDirectory.dir("generatedAntlr"))
-            }
             dependencies {
                 implementation(libs.antlr.kotlin)
                 implementation(libs.jetbrains.kotlinx.serialization)
