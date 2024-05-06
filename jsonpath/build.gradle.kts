@@ -25,35 +25,8 @@ val artifactVersion: String by extra
 group = "at.asitplus"
 version = artifactVersion
 
-//work around https://youtrack.jetbrains.com/issue/KT-65315
-fun NamedDomainObjectContainer<KotlinSourceSet>.shiftResources() {
-    kotlin.runCatching {
-        getByName("commonMain") {
-            logger.lifecycle("")
-            logger.lifecycle("> Working around KT-65315 by moving resources to platform targets")
-
-            val configuredRsrcs = resources.srcDirs
-
-            this@shiftResources.filterNot {
-                it.name == "commonMain" || it.name.endsWith(
-                    "Test"
-                )
-            }.forEach {
-                logger.info(
-                    "   * SourceSet ${it.name} now now also contains ${
-                        configuredRsrcs.joinToString {
-                            it.canonicalPath.substring(project.projectDir.canonicalPath.length)
-                        }
-                    }"
-                )
-                it.resources.srcDirs(*configuredRsrcs.toTypedArray())
-            }
-            logger.info("  Clearing commonMain srcSet")
-            resources.setSrcDirs(emptyList<File>())
-        }
-
-
-    }
+repositories {
+    mavenCentral()
 }
 
 
@@ -63,11 +36,10 @@ kotlin {
     iosSimulatorArm64()
     iosX64()
 
+    jvmToolchain(17)
+
     sourceSets {
         commonMain {
-            kotlin {
-                srcDir(layout.buildDirectory.dir("generatedAntlr"))
-            }
             dependencies {
                 implementation(libs.antlr.kotlin)
                 implementation(libs.jetbrains.kotlinx.serialization)
@@ -95,7 +67,33 @@ kotlin {
 
 
 //work around https://youtrack.jetbrains.com/issue/KT-65315
-kotlin.sourceSets.shiftResources()
+kotlin.sourceSets.apply {
+    kotlin.runCatching {
+        getByName("commonMain") {
+            logger.lifecycle("")
+            logger.lifecycle("> Working around KT-65315 by moving resources to platform targets")
+
+            val configuredRsrcs = resources.srcDirs
+
+            this@apply.filterNot {
+                it.name == "commonMain" || it.name.endsWith(
+                    "Test"
+                )
+            }.forEach {
+                logger.info(
+                    "   * SourceSet ${it.name} now now also contains ${
+                        configuredRsrcs.joinToString {
+                            it.canonicalPath.substring(project.projectDir.canonicalPath.length)
+                        }
+                    }"
+                )
+                it.resources.srcDirs(*configuredRsrcs.toTypedArray())
+            }
+            logger.info("  Clearing commonMain srcSet")
+            resources.setSrcDirs(emptyList<File>())
+        }
+    }
+}
 
 
 exportIosFramework("JsonPath")
@@ -121,7 +119,7 @@ publishing {
                 }
                 developers {
                     developer {
-                        id.set("acrusage")
+                        id.set("acrusage") //may or may not work when publishing
                         name.set("Stefan Kreiner")
                         email.set("stefan.kreiner@iaik.tugraz.at")
                     }
@@ -166,9 +164,6 @@ signing {
 
 val generateKotlinGrammarSource = tasks.register<AntlrKotlinTask>("generateKotlinGrammarSource") {
     dependsOn("cleanGenerateKotlinGrammarSource")
-    dependsOn(tasks.withType<ProcessResources>())
-    dependsOn(tasks.withType<MetadataDependencyTransformationTask>())
-    dependsOn(tasks.named<Task>("buildKotlinToolingMetadata"))
 
     // compiling any *.g4 files within the project
     source = fileTree(layout.projectDirectory) {
@@ -253,25 +248,8 @@ fun Project.setupDokka(
 
 
 afterEvaluate {
-
-    tasks.filter { it.name.endsWith("DependenciesMetadata") }.forEach {
-        logger.lifecycle("> Making tasks ${it.name} depend on ${generateKotlinGrammarSource.name}")
-
-        it.dependsOn(generateKotlinGrammarSource)
-    }
-
-    tasks.withType<KotlinCompile<*>> {
-        dependsOn(generateKotlinGrammarSource)
-    }
-
     tasks.withType<Test> {
         useJUnitPlatform()
-    }
-    tasks.filter { it.name.contains("ourcesJar") }.forEach {
-        it.dependsOn(generateKotlinGrammarSource)
-    }
-    tasks.named<Task>("dokkaHtml") {
-        dependsOn(generateKotlinGrammarSource)
     }
 
     /**

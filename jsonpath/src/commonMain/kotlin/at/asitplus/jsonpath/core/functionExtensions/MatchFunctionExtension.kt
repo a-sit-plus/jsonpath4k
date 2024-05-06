@@ -10,7 +10,7 @@ import kotlinx.serialization.json.JsonPrimitive
  * date: 2024-02
  * section: 2.4.6.  match() Function Extension
  */
-data object MatchFunctionExtension : JsonPathFunctionExtension.LogicalTypeFunctionExtension(
+internal data object MatchFunctionExtension : JsonPathFunctionExtension.LogicalTypeFunctionExtension(
     name = "match",
     argumentTypes = listOf(
         JsonPathFilterExpressionType.ValueType,

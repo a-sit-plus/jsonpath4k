@@ -14,7 +14,7 @@ import kotlin.math.min
  * date: 2024-02
  * section: 2.3.  Selectors
  */
-sealed interface JsonPathSelector {
+internal sealed interface JsonPathSelector {
     fun invoke(
         currentNode: JsonElement,
         rootNode: JsonElement = currentNode,

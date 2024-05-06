@@ -4,8 +4,8 @@ import at.asitplus.jsonpath.core.JsonPathCompiler
 import at.asitplus.jsonpath.core.JsonPathFunctionExtension
 import at.asitplus.jsonpath.core.JsonPathQuery
 import at.asitplus.jsonpath.core.NodeList
-import at.asitplus.parser.generated.JsonPathLexer
-import at.asitplus.parser.generated.JsonPathParser
+import at.asitplus.jsonpath.generated.JsonPathLexer
+import at.asitplus.jsonpath.generated.JsonPathParser
 import kotlinx.serialization.json.JsonElement
 import org.antlr.v4.kotlinruntime.CharStreams
 import org.antlr.v4.kotlinruntime.CommonTokenStream

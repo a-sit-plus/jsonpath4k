@@ -1,13 +1,9 @@
-package at.asitplus.jsonpath.implementation
+package at.asitplus.jsonpath.core
 
-import at.asitplus.jsonpath.core.JsonPathQuery
-import at.asitplus.jsonpath.core.JsonPathSelector
-import at.asitplus.jsonpath.core.NodeList
-import at.asitplus.jsonpath.core.NodeListEntry
 import kotlinx.serialization.json.JsonElement
 
 
-class JsonPathSelectorQuery(
+internal class JsonPathSelectorQuery(
     private val selectors: List<JsonPathSelector>,
 ) : JsonPathQuery {
     override fun invoke(currentNode: JsonElement, rootNode: JsonElement): NodeList {

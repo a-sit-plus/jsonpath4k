@@ -5,7 +5,7 @@ import org.antlr.v4.kotlinruntime.Token
 import org.antlr.v4.kotlinruntime.ast.Position
 
 internal data class AbstractSyntaxTree<T>(
-    val context: String,
+    val text: String,
     val position: Position?,
     val value: T,
     val children: List<AbstractSyntaxTree<out T>> = listOf(),
@@ -15,7 +15,7 @@ internal data class AbstractSyntaxTree<T>(
         value: T,
         children: List<AbstractSyntaxTree<out T>> = listOf(),
     ) : this(
-        context = context?.text ?: "",
+        text = context?.text ?: "",
         position = context?.position,
         value = value,
         children = children,
@@ -25,7 +25,7 @@ internal data class AbstractSyntaxTree<T>(
         value: T,
         children: List<AbstractSyntaxTree<out T>> = listOf(),
     ) : this(
-        context = token.text ?: "",
+        text = token.text ?: "",
         position = token.startPoint().let { Position(it, token.endPoint() ?: it) },
         value = value,
         children = children,

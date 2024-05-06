@@ -4,9 +4,10 @@ import at.asitplus.jsonpath.core.FilterPredicate
 import at.asitplus.jsonpath.core.JsonPathFilterExpressionType
 import at.asitplus.jsonpath.core.JsonPathFilterExpressionValue
 import at.asitplus.jsonpath.core.JsonPathFunctionExtension
-import at.asitplus.parser.generated.JsonPathParser
-import at.asitplus.parser.generated.JsonPathParserBaseVisitor
 import at.asitplus.jsonpath.core.JsonPathSelector
+import at.asitplus.jsonpath.core.JsonPathSelectorQuery
+import at.asitplus.jsonpath.generated.JsonPathParser
+import at.asitplus.jsonpath.generated.JsonPathParserBaseVisitor
 import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonNull
@@ -387,7 +388,7 @@ internal class AntlrJsonPathSemanticAnalyzerVisitor(
             }
 
         val isArglistSizeConsistent = ctx.function_argument().size == extension.argumentTypes.size
-        val coercedArgumentTypes =
+        val coercedArgumentExpressions =
             functionArgumentNodes.map { it.value }.mapIndexed { index, argumentNode ->
                 when (extension.argumentTypes.getOrNull(index)) {
                     /**
@@ -446,36 +447,45 @@ internal class AntlrJsonPathSemanticAnalyzerVisitor(
                 }
             }
 
-        val coercedFilterExpressionArguments = coercedArgumentTypes
-            .filterIsInstance<JsonPathExpression.FilterExpression>()
-
-        val isAllFilterExpressionValues =
-            coercedArgumentTypes.size == coercedFilterExpressionArguments.size
+        val coercedArgumentTypes = coercedArgumentExpressions.map {
+            if (it !is JsonPathExpression.FilterExpression) {
+                null
+            } else {
+                it.expressionType
+            }
+        }
 
         val isCoercedArgumentTypesMatching =
-            coercedFilterExpressionArguments.mapIndexed { index, argumentType ->
-                argumentType.expressionType == extension.argumentTypes[index]
+            coercedArgumentTypes.mapIndexed { index, argumentType ->
+                argumentType == extension.argumentTypes[index]
             }.all {
                 it
             }
 
         val isValidFunctionCall =
-            isArglistSizeConsistent and isCoercedArgumentTypesMatching and isAllFilterExpressionValues
+            isArglistSizeConsistent and isCoercedArgumentTypesMatching
 
         if (isValidFunctionCall == false) {
             errorListener?.invalidArglistForFunctionExtension(
                 functionExtension = extension,
-                coercedArgumentTypes = coercedArgumentTypes,
+                coercedArgumentTypes = coercedArgumentTypes.zip(
+                    functionArgumentNodes.map {
+                        it.text
+                    }
+                )
             )
         }
 
         return AbstractSyntaxTree(
             context = ctx,
             value = if (isValidFunctionCall) {
+                val coercedArguments =
+                    coercedArgumentExpressions.filterIsInstance<JsonPathExpression.FilterExpression>()
+
                 when (extension) {
                     is JsonPathFunctionExtension.LogicalTypeFunctionExtension -> {
                         JsonPathExpression.FilterExpression.LogicalExpression { context ->
-                            extension.invoke(coercedFilterExpressionArguments.map {
+                            extension.invoke(coercedArguments.map {
                                 it.evaluate.invoke(context)
                             })
                         }
@@ -483,7 +493,7 @@ internal class AntlrJsonPathSemanticAnalyzerVisitor(
 
                     is JsonPathFunctionExtension.NodesTypeFunctionExtension -> {
                         JsonPathExpression.FilterExpression.NodesExpression.NodesFunctionExpression { context ->
-                            extension.invoke(coercedFilterExpressionArguments.map {
+                            extension.invoke(coercedArguments.map {
                                 it.evaluate.invoke(context)
                             })
                         }
@@ -491,7 +501,7 @@ internal class AntlrJsonPathSemanticAnalyzerVisitor(
 
                     is JsonPathFunctionExtension.ValueTypeFunctionExtension -> {
                         JsonPathExpression.FilterExpression.ValueExpression { context ->
-                            extension.invoke(coercedFilterExpressionArguments.map {
+                            extension.invoke(coercedArguments.map {
                                 it.evaluate.invoke(context)
                             })
                         }
@@ -550,7 +560,7 @@ internal class AntlrJsonPathSemanticAnalyzerVisitor(
                 JsonPathExpression.ErrorType
             } else if (secondValue !is JsonPathExpression.FilterExpression.ValueExpression) {
                 JsonPathExpression.ErrorType
-            } else evaluateComparison(
+            } else comparisonExpression(
                 firstComparable = firstValue.evaluate,
                 secondComparable = secondValue.evaluate,
                 ctx.comparisonOp(),
@@ -559,7 +569,7 @@ internal class AntlrJsonPathSemanticAnalyzerVisitor(
         )
     }
 
-    private fun evaluateComparison(
+    private fun comparisonExpression(
         firstComparable: (JsonPathExpressionEvaluationContext) -> JsonPathFilterExpressionValue.ValueTypeValue,
         secondComparable: (JsonPathExpressionEvaluationContext) -> JsonPathFilterExpressionValue.ValueTypeValue,
         comparisonOpContext: JsonPathParser.ComparisonOpContext,

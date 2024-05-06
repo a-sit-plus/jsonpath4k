@@ -14,7 +14,7 @@ import kotlinx.serialization.json.JsonPrimitive
  * section: 2.4.4.  length() Function Extension
  */
 @OptIn(ExperimentalSerializationApi::class)
-data object LengthFunctionExtension : JsonPathFunctionExtension.ValueTypeFunctionExtension(
+internal data object LengthFunctionExtension : JsonPathFunctionExtension.ValueTypeFunctionExtension(
     name = "length",
     argumentTypes = listOf(
         JsonPathFilterExpressionType.ValueType,

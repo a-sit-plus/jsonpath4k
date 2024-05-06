@@ -89,7 +89,7 @@ fragment NAME_FIRST:  ALPHA |
                       UNDERLINE   |
                       '\u0080'..'\uD7FF' |
                          // skip surrogate code points
-                      '\uE000'..'\u{10FFFF}';
+                      '\uE000'..'\uFFFF';
 fragment NAME_CHAR            : NAME_FIRST | DIGIT;
 fragment MEMBER_NAME_SHORTHAND_FRAGMENT: NAME_FIRST NAME_CHAR*;
 
@@ -110,7 +110,7 @@ fragment UNESCAPED:   '\u0020' | '\u0021' |                      // see RFC 8259
                          // omit 0x5C \
                       '\u005D'..'\uD7FF' |
                          // skip surrogate code points
-                      '\uE000'..'\u{10FFFF}'
+                      '\uE000'..'\uFFFF'
                       ;
 
 fragment ESC: BACKSLASH;

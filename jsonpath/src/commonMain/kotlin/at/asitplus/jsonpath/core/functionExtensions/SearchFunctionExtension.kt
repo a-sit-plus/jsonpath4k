@@ -10,7 +10,7 @@ import kotlinx.serialization.json.JsonPrimitive
  * date: 2024-02
  * section: 2.4.7.  search() Function Extension
  */
-data object SearchFunctionExtension : JsonPathFunctionExtension.LogicalTypeFunctionExtension(
+internal data object SearchFunctionExtension : JsonPathFunctionExtension.LogicalTypeFunctionExtension(
     name = "search",
     argumentTypes = listOf(
         JsonPathFilterExpressionType.ValueType,
