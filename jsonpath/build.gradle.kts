@@ -219,7 +219,7 @@ fun Project.exportIosFramework(
 }
 
 fun Project.setupDokka(
-    outputDir: String = layout.buildDirectory.dir("dokka").get().asFile.canonicalPath,
+    outputDir: String = rootProject.layout.buildDirectory.dir("dokka").get().asFile.canonicalPath,
     baseUrl: String,
     multiModuleDoc: Boolean = false,
     remoteLineSuffix: String = "#L"
