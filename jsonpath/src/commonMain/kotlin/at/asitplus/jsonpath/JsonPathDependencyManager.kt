@@ -7,9 +7,9 @@ import at.asitplus.jsonpath.core.functionExtensions.lengthFunctionExtension
 import at.asitplus.jsonpath.core.functionExtensions.matchFunctionExtension
 import at.asitplus.jsonpath.core.functionExtensions.searchFunctionExtension
 import at.asitplus.jsonpath.core.functionExtensions.valueFunctionExtension
+import at.asitplus.jsonpath.core.functionExtensions.countFunctionExtension
 import at.asitplus.jsonpath.implementation.AntlrJsonPathCompiler
 import at.asitplus.jsonpath.implementation.AntlrJsonPathCompilerErrorListener
-import at.asitplus.wallet.lib.data.jsonpath.functionExtensions.countFunctionExtension
 import io.github.aakira.napier.Napier
 import org.antlr.v4.kotlinruntime.BaseErrorListener
 import org.antlr.v4.kotlinruntime.RecognitionException

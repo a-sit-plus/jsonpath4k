@@ -1,4 +1,4 @@
-package at.asitplus.wallet.lib.data.jsonpath.functionExtensions
+package at.asitplus.jsonpath.core.functionExtensions
 
 import at.asitplus.jsonpath.core.JsonPathFilterExpressionValue
 import at.asitplus.jsonpath.core.JsonPathFilterExpressionType
