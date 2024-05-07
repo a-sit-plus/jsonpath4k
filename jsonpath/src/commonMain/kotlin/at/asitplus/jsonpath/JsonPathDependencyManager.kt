@@ -53,7 +53,7 @@ private val napierAntlrJsonPathCompilerErrorListener by lazy {
         }
 
         override fun invalidFunctionExtensionForComparable(functionExtensionName: String) {
-            Napier.e("Invalid JSONPath function extension return type for test expression: \"$functionExtensionName\"")
+            Napier.e("Invalid JSONPath function extension return type for comparable expression: \"$functionExtensionName\"")
         }
 
         override fun invalidArglistForFunctionExtension(
