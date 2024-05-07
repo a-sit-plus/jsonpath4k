@@ -8,7 +8,7 @@ import at.asitplus.jsonpath.core.JsonPathFunctionExtension
  */
 interface JsonPathFunctionExtensionRepository {
     /**
-     * Returns false if extension with name already exists, and true if extension was added successfully
+     * Implementations should return false if an extension with that name already exists, and true if extension was added successfully
      */
     fun addExtension(name: String, extension: () -> JsonPathFunctionExtension<*>): Boolean
     fun getExtension(name: String): JsonPathFunctionExtension<*>?
