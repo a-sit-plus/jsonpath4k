@@ -38,7 +38,7 @@ val normalizedPath = nodeList[0].normalizedJsonPath
 This library supports the function extensions specified in [RFC9535](https://www.rfc-editor.org/rfc/rfc9535.html#name-function-extensions) by default. 
 
 ### Custom function extensions
-Custom function extensions can be added using `JsonPathDependencyManager.functionExtensionRepository.setExtension`:
+Custom function extensions can be added using `JsonPathDependencyManager.functionExtensionRepository.addExtension`:
 ```kotlin
 // adding a logical type function extension with 1 parameter of type NodesType
 JsonPathDependencyManager.functionExtensionRepository.addExtension("foo") {
@@ -106,14 +106,14 @@ Function extensions can be removed by setting the value of `JsonPathDependencyMa
 Existing functions can be preserved by exporting them using `JsonPathDependencyManager.functionExtensionRepository.export()` and selectively importing them into the new repository.
 
 ### Testing custom function extensions
-In order to test custom function extensions without polluting the global function extension repository, it is advised to copy the function extension repository before adding functions to be tested, and reset it to its original state afterwards.
+In order to test custom function extensions without polluting the default function extension repository, it is advised to copy the function extension repository before adding functions to be tested, and reset it to its original state afterwards.
 
 ```kotlin
 // make backup of extension repository 
 val repositoryBackup = JsonPathDependencyManager.functionExtensionRepository.copy()
 
 // add extension
-JsonPathDependencyManager.functionExtensionRepository.setExtension("foo") {
+JsonPathDependencyManager.functionExtensionRepository.addExtension("foo") {
     JsonPathFunctionExtension.LogicalTypeFunctionExtension {
         true
     }
