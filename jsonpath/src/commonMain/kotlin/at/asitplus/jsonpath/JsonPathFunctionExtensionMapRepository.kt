@@ -8,9 +8,12 @@ internal class JsonPathFunctionExtensionMapRepository(
     override fun addExtension(
         name: String,
         extension: () -> JsonPathFunctionExtension<*>
-    ): Boolean = if(extensions.containsKey(name)) {
-        false
-    } else true.also{
+    ) {
+        extensions[name]?.let {
+            throw FunctionExtensionCollisionException(
+                "A function extension with the name \"$name\" has already been added: $it"
+            )
+        }
         extensions[name] = extension()
     }
 

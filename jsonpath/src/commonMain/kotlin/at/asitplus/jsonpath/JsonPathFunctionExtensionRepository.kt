@@ -8,10 +8,12 @@ import at.asitplus.jsonpath.core.JsonPathFunctionExtension
  */
 interface JsonPathFunctionExtensionRepository {
     /**
-     * Implementations should return false if an extension with that name already exists, and true if extension was added successfully
+     * Implementations should throw FunctionExtensionCollisionException if an extension with that name already exists.
      */
-    fun addExtension(name: String, extension: () -> JsonPathFunctionExtension<*>): Boolean
+    fun addExtension(name: String, extension: () -> JsonPathFunctionExtension<*>)
     fun getExtension(name: String): JsonPathFunctionExtension<*>?
     fun export(): Map<String, JsonPathFunctionExtension<*>>
     fun copy(): JsonPathFunctionExtensionRepository
 }
+
+open class FunctionExtensionCollisionException(message: String) : Exception(message)
