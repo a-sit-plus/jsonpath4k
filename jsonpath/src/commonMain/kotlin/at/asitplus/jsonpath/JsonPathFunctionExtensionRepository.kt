@@ -7,7 +7,11 @@ import at.asitplus.jsonpath.core.JsonPathFunctionExtension
  * It's a way to provide users with a way to add custom function extensions.
  */
 interface JsonPathFunctionExtensionRepository {
-    fun addExtension(functionExtension: JsonPathFunctionExtension<*>)
+    /**
+     * Returns false if extension with name already exists, and true if extension was added successfully
+     */
+    fun addExtension(name: String, extension: () -> JsonPathFunctionExtension<*>): Boolean
     fun getExtension(name: String): JsonPathFunctionExtension<*>?
     fun export(): Map<String, JsonPathFunctionExtension<*>>
+    fun copy(): JsonPathFunctionExtensionRepository
 }

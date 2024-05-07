@@ -467,7 +467,8 @@ internal class AntlrJsonPathSemanticAnalyzerVisitor(
 
         if (isValidFunctionCall == false) {
             errorListener?.invalidArglistForFunctionExtension(
-                functionExtension = extension,
+                functionExtensionName = ctx.FUNCTION_NAME().text,
+                functionExtensionImplementation = extension,
                 coercedArgumentTypes = coercedArgumentTypes.zip(
                     functionArgumentNodes.map {
                         it.text
@@ -485,24 +486,24 @@ internal class AntlrJsonPathSemanticAnalyzerVisitor(
                 when (extension) {
                     is JsonPathFunctionExtension.LogicalTypeFunctionExtension -> {
                         JsonPathExpression.FilterExpression.LogicalExpression { context ->
-                            extension.invoke(coercedArguments.map {
-                                it.evaluate.invoke(context)
+                            extension.evaluate(coercedArguments.map {
+                                it.evaluate(context)
                             })
                         }
                     }
 
                     is JsonPathFunctionExtension.NodesTypeFunctionExtension -> {
                         JsonPathExpression.FilterExpression.NodesExpression.NodesFunctionExpression { context ->
-                            extension.invoke(coercedArguments.map {
-                                it.evaluate.invoke(context)
+                            extension.evaluate(coercedArguments.map {
+                                it.evaluate(context)
                             })
                         }
                     }
 
                     is JsonPathFunctionExtension.ValueTypeFunctionExtension -> {
                         JsonPathExpression.FilterExpression.ValueExpression { context ->
-                            extension.invoke(coercedArguments.map {
-                                it.evaluate.invoke(context)
+                            extension.evaluate(coercedArguments.map {
+                                it.evaluate(context)
                             })
                         }
                     }
