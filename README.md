@@ -6,7 +6,7 @@
 [![Java](https://img.shields.io/badge/java-17+-blue.svg?logo=OPENJDK)](https://www.oracle.com/java/technologies/downloads/#java11)
 [![Maven Central](https://img.shields.io/maven-central/v/at.asitplus/jsonpath)](https://mvnrepository.com/artifact/at.asitplus/jsonpath/)
 
-This is a Kotlin Multiplatform Library for using Json Paths as defined in [RFC9535](https://datatracker.ietf.org/doc/rfc9535).
+This is a Kotlin Multiplatform Library for using Json Paths as specified in [RFC9535](https://datatracker.ietf.org/doc/rfc9535).
 
 ## Architecture
 
@@ -16,7 +16,7 @@ Notable features for multiplatform are:
 
 - Use of [Napier](https://github.com/AAkira/Napier) as the logging framework for the default compiler instance
 - Use of [Kotest](https://kotest.io/) for unit tests
-- Use of [kotlinx-serialization](https://github.com/Kotlin/kotlinx.serialization) for serialization from/to JSON.
+- Use of [kotlinx-serialization](https://github.com/Kotlin/kotlinx.serialization) for serialization from/to JSON and to have JsonElement as evaluation target for JsonPathQuery
 
 ## Using the library
 1. Use the JsonPath constructor for compiling JSONPath query expressions.
