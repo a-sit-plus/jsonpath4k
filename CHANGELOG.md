@@ -7,7 +7,6 @@
   - Changed `addExtension`: 
     - Takes an additional parameter for the function extension name  
     - The function extension is now constructed only when necessary, which has been changed mostly because the definition syntax now feels cleaner.
-  - Added `clone`: Provides a way for users to make a hard-copy of the repository, which is especially useful for testing custom function extensions
 - BREAKING CHANGE to `JsonPathCompiler`:
   - Changed `compile`: Takes the function extension retriever as second argument now
 
