@@ -13,7 +13,6 @@ interface JsonPathFunctionExtensionRepository {
     fun addExtension(name: String, extension: () -> JsonPathFunctionExtension<*>)
     fun getExtension(name: String): JsonPathFunctionExtension<*>?
     fun export(): Map<String, JsonPathFunctionExtension<*>>
-    fun copy(): JsonPathFunctionExtensionRepository
 }
 
 open class FunctionExtensionCollisionException(message: String) : Exception(message)

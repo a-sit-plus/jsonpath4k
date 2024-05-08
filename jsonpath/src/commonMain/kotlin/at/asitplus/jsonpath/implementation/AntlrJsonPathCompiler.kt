@@ -12,10 +12,12 @@ import org.antlr.v4.kotlinruntime.CommonTokenStream
 import org.antlr.v4.kotlinruntime.ListTokenSource
 
 class AntlrJsonPathCompiler(
-    private var functionExtensionRetriever: (String) -> JsonPathFunctionExtension<*>?,
     private var errorListener: AntlrJsonPathCompilerErrorListener? = null,
 ) : JsonPathCompiler {
-    override fun compile(jsonPath: String): JsonPathQuery {
+    override fun compile(
+        jsonPath: String,
+        functionExtensionRetriever: (String) -> JsonPathFunctionExtension<*>?,
+    ): JsonPathQuery {
         val lexerErrorDetector = AntlrSyntaxErrorDetector()
         val tokens = JsonPathLexer(CharStreams.fromString(jsonPath)).apply {
             addErrorListener(lexerErrorDetector)
@@ -24,7 +26,7 @@ class AntlrJsonPathCompiler(
             }
         }.allTokens
 
-        if(lexerErrorDetector.isError) {
+        if (lexerErrorDetector.isError) {
             throw JsonPathLexerException()
         }
 
@@ -37,7 +39,7 @@ class AntlrJsonPathCompiler(
             }
         }.jsonpath_query()
 
-        if(parserErrorDetector.isError) {
+        if (parserErrorDetector.isError) {
             throw JsonPathParserException()
         }
 
@@ -47,10 +49,10 @@ class AntlrJsonPathCompiler(
         ).visit(jsonPathQueryContext)
         val rootValueType = abstractSyntaxTree?.value
 
-        if(rootValueType is JsonPathExpression.ErrorType) {
+        if (rootValueType is JsonPathExpression.ErrorType) {
             throw JsonPathTypeCheckerException("Type errors have occured: $abstractSyntaxTree")
         }
-        if(rootValueType !is JsonPathExpression.FilterExpression.NodesExpression.FilterQueryExpression) {
+        if (rootValueType !is JsonPathExpression.FilterExpression.NodesExpression.FilterQueryExpression) {
             throw JsonPathTypeCheckerException("Invalid root value type: $rootValueType: $abstractSyntaxTree")
         }
 

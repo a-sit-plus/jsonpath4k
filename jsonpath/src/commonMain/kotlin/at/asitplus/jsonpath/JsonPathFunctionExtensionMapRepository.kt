@@ -19,6 +19,4 @@ internal class JsonPathFunctionExtensionMapRepository(
 
     override fun getExtension(name: String): JsonPathFunctionExtension<*>? = extensions[name]
     override fun export(): Map<String, JsonPathFunctionExtension<*>> = extensions.toMap()
-    override fun copy(): JsonPathFunctionExtensionRepository =
-        JsonPathFunctionExtensionMapRepository(extensions.toMutableMap())
 }

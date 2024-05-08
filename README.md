@@ -101,34 +101,28 @@ JsonPathDependencyManager.functionExtensionRepository.addExtension("foo") {
 ```
 
 ### Removing Function extensions
-Function extensions can be removed by setting the value of `JsonPathDependencyManager.functionExtensionRepository` to a new repository.
+Function extensions can be removed from the default repository by setting the value of `JsonPathDependencyManager.functionExtensionRepository` to a new repository.
 
 Existing functions can be preserved by exporting them using `JsonPathDependencyManager.functionExtensionRepository.export()` and selectively importing them into the new repository.
 
+
+
 ### Testing custom function extensions
-In order to test custom function extensions without polluting the default function extension repository, it is advised to copy the function extension repository before adding functions to be tested, and reset it to its original state afterwards.
+In order to test custom function extensions without polluting the default function extension repository, it is advised to make an export and use the resulting map to build a function extension retriever.
 
 ```kotlin
-// make backup of extension repository 
-val repositoryBackup = JsonPathDependencyManager.functionExtensionRepository.copy()
-
-// add extension
-JsonPathDependencyManager.functionExtensionRepository.addExtension("foo") {
-    JsonPathFunctionExtension.LogicalTypeFunctionExtension {
+val testRetriever = JsonPathDependencyManager.functionExtensionRepository.export().plus(
+    "foo" to JsonPathFunctionExtension.LogicalTypeFunctionExtension(
+        JsonPathFilterExpressionType.ValueType,
+        JsonPathFilterExpressionType.ValueType,
+    ) {
         true
     }
-}
+)
+val jsonPath = JsonPath(jsonPathStatement, functionExtensionRetriever = testRetriever::get)
 
-// compile json path
-val jsonPath = try {
-    JsonPath(jsonPathStatement)
-} finally {
-    // reset extension repository to its original state
-    JsonPathDependencyManager.functionExtensionRepository = repositoryBackup
-}
-
-// evaluate against a json element
-jsonPath.evaluate(buildJsonElement {})
+// select from a json element
+jsonPath.query(buildJsonElement {})
 ```
 
 ## Error handeling
@@ -139,8 +133,5 @@ JsonPathDependencyManager.compiler = AntlrJsonPathCompiler(
     errorListener = object : AntlrJsonPathCompilerErrorListener {
         //TODO: IMPLEMENT MEMBERS                                                            
     },
-    functionExtensionRetriever = {
-        JsonPathDependencyManager.functionExtensionRepository.getExtension(it)
-    }
 )
 ```

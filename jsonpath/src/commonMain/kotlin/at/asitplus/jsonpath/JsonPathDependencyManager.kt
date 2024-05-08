@@ -30,15 +30,8 @@ object JsonPathDependencyManager {
             ).toMap().toMutableMap()
         )
 
-    /**
-     * Implementations should support the case where the function extensions change before executing the resulting query.
-     * Implementations should use the above mentioned function extension repository as a source of function extensions.
-     */
     var compiler: JsonPathCompiler = AntlrJsonPathCompiler(
         errorListener = napierAntlrJsonPathCompilerErrorListener,
-        functionExtensionRetriever = {
-            functionExtensionRepository.getExtension(it)
-        }
     )
 }
 
