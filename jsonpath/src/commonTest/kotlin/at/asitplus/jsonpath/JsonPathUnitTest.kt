@@ -1,7 +1,6 @@
 package at.asitplus.jsonpath
 
 import at.asitplus.jsonpath.core.JsonPathFilterExpressionType
-import at.asitplus.jsonpath.core.JsonPathFilterExpressionValue
 import at.asitplus.jsonpath.core.JsonPathFunctionExtension
 import at.asitplus.jsonpath.implementation.JsonPathTypeCheckerException
 import io.kotest.assertions.throwables.shouldNotThrowAny
@@ -764,19 +763,21 @@ class JsonPathUnitTest : FreeSpec({
             // making sure that the dependencies are reset to their default for the next test
             val defaultCompilerBuilderBackup = JsonPathDependencyManager.compiler
             val defaultFunctionExtensionRepositoryBackup =
-                JsonPathDependencyManager.functionExtensionRepository
+                JsonPathDependencyManager.functionExtensionRepository.export()
             beforeEach {
                 // prepare a dummy repository to be modified by the tests
                 JsonPathDependencyManager.functionExtensionRepository =
                     JsonPathFunctionExtensionMapRepository(
-                        JsonPathDependencyManager.functionExtensionRepository.export()
-                            .toMutableMap()
+                        defaultFunctionExtensionRepositoryBackup.toMutableMap()
                     )
             }
             afterEach {
                 JsonPathDependencyManager.apply {
                     compiler = defaultCompilerBuilderBackup
-                    functionExtensionRepository = defaultFunctionExtensionRepositoryBackup
+                    functionExtensionRepository =
+                        JsonPathFunctionExtensionMapRepository(
+                            defaultFunctionExtensionRepositoryBackup.toMutableMap()
+                        )
                 }
             }
             "\$[?length(@) < 3]" {
@@ -800,19 +801,12 @@ class JsonPathUnitTest : FreeSpec({
                 }
             }
             "\$[?count(foo(@.*)) == 1]" {
-                JsonPathDependencyManager.functionExtensionRepository.apply {
-                    this.addExtension(
-                        object : JsonPathFunctionExtension.NodesTypeFunctionExtension(
-                            name = "foo",
-                            argumentTypes = listOf(JsonPathFilterExpressionType.NodesType),
-                        ) {
-                            override fun invoke(arguments: List<JsonPathFilterExpressionValue>): JsonPathFilterExpressionValue.NodesTypeValue.FunctionExtensionResult {
-                                return JsonPathFilterExpressionValue.NodesTypeValue.FunctionExtensionResult(
-                                    listOf()
-                                )
-                            }
-                        }
-                    )
+                JsonPathDependencyManager.functionExtensionRepository.addExtension("foo") {
+                    JsonPathFunctionExtension.NodesTypeFunctionExtension(
+                        JsonPathFilterExpressionType.NodesType,
+                    ) {
+                        listOf()
+                    }
                 }
 
                 shouldNotThrowAny {
@@ -836,17 +830,12 @@ class JsonPathUnitTest : FreeSpec({
             }
             "\$[?bar(@.a)]" - {
                 "logical type argument" {
-                    JsonPathDependencyManager.functionExtensionRepository.apply {
-                        this.addExtension(
-                            object : JsonPathFunctionExtension.LogicalTypeFunctionExtension(
-                                name = "bar",
-                                argumentTypes = listOf(JsonPathFilterExpressionType.LogicalType),
-                            ) {
-                                override fun invoke(arguments: List<JsonPathFilterExpressionValue>): JsonPathFilterExpressionValue.LogicalTypeValue {
-                                    return JsonPathFilterExpressionValue.LogicalTypeValue(true)
-                                }
-                            }
-                        )
+                    JsonPathDependencyManager.functionExtensionRepository.addExtension("bar") {
+                        JsonPathFunctionExtension.LogicalTypeFunctionExtension(
+                            JsonPathFilterExpressionType.LogicalType,
+                        ) {
+                            true
+                        }
                     }
 
                     shouldNotThrowAny {
@@ -854,17 +843,12 @@ class JsonPathUnitTest : FreeSpec({
                     }
                 }
                 "value type argument" {
-                    JsonPathDependencyManager.functionExtensionRepository.apply {
-                        this.addExtension(
-                            object : JsonPathFunctionExtension.LogicalTypeFunctionExtension(
-                                name = "bar",
-                                argumentTypes = listOf(JsonPathFilterExpressionType.ValueType),
-                            ) {
-                                override fun invoke(arguments: List<JsonPathFilterExpressionValue>): JsonPathFilterExpressionValue.LogicalTypeValue {
-                                    return JsonPathFilterExpressionValue.LogicalTypeValue(true)
-                                }
-                            }
-                        )
+                    JsonPathDependencyManager.functionExtensionRepository.addExtension("bar") {
+                        JsonPathFunctionExtension.LogicalTypeFunctionExtension(
+                            JsonPathFilterExpressionType.ValueType,
+                        ) {
+                            true
+                        }
                     }
 
                     shouldNotThrowAny {
@@ -872,17 +856,12 @@ class JsonPathUnitTest : FreeSpec({
                     }
                 }
                 "nodes type argument" {
-                    JsonPathDependencyManager.functionExtensionRepository.apply {
-                        this.addExtension(
-                            object : JsonPathFunctionExtension.LogicalTypeFunctionExtension(
-                                name = "bar",
-                                argumentTypes = listOf(JsonPathFilterExpressionType.NodesType),
-                            ) {
-                                override fun invoke(arguments: List<JsonPathFilterExpressionValue>): JsonPathFilterExpressionValue.LogicalTypeValue {
-                                    return JsonPathFilterExpressionValue.LogicalTypeValue(true)
-                                }
-                            }
-                        )
+                    JsonPathDependencyManager.functionExtensionRepository.addExtension("bar") {
+                        JsonPathFunctionExtension.LogicalTypeFunctionExtension(
+                            JsonPathFilterExpressionType.NodesType,
+                        ) {
+                            true
+                        }
                     }
 
                     shouldNotThrowAny {
@@ -892,17 +871,12 @@ class JsonPathUnitTest : FreeSpec({
             }
             "\$[?bnl(@.*)]" - {
                 "logical type argument" {
-                    JsonPathDependencyManager.functionExtensionRepository.apply {
-                        this.addExtension(
-                            object : JsonPathFunctionExtension.LogicalTypeFunctionExtension(
-                                name = "bnl",
-                                argumentTypes = listOf(JsonPathFilterExpressionType.LogicalType),
-                            ) {
-                                override fun invoke(arguments: List<JsonPathFilterExpressionValue>): JsonPathFilterExpressionValue.LogicalTypeValue {
-                                    return JsonPathFilterExpressionValue.LogicalTypeValue(true)
-                                }
-                            }
-                        )
+                    JsonPathDependencyManager.functionExtensionRepository.addExtension("bnl") {
+                        JsonPathFunctionExtension.LogicalTypeFunctionExtension(
+                            JsonPathFilterExpressionType.LogicalType,
+                        ) {
+                            true
+                        }
                     }
 
                     shouldNotThrowAny {
@@ -910,17 +884,12 @@ class JsonPathUnitTest : FreeSpec({
                     }
                 }
                 "value type argument" {
-                    JsonPathDependencyManager.functionExtensionRepository.apply {
-                        this.addExtension(
-                            object : JsonPathFunctionExtension.LogicalTypeFunctionExtension(
-                                name = "bnl",
-                                argumentTypes = listOf(JsonPathFilterExpressionType.ValueType),
-                            ) {
-                                override fun invoke(arguments: List<JsonPathFilterExpressionValue>): JsonPathFilterExpressionValue.LogicalTypeValue {
-                                    return JsonPathFilterExpressionValue.LogicalTypeValue(true)
-                                }
-                            }
-                        )
+                    JsonPathDependencyManager.functionExtensionRepository.addExtension("bnl") {
+                        JsonPathFunctionExtension.LogicalTypeFunctionExtension(
+                            JsonPathFilterExpressionType.ValueType,
+                        ) {
+                            true
+                        }
                     }
 
                     shouldThrow<JsonPathTypeCheckerException> {
@@ -928,17 +897,12 @@ class JsonPathUnitTest : FreeSpec({
                     }
                 }
                 "nodes type argument" {
-                    JsonPathDependencyManager.functionExtensionRepository.apply {
-                        this.addExtension(
-                            object : JsonPathFunctionExtension.LogicalTypeFunctionExtension(
-                                name = "bnl",
-                                argumentTypes = listOf(JsonPathFilterExpressionType.NodesType),
-                            ) {
-                                override fun invoke(arguments: List<JsonPathFilterExpressionValue>): JsonPathFilterExpressionValue.LogicalTypeValue {
-                                    return JsonPathFilterExpressionValue.LogicalTypeValue(true)
-                                }
-                            }
-                        )
+                    JsonPathDependencyManager.functionExtensionRepository.addExtension("bnl") {
+                        JsonPathFunctionExtension.LogicalTypeFunctionExtension(
+                            JsonPathFilterExpressionType.NodesType
+                        ) {
+                            true
+                        }
                     }
 
                     shouldNotThrowAny {
@@ -947,17 +911,12 @@ class JsonPathUnitTest : FreeSpec({
                 }
             }
             "\$[?blt(1==1)]" {
-                JsonPathDependencyManager.functionExtensionRepository.apply {
-                    this.addExtension(
-                        object : JsonPathFunctionExtension.LogicalTypeFunctionExtension(
-                            name = "blt",
-                            argumentTypes = listOf(JsonPathFilterExpressionType.LogicalType),
-                        ) {
-                            override fun invoke(arguments: List<JsonPathFilterExpressionValue>): JsonPathFilterExpressionValue.LogicalTypeValue {
-                                return JsonPathFilterExpressionValue.LogicalTypeValue(true)
-                            }
-                        }
-                    )
+                JsonPathDependencyManager.functionExtensionRepository.addExtension("blt") {
+                    JsonPathFunctionExtension.LogicalTypeFunctionExtension(
+                        JsonPathFilterExpressionType.LogicalType,
+                    ) {
+                        true
+                    }
                 }
 
                 shouldNotThrowAny {
@@ -965,17 +924,12 @@ class JsonPathUnitTest : FreeSpec({
                 }
             }
             "\$[?blt(1)]" {
-                JsonPathDependencyManager.functionExtensionRepository.apply {
-                    this.addExtension(
-                        object : JsonPathFunctionExtension.LogicalTypeFunctionExtension(
-                            name = "blt",
-                            argumentTypes = listOf(JsonPathFilterExpressionType.LogicalType),
-                        ) {
-                            override fun invoke(arguments: List<JsonPathFilterExpressionValue>): JsonPathFilterExpressionValue.LogicalTypeValue {
-                                return JsonPathFilterExpressionValue.LogicalTypeValue(true)
-                            }
-                        }
-                    )
+                JsonPathDependencyManager.functionExtensionRepository.addExtension("blt") {
+                    JsonPathFunctionExtension.LogicalTypeFunctionExtension(
+                        JsonPathFilterExpressionType.LogicalType,
+                    ) {
+                        true
+                    }
                 }
 
                 shouldThrow<JsonPathTypeCheckerException> {
@@ -983,17 +937,12 @@ class JsonPathUnitTest : FreeSpec({
                 }
             }
             "\$[?bal(1)]" {
-                JsonPathDependencyManager.functionExtensionRepository.apply {
-                    this.addExtension(
-                        object : JsonPathFunctionExtension.LogicalTypeFunctionExtension(
-                            name = "bal",
-                            argumentTypes = listOf(JsonPathFilterExpressionType.ValueType),
-                        ) {
-                            override fun invoke(arguments: List<JsonPathFilterExpressionValue>): JsonPathFilterExpressionValue.LogicalTypeValue {
-                                return JsonPathFilterExpressionValue.LogicalTypeValue(true)
-                            }
-                        }
-                    )
+                JsonPathDependencyManager.functionExtensionRepository.addExtension("bal") {
+                    JsonPathFunctionExtension.LogicalTypeFunctionExtension(
+                        JsonPathFilterExpressionType.ValueType,
+                    ) {
+                        true
+                    }
                 }
 
                 shouldNotThrowAny {

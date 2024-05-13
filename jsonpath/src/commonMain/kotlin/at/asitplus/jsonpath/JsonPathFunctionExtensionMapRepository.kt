@@ -5,20 +5,18 @@ import at.asitplus.jsonpath.core.JsonPathFunctionExtension
 internal class JsonPathFunctionExtensionMapRepository(
     private val extensions: MutableMap<String, JsonPathFunctionExtension<*>> = mutableMapOf()
 ) : JsonPathFunctionExtensionRepository {
-    override fun addExtension(functionExtension: JsonPathFunctionExtension<*>) {
-        if(extensions.containsKey(functionExtension.name)) {
-            throw FunctionExtensionCollisionException(functionExtension.name)
+    override fun addExtension(
+        name: String,
+        extension: () -> JsonPathFunctionExtension<*>
+    ) {
+        extensions[name]?.let {
+            throw FunctionExtensionCollisionException(
+                "A function extension with the name \"$name\" has already been added: $it"
+            )
         }
-        extensions[functionExtension.name] = functionExtension
+        extensions[name] = extension()
     }
-    override fun getExtension(name: String): JsonPathFunctionExtension<*>? {
-        return extensions[name]
-    }
-    override fun export(): Map<String, JsonPathFunctionExtension<*>> {
-        return extensions.toMap()
-    }
-}
 
-class FunctionExtensionCollisionException(val functionName: String) : Exception(
-    "A function extension with the name \"$functionName\" has already been registered."
-)
+    override fun getExtension(name: String): JsonPathFunctionExtension<*>? = extensions[name]
+    override fun export(): Map<String, JsonPathFunctionExtension<*>> = extensions.toMap()
+}

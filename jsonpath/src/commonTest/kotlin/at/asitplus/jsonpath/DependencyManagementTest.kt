@@ -1,15 +1,15 @@
 package at.asitplus.jsonpath
 
 import at.asitplus.jsonpath.core.JsonPathCompiler
-import at.asitplus.jsonpath.core.JsonPathFilterExpressionValue
 import at.asitplus.jsonpath.core.JsonPathFunctionExtension
 import at.asitplus.jsonpath.core.JsonPathQuery
-import at.asitplus.jsonpath.core.JsonPathSelectorQuery
+import at.asitplus.jsonpath.core.NodeList
 import io.kotest.assertions.throwables.shouldNotThrowAny
 import io.kotest.core.spec.style.FreeSpec
 import io.kotest.matchers.collections.shouldBeIn
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.nulls.shouldNotBeNull
+import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonNull
 import kotlinx.serialization.json.buildJsonObject
 
@@ -17,23 +17,21 @@ import kotlinx.serialization.json.buildJsonObject
 class DependencyManagementTest : FreeSpec({
     // making sure that the dependencies are reset to their default for the next test
     val defaultCompilerBuilderBackup = JsonPathDependencyManager.compiler
-    var defaultTestFunctionExtensionRepository =
-        JsonPathDependencyManager.functionExtensionRepository
     val defaultFunctionExtensionRepositoryBackup =
-        JsonPathDependencyManager.functionExtensionRepository
+        JsonPathDependencyManager.functionExtensionRepository.export()
     beforeEach {
         // prepare a dummy repository to be modified by the tests
         JsonPathDependencyManager.functionExtensionRepository =
             JsonPathFunctionExtensionMapRepository(
-                JsonPathDependencyManager.functionExtensionRepository.export().toMutableMap()
+                defaultFunctionExtensionRepositoryBackup.toMutableMap()
             )
-        defaultTestFunctionExtensionRepository =
-            JsonPathDependencyManager.functionExtensionRepository
     }
     afterEach {
         JsonPathDependencyManager.apply {
             compiler = defaultCompilerBuilderBackup
-            functionExtensionRepository = defaultFunctionExtensionRepositoryBackup
+            functionExtensionRepository = JsonPathFunctionExtensionMapRepository(
+                defaultFunctionExtensionRepositoryBackup.toMutableMap()
+            )
         }
     }
 
@@ -41,25 +39,14 @@ class DependencyManagementTest : FreeSpec({
         "compiler that was built when the repository supported a function extension before it was removed should succeed compilation before and query afterwards" {
             val jsonPathStatement = "$[?foo()]"
 
-            JsonPathDependencyManager.functionExtensionRepository.apply {
-                addExtension(
-                    object : JsonPathFunctionExtension.LogicalTypeFunctionExtension(
-                        name = "foo",
-                        argumentTypes = listOf(),
-                    ) {
-                        override fun invoke(arguments: List<JsonPathFilterExpressionValue>): JsonPathFilterExpressionValue.LogicalTypeValue {
-                            return JsonPathFilterExpressionValue.LogicalTypeValue(true)
-                        }
+            val jsonPath = shouldNotThrowAny {
+                val testRepo = JsonPathDependencyManager.functionExtensionRepository.export().plus(
+                    "foo" to JsonPathFunctionExtension.LogicalTypeFunctionExtension {
+                        true
                     }
                 )
+                JsonPath(jsonPathStatement, functionExtensionRetriever = testRepo::get)
             }
-            val jsonPath = shouldNotThrowAny {
-                JsonPath(jsonPathStatement)
-            }
-
-            // this basically removes the foo-extension by changing to the default extension repository
-            JsonPathDependencyManager.functionExtensionRepository =
-                defaultTestFunctionExtensionRepository
 
             shouldNotThrowAny {
                 val jsonElement = buildJsonObject {
@@ -75,12 +62,20 @@ class DependencyManagementTest : FreeSpec({
 
     "changing the compiler also changes the compiler used in the next JsonPath" {
         val incorrectEmptyQueryCompiler = object : JsonPathCompiler {
-            override fun compile(jsonPath: String): JsonPathQuery {
-                return JsonPathSelectorQuery(listOf())
+            override fun compile(
+                jsonPath: String,
+                functionExtensionRetriever: (String) -> JsonPathFunctionExtension<*>?,
+            ): JsonPathQuery {
+                return object : JsonPathQuery {
+                    override fun invoke(currentNode: JsonElement, rootNode: JsonElement): NodeList {
+                        return listOf()
+                    }
+                }
             }
         }
         JsonPathDependencyManager.compiler = incorrectEmptyQueryCompiler
         val emptyQueryResult = JsonPath("$").query(buildJsonObject {})
-        emptyQueryResult.shouldHaveSize(0) // the compiler always yields an empty query
+        // this checks, whether the new compiler has indeed been used
+        emptyQueryResult.shouldHaveSize(0)
     }
 })
