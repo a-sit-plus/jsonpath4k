@@ -3,13 +3,13 @@ package at.asitplus.jsonpath
 import at.asitplus.jsonpath.core.JsonPathCompiler
 import at.asitplus.jsonpath.core.JsonPathFilterExpressionType
 import at.asitplus.jsonpath.core.JsonPathFunctionExtension
-import at.asitplus.jsonpath.core.functionExtensions.LengthFunctionExtension
-import at.asitplus.jsonpath.core.functionExtensions.MatchFunctionExtension
-import at.asitplus.jsonpath.core.functionExtensions.SearchFunctionExtension
-import at.asitplus.jsonpath.core.functionExtensions.ValueFunctionExtension
+import at.asitplus.jsonpath.core.functionExtensions.lengthFunctionExtension
+import at.asitplus.jsonpath.core.functionExtensions.matchFunctionExtension
+import at.asitplus.jsonpath.core.functionExtensions.searchFunctionExtension
+import at.asitplus.jsonpath.core.functionExtensions.valueFunctionExtension
+import at.asitplus.jsonpath.core.functionExtensions.countFunctionExtension
 import at.asitplus.jsonpath.implementation.AntlrJsonPathCompiler
 import at.asitplus.jsonpath.implementation.AntlrJsonPathCompilerErrorListener
-import at.asitplus.wallet.lib.data.jsonpath.functionExtensions.CountFunctionExtension
 import io.github.aakira.napier.Napier
 import org.antlr.v4.kotlinruntime.BaseErrorListener
 import org.antlr.v4.kotlinruntime.RecognitionException
@@ -22,72 +22,72 @@ object JsonPathDependencyManager {
     var functionExtensionRepository: JsonPathFunctionExtensionRepository =
         JsonPathFunctionExtensionMapRepository(
             listOf(
-                LengthFunctionExtension,
-                CountFunctionExtension,
-                MatchFunctionExtension,
-                SearchFunctionExtension,
-                ValueFunctionExtension,
-            ).associateBy {
-                it.name
-            }.toMutableMap()
+                lengthFunctionExtension,
+                countFunctionExtension,
+                matchFunctionExtension,
+                searchFunctionExtension,
+                valueFunctionExtension,
+            ).toMap().toMutableMap()
         )
 
-    /**
-     * Implementations should support the case where the function extensions change before executing the resulting query.
-     * Implementations should use the above mentioned function extension repository as a source of function extensions.
-     */
-    var compiler: JsonPathCompiler = run {
-        val napierAntlrJsonPathCompilerErrorListener =
-            object : AntlrJsonPathCompilerErrorListener, BaseErrorListener() {
-                override fun unknownFunctionExtension(functionExtensionName: String) {
-                    Napier.e("Unknown JSONPath function extension: \"$functionExtensionName\"")
-                }
+    var compiler: JsonPathCompiler = AntlrJsonPathCompiler(
+        errorListener = napierAntlrJsonPathCompilerErrorListener,
+    )
+}
 
-                override fun invalidFunctionExtensionForTestExpression(functionExtensionName: String) {
-                    Napier.e("Invalid JSONPath function extension return type for test expression: \"$functionExtensionName\"")
-                }
+private val napierAntlrJsonPathCompilerErrorListener by lazy {
+    object : AntlrJsonPathCompilerErrorListener, BaseErrorListener() {
+        override fun unknownFunctionExtension(functionExtensionName: String) {
+            Napier.e {
+                "Unknown JSONPath function extension: \"$functionExtensionName\""
+            }
+        }
 
-                override fun invalidFunctionExtensionForComparable(functionExtensionName: String) {
-                    Napier.e("Invalid JSONPath function extension return type for test expression: \"$functionExtensionName\"")
-                }
+        override fun invalidFunctionExtensionForTestExpression(functionExtensionName: String) {
+            Napier.e {
+                "Invalid JSONPath function extension return type for test expression: \"$functionExtensionName\""
+            }
+        }
 
-                override fun invalidArglistForFunctionExtension(
-                    functionExtension: JsonPathFunctionExtension<*>,
-                    coercedArgumentTypes: List<Pair<JsonPathFilterExpressionType?, String>>
-                ) {
-                    Napier.e(
-                        "Invalid arguments for function extension \"${functionExtension.name}\": Expected: <${
-                            functionExtension.argumentTypes.joinToString(
-                                ", "
-                            )
-                        }>, but received <${
-                            coercedArgumentTypes.map { it.first }.joinToString(", ")
-                        }>: <${coercedArgumentTypes.map { it.second }.joinToString(", ")}>"
+        override fun invalidFunctionExtensionForComparable(functionExtensionName: String) {
+            Napier.e {
+                "Invalid JSONPath function extension return type for comparable expression: \"$functionExtensionName\""
+            }
+        }
+
+        override fun invalidArglistForFunctionExtension(
+            functionExtensionName: String,
+            functionExtensionImplementation: JsonPathFunctionExtension<*>,
+            coercedArgumentTypes: List<Pair<JsonPathFilterExpressionType?, String>>
+        ) {
+            Napier.e {
+                "Invalid arguments for function extension \"$functionExtensionName\": Expected: <${
+                    functionExtensionImplementation.argumentTypes.joinToString(
+                        ", "
                     )
-                }
-
-                override fun invalidTestExpression(testContextString: String) {
-                    Napier.e("Invalid test expression: $testContextString")
-                }
-
-                override fun syntaxError(
-                    recognizer: Recognizer<*, *>,
-                    offendingSymbol: Any?,
-                    line: Int,
-                    charPositionInLine: Int,
-                    msg: String,
-                    e: RecognitionException?
-                ) {
-                    Napier.e("Syntax error $line:$charPositionInLine $msg")
-                }
+                }>, but received <${
+                    coercedArgumentTypes.map { it.first }.joinToString(", ")
+                }>: <${coercedArgumentTypes.map { it.second }.joinToString(", ")}>"
             }
+        }
 
-
-        AntlrJsonPathCompiler(
-            errorListener = napierAntlrJsonPathCompilerErrorListener,
-            functionExtensionRetriever = {
-                functionExtensionRepository.getExtension(it)
+        override fun invalidTestExpression(testContextString: String) {
+            Napier.e {
+                "Invalid test expression: $testContextString"
             }
-        )
+        }
+
+        override fun syntaxError(
+            recognizer: Recognizer<*, *>,
+            offendingSymbol: Any?,
+            line: Int,
+            charPositionInLine: Int,
+            msg: String,
+            e: RecognitionException?
+        ) {
+            Napier.e {
+                "Syntax error $line:$charPositionInLine $msg"
+            }
+        }
     }
 }

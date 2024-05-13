@@ -1,58 +1,51 @@
 package at.asitplus.jsonpath.core
 
+import kotlinx.serialization.json.JsonElement
+
 /**
  * specification: https://datatracker.ietf.org/doc/rfc9535/
  * date: 2024-02
  * section: 2.4.  Function Extensions
  */
 sealed class JsonPathFunctionExtension<ReturnType : JsonPathFilterExpressionValue>(
-    val name: String,
-    val argumentTypes: List<JsonPathFilterExpressionType>,
+    vararg val argumentTypes: JsonPathFilterExpressionType,
 ) {
-    abstract fun invoke(arguments: List<JsonPathFilterExpressionValue>): ReturnType
-    fun validateArgumentTypes(arguments: List<JsonPathFilterExpressionValue>) {
-        val isNotArgumentsMatching =
-            (arguments.size != argumentTypes.size) or arguments.zip(argumentTypes).any {
-                it.first.expressionType != it.second
-            }
-        if (isNotArgumentsMatching) {
-            throw InvalidFunctionExtensionArgumentsException(
-                functionExtension = this,
-                actualArguments = arguments
-            )
+    abstract fun evaluate(arguments: List<JsonPathFilterExpressionValue>): ReturnType
+
+    class ValueTypeFunctionExtension(
+        vararg argumentTypes: JsonPathFilterExpressionType,
+        private val evaluator: (arguments: List<JsonPathFilterExpressionValue>) -> JsonElement?
+    ) : JsonPathFunctionExtension<JsonPathFilterExpressionValue.ValueTypeValue>(
+        argumentTypes = argumentTypes,
+    ) {
+        override fun evaluate(arguments: List<JsonPathFilterExpressionValue>): JsonPathFilterExpressionValue.ValueTypeValue {
+            return evaluator(arguments)?.let {
+                JsonPathFilterExpressionValue.ValueTypeValue.JsonValue(it)
+            } ?: JsonPathFilterExpressionValue.ValueTypeValue.Nothing
         }
     }
 
-    abstract class ValueTypeFunctionExtension(
-        name: String,
-        argumentTypes: List<JsonPathFilterExpressionType>,
-    ) : JsonPathFunctionExtension<JsonPathFilterExpressionValue.ValueTypeValue>(
-        name = name,
-        argumentTypes = argumentTypes,
-    )
-
-    abstract class LogicalTypeFunctionExtension(
-        name: String,
-        argumentTypes: List<JsonPathFilterExpressionType>,
+    class LogicalTypeFunctionExtension(
+        vararg argumentTypes: JsonPathFilterExpressionType,
+        private val evaluator: (arguments: List<JsonPathFilterExpressionValue>) -> Boolean
     ) : JsonPathFunctionExtension<JsonPathFilterExpressionValue.LogicalTypeValue>(
-        name = name,
         argumentTypes = argumentTypes,
-    )
+    ) {
+        override fun evaluate(arguments: List<JsonPathFilterExpressionValue>): JsonPathFilterExpressionValue.LogicalTypeValue {
+            return JsonPathFilterExpressionValue.LogicalTypeValue(evaluator(arguments))
+        }
+    }
 
-    abstract class NodesTypeFunctionExtension(
-        name: String,
-        argumentTypes: List<JsonPathFilterExpressionType>,
+    class NodesTypeFunctionExtension(
+        vararg argumentTypes: JsonPathFilterExpressionType,
+        private val evaluator: (arguments: List<JsonPathFilterExpressionValue>) -> List<JsonElement>
     ) : JsonPathFunctionExtension<JsonPathFilterExpressionValue.NodesTypeValue.FunctionExtensionResult>(
-        name = name,
         argumentTypes = argumentTypes,
-    )
+    ) {
+        override fun evaluate(arguments: List<JsonPathFilterExpressionValue>): JsonPathFilterExpressionValue.NodesTypeValue.FunctionExtensionResult {
+            return JsonPathFilterExpressionValue.NodesTypeValue.FunctionExtensionResult(
+                evaluator(arguments)
+            )
+        }
+    }
 }
-
-class InvalidFunctionExtensionArgumentsException(
-    val functionExtension: JsonPathFunctionExtension<*>,
-    val actualArguments: List<JsonPathFilterExpressionValue>
-) : Exception(
-    "Invalid arguments for function extension \"${functionExtension.name}\": Expected: <${
-        functionExtension.argumentTypes.joinToString(", ")
-    }>, but received <${actualArguments.map { it.expressionType }.joinToString(", ")}>: <${actualArguments.joinToString(", ")}>"
-)
