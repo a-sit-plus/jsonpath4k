@@ -38,15 +38,21 @@ object JsonPathDependencyManager {
 private val napierAntlrJsonPathCompilerErrorListener by lazy {
     object : AntlrJsonPathCompilerErrorListener, BaseErrorListener() {
         override fun unknownFunctionExtension(functionExtensionName: String) {
-            Napier.e("Unknown JSONPath function extension: \"$functionExtensionName\"")
+            Napier.e {
+                "Unknown JSONPath function extension: \"$functionExtensionName\""
+            }
         }
 
         override fun invalidFunctionExtensionForTestExpression(functionExtensionName: String) {
-            Napier.e("Invalid JSONPath function extension return type for test expression: \"$functionExtensionName\"")
+            Napier.e {
+                "Invalid JSONPath function extension return type for test expression: \"$functionExtensionName\""
+            }
         }
 
         override fun invalidFunctionExtensionForComparable(functionExtensionName: String) {
-            Napier.e("Invalid JSONPath function extension return type for comparable expression: \"$functionExtensionName\"")
+            Napier.e {
+                "Invalid JSONPath function extension return type for comparable expression: \"$functionExtensionName\""
+            }
         }
 
         override fun invalidArglistForFunctionExtension(
@@ -54,7 +60,7 @@ private val napierAntlrJsonPathCompilerErrorListener by lazy {
             functionExtensionImplementation: JsonPathFunctionExtension<*>,
             coercedArgumentTypes: List<Pair<JsonPathFilterExpressionType?, String>>
         ) {
-            Napier.e(
+            Napier.e {
                 "Invalid arguments for function extension \"$functionExtensionName\": Expected: <${
                     functionExtensionImplementation.argumentTypes.joinToString(
                         ", "
@@ -62,11 +68,13 @@ private val napierAntlrJsonPathCompilerErrorListener by lazy {
                 }>, but received <${
                     coercedArgumentTypes.map { it.first }.joinToString(", ")
                 }>: <${coercedArgumentTypes.map { it.second }.joinToString(", ")}>"
-            )
+            }
         }
 
         override fun invalidTestExpression(testContextString: String) {
-            Napier.e("Invalid test expression: $testContextString")
+            Napier.e {
+                "Invalid test expression: $testContextString"
+            }
         }
 
         override fun syntaxError(
@@ -77,7 +85,9 @@ private val napierAntlrJsonPathCompilerErrorListener by lazy {
             msg: String,
             e: RecognitionException?
         ) {
-            Napier.e("Syntax error $line:$charPositionInLine $msg")
+            Napier.e {
+                "Syntax error $line:$charPositionInLine $msg"
+            }
         }
     }
 }
