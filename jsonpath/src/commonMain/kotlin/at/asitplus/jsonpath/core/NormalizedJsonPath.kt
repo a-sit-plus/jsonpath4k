@@ -1,10 +1,13 @@
 package at.asitplus.jsonpath.core
 
+import kotlinx.serialization.Serializable
+
 /**
  * specification: https://datatracker.ietf.org/doc/rfc9535/
  * date: 2024-02
  * section: 2.7.  Normalized Paths
  */
+@Serializable
 class NormalizedJsonPath(
     val segments: List<NormalizedJsonPathSegment> = listOf(),
 ) {
