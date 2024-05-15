@@ -1,5 +1,8 @@
 
-[UNRELEASED] Release 2.0.0:
+[UNRELEASED] Release 2.1.0:
+- Add: Serialization for `NormalizedJsonPathSegment`, `NormalizedJsonPath` and `NodeListEntry`
+
+Release 2.0.0:
 - BREAKING CHANGE to `JsonPathFunctionExtension`: breaks specification syntax for function extensions, but provides simpler definition syntax.
   - The function extensions no longer hold a name. A name must only be provided when adding a function extension to a repository
   - The function extension classes are no longer inheritable. Instances must be created from constructors.
