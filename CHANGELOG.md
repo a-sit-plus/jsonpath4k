@@ -1,3 +1,5 @@
+[UNRELEASED] Release 2.3.0:
+
 Release 2.2.0:
 - Rebranding to JsonPath4K
   - change Maven coordinates to `at.asitplus:jsonpath4k`
