@@ -39,21 +39,21 @@ internal class AntlrJsonPathSemanticAnalyzerVisitor(
     }
 
     override fun aggregateResult(
-        aggregate: AbstractSyntaxTree<out JsonPathExpression>?,
+        aggregate: AbstractSyntaxTree<out JsonPathExpression>,
         nextResult: AbstractSyntaxTree<out JsonPathExpression>
     ): AbstractSyntaxTree<out JsonPathExpression> {
-        val children = (aggregate?.children ?: listOf()) + nextResult
+        val children = (aggregate.children) + nextResult
         return AbstractSyntaxTree(
             context = null,
             value = if (children.any { it.value is JsonPathExpression.ErrorType }) {
                 JsonPathExpression.ErrorType
             } else {
-                when (aggregate?.value) {
+                when (aggregate.value) {
                     is JsonPathExpression.ErrorType -> {
                         JsonPathExpression.ErrorType
                     }
 
-                    null, is JsonPathExpression.NoType -> {
+                    is JsonPathExpression.NoType -> {
                         nextResult.value
                     }
 
@@ -61,7 +61,7 @@ internal class AntlrJsonPathSemanticAnalyzerVisitor(
                         // don't override a value with no value
                         aggregate.value
                     } else {
-                        // this is not generalizable anyway and needs to be handeled for each node explicitly
+                        // this is not generalizable anyway and needs to be handled for each node explicitly
                         nextResult.value
                     }
                 }

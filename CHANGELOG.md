@@ -1,3 +1,13 @@
+Release 2.2.0:
+- Rebranding to JsonPath4K
+  - change Maven coordinates to `at.asitplus:jsonpath4k`
+  - publish relocation POM for Version 2.0.0
+- Dependency Updates
+  - Update to Kotlin 2.0.0
+  - Update to Kotest 5.9.1
+  - Update to kotlinx-serialization 1.7.1
+  - Gradle 8.9
+  - Antlr-Kotlin 1.0.0-RC4
 
 Release 2.1.0:
 - Add: Serialization for `NormalizedJsonPathSegment`, `NormalizedJsonPath` and `NodeListEntry`
