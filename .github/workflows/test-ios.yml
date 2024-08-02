@@ -20,6 +20,6 @@ jobs:
         uses: dorny/test-reporter@v1
         if: success() || failure()
         with:
-          name: jsonpath Tests
-          path: jsonpath/build/test-results/**/TEST*.xml
+          name: jsonpath4k Tests
+          path: jsonpath4k/build/test-results/**/TEST*.xml
           reporter: java-junit

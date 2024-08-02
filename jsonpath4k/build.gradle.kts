@@ -1,13 +1,10 @@
 import com.strumenta.antlrkotlin.gradle.AntlrKotlinTask
 import org.jetbrains.dokka.gradle.DokkaTask
 import org.jetbrains.dokka.gradle.DokkaTaskPartial
-import org.jetbrains.kotlin.gradle.dsl.KotlinCompile
 import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
 import org.jetbrains.kotlin.gradle.dsl.kotlinExtension
-import org.jetbrains.kotlin.gradle.plugin.KotlinSourceSet
 import org.jetbrains.kotlin.gradle.plugin.mpp.BitcodeEmbeddingMode
 import org.jetbrains.kotlin.gradle.plugin.mpp.KotlinNativeTarget
-import org.jetbrains.kotlin.gradle.plugin.mpp.MetadataDependencyTransformationTask
 import org.jetbrains.kotlin.gradle.plugin.mpp.apple.XCFrameworkConfig
 
 plugins {
@@ -28,6 +25,28 @@ version = artifactVersion
 repositories {
     mavenCentral()
 }
+
+
+val generateKotlinGrammarSource = tasks.register<AntlrKotlinTask>("generateKotlinGrammarSource") {
+    dependsOn("cleanGenerateKotlinGrammarSource")
+
+    // compiling any *.g4 files within the project
+    source = fileTree(layout.projectDirectory) {
+        include("**/*.g4")
+    }
+
+    // We want the generated source files to have this package name
+    packageName = "at.asitplus.jsonpath.generated"
+
+    // We want visitors alongside listeners.
+    // The Kotlin target language is implicit, as is the file encoding (UTF-8)
+    arguments = listOf("-visitor")
+
+    // Generated files are output inside build/generatedAntlr/{package-name}
+    val outDir = "generatedAntlr/${packageName!!.replace(".", "/")}"
+    outputDirectory = layout.buildDirectory.dir(outDir).get().asFile
+}
+
 
 
 kotlin {
@@ -65,52 +84,21 @@ kotlin {
     }
 }
 
-
-//work around https://youtrack.jetbrains.com/issue/KT-65315
-kotlin.sourceSets.apply {
-    kotlin.runCatching {
-        getByName("commonMain") {
-            logger.lifecycle("")
-            logger.lifecycle("> Working around KT-65315 by moving resources to platform targets")
-
-            val configuredRsrcs = resources.srcDirs
-
-            this@apply.filterNot {
-                it.name == "commonMain" || it.name.endsWith(
-                    "Test"
-                )
-            }.forEach {
-                logger.info(
-                    "   * SourceSet ${it.name} now now also contains ${
-                        configuredRsrcs.joinToString {
-                            it.canonicalPath.substring(project.projectDir.canonicalPath.length)
-                        }
-                    }"
-                )
-                it.resources.srcDirs(*configuredRsrcs.toTypedArray())
-            }
-            logger.info("  Clearing commonMain srcSet")
-            resources.setSrcDirs(emptyList<File>())
-        }
-    }
-}
-
-
-exportIosFramework("JsonPath")
+exportIosFramework("JsonPath4K")
 
 val javadocJar = setupDokka(
-    baseUrl = "https://github.com/a-sit-plus/jsonpath/tree/main/",
+    baseUrl = "https://github.com/a-sit-plus/jsonpath4k/tree/main/",
     multiModuleDoc = false
 )
 
 publishing {
     publications {
         withType<MavenPublication> {
-            artifact(javadocJar)
+            if (this.name != "relocation") artifact(javadocJar)
             pom {
-                name.set("JsonPath")
+                name.set("JsonPath4K")
                 description.set("Kotlin Multiplatform library for using Json Paths as specified in [RFC9535](https://datatracker.ietf.org/doc/rfc9535/)")
-                url.set("https://github.com/a-sit-plus/jsonpath")
+                url.set("https://github.com/a-sit-plus/jsonpath4k")
                 licenses {
                     license {
                         name.set("The Apache License, Version 2.0")
@@ -119,7 +107,7 @@ publishing {
                 }
                 developers {
                     developer {
-                        id.set("acrusage") //may or may not work when publishing
+                        id.set("acrusage")
                         name.set("Stefan Kreiner")
                         email.set("stefan.kreiner@iaik.tugraz.at")
                     }
@@ -135,13 +123,33 @@ publishing {
                     }
                 }
                 scm {
-                    connection.set("scm:git:git@github.com:a-sit-plus/jsonpath.git")
-                    developerConnection.set("scm:git:git@github.com:a-sit-plus/jsonpath.git")
-                    url.set("https://github.com/a-sit-plus/jsonpath")
+                    connection.set("scm:git:git@github.com:a-sit-plus/jsonpath4k.git")
+                    developerConnection.set("scm:git:git@github.com:a-sit-plus/jsonpath4k.git")
+                    url.set("https://github.com/a-sit-plus/jsonpath4k")
+                }
+            }
+        }
+
+        //REMOVE ME AFTER REBRANDED ARTIFACT HAS BEEN PUBLISHED
+        create<MavenPublication>("relocation") {
+            pom {
+                // Old artifact coordinates
+                groupId = "at.asitplus"
+                artifactId = "jsonpath"
+                version = artifactVersion
+
+                distributionManagement {
+                    relocation {
+                        // New artifact coordinates
+                        artifactId = "jsonpath4k"
+                        version = artifactVersion
+                        message = "artifactId has been changed"
+                    }
                 }
             }
         }
     }
+
     repositories {
         mavenLocal {
             signing.isRequired = false
@@ -160,27 +168,6 @@ signing {
     val signingPassword: String? by project
     useInMemoryPgpKeys(signingKeyId, signingKey, signingPassword)
     sign(publishing.publications)
-}
-
-val generateKotlinGrammarSource = tasks.register<AntlrKotlinTask>("generateKotlinGrammarSource") {
-    dependsOn("cleanGenerateKotlinGrammarSource")
-
-    // compiling any *.g4 files within the project
-    source = fileTree(layout.projectDirectory) {
-        include("**/*.g4")
-    }
-
-    // We want the generated source files to have this package name
-    val pkgName = "at.asitplus.parser.generated"
-    packageName = pkgName
-
-    // We want visitors alongside listeners.
-    // The Kotlin target language is implicit, as is the file encoding (UTF-8)
-    arguments = listOf("-visitor")
-
-    // Generated files are outputted inside build/generatedAntlr/{package-name}
-    val outDir = "generatedAntlr/${pkgName.replace(".", "/")}"
-    outputDirectory = layout.buildDirectory.dir(outDir).get().asFile
 }
 
 

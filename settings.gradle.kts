@@ -1,4 +1,4 @@
-rootProject.name = "JsonPath"
+rootProject.name = "JsonPath4K"
 
 pluginManagement {
     repositories {
@@ -9,4 +9,4 @@ pluginManagement {
     }
 }
 
-include(":jsonpath")
+include(":jsonpath4k")

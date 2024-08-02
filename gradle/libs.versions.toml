@@ -1,8 +1,8 @@
 [versions]
-antlr-kotlin = "1.0.0-RC3"
-kotest = "5.8.1"
-jetbrains-kotlin = "1.9.23"
-jetbrains-kotlinx-serialization = "1.6.3"
+antlr-kotlin = "1.0.0-RC4"
+kotest = "5.9.1"
+jetbrains-kotlin = "2.0.0"
+jetbrains-kotlinx-serialization = "1.7.1"
 jetbrains-dokka = "1.9.20"
 napier = "2.7.1"
 gradle-nexus-publish = "2.0.0"

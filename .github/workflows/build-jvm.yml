@@ -14,9 +14,9 @@ jobs:
           java-version: '17'
       - name: Build jar
         run: ./gradlew assemble
-      - name: Upload jar jsonpath
+      - name: Upload jar jsonpath4k
         uses: actions/upload-artifact@v3
         with:
-          name: jsonpath
+          name: jsonpath4k
           path: |
-            jsonpath/build/libs/*jar
+            jsonpath4k/build/libs/*jar

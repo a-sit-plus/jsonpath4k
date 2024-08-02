@@ -15,16 +15,16 @@ jobs:
       - name: Build klibs
         run: ./gradlew iosArm64MainKlibrary iosX64MainKlibrary
       - name: Build XCFrameworks
-        run: ./gradlew assembleJsonPathXCFramework
-      - name: Upload debug XCFramework jsonpath
+        run: ./gradlew assembleJsonPath4KXCFramework
+      - name: Upload debug XCFramework jsonpath4k
         uses: actions/upload-artifact@v3
         with:
-          name: JsonPath-debug.xcframework
+          name: JsonPath4K-debug.xcframework
           path: |
-            jsonpath/build/XCFrameworks/debug/
-      - name: Upload release XCFramework jsonpath
+            jsonpath4k/build/XCFrameworks/debug/
+      - name: Upload release XCFramework jsonpath4k
         uses: actions/upload-artifact@v3
         with:
-          name: JsonPath-release.xcframework
+          name: JsonPath4K-release.xcframework
           path: |
-            jsonpath/build/XCFrameworks/release/
+            jsonpath4k/build/XCFrameworks/release/
