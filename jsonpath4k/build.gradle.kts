@@ -129,25 +129,6 @@ publishing {
                 }
             }
         }
-
-        //REMOVE ME AFTER REBRANDED ARTIFACT HAS BEEN PUBLISHED
-        create<MavenPublication>("relocation") {
-            pom {
-                // Old artifact coordinates
-                groupId = "at.asitplus"
-                artifactId = "jsonpath"
-                version = artifactVersion
-
-                distributionManagement {
-                    relocation {
-                        // New artifact coordinates
-                        artifactId = "jsonpath4k"
-                        version = artifactVersion
-                        message = "artifactId has been changed"
-                    }
-                }
-            }
-        }
     }
 
     repositories {
