@@ -36,15 +36,14 @@ val generateKotlinGrammarSource = tasks.register<AntlrKotlinTask>("generateKotli
     }
 
     // We want the generated source files to have this package name
-    val pkgName = "at.asitplus.jsonpath.generated"
-    packageName = pkgName
+    packageName = "at.asitplus.jsonpath.generated"
 
     // We want visitors alongside listeners.
     // The Kotlin target language is implicit, as is the file encoding (UTF-8)
     arguments = listOf("-visitor")
 
     // Generated files are output inside build/generatedAntlr/{package-name}
-    val outDir = "generatedAntlr/${pkgName.replace(".", "/")}"
+    val outDir = "generatedAntlr/${packageName!!.replace(".", "/")}"
     outputDirectory = layout.buildDirectory.dir(outDir).get().asFile
 }
 
@@ -95,7 +94,7 @@ val javadocJar = setupDokka(
 publishing {
     publications {
         withType<MavenPublication> {
-            artifact(javadocJar)
+            if (this.name != "relocation") artifact(javadocJar)
             pom {
                 name.set("JsonPath4K")
                 description.set("Kotlin Multiplatform library for using Json Paths as specified in [RFC9535](https://datatracker.ietf.org/doc/rfc9535/)")
@@ -137,13 +136,13 @@ publishing {
                 // Old artifact coordinates
                 groupId = "at.asitplus"
                 artifactId = "jsonpath"
-                version = "$version"
+                version = artifactVersion
 
                 distributionManagement {
                     relocation {
                         // New artifact coordinates
                         artifactId = "jsonpath4k"
-                        version = "$version"
+                        version = artifactVersion
                         message = "artifactId has been changed"
                     }
                 }
