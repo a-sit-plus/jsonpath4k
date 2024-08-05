@@ -1,4 +1,5 @@
-[UNRELEASED] Release 2.3.0:
+# UNRELEASED Release 2.3.0:
+  * add tests
 
 Release 2.2.0:
 - Rebranding to JsonPath4K

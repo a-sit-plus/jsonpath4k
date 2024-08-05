@@ -1165,4 +1165,84 @@ class JsonPathUnitTest : FreeSpec({
             }
         }
     }
+
+    "Examples from issues" - {
+        "https://github.com/a-sit-plus/jsonpath4k/issues/20" - {
+            val jsonElement = Json.decodeFromString<JsonElement>(
+                "{\n" +
+                        " \"id\": \"ic2:te\",\n" +
+                        " \"meta\": 1,\n" +
+                        " \"pos\": {\n" +
+                        "  \"x\": 23,\n" +
+                        "  \"y\": 64,\n" +
+                        "  \"z\": 179\n" +
+                        " },\n" +
+                        " \"dimension\": 0,\n" +
+                        " \"tag\": {\n" +
+                        "  \"components\": {\n" +
+                        "   \"energy\": {\n" +
+                        "    \"storage\": 0.0\n" +
+                        "   }\n" +
+                        "  },\n" +
+                        "  \"fuel\": 0,\n" +
+                        "  \"InvSlots\": {\n" +
+                        "   \"charge\": {\n" +
+                        "    \"Contents\": []\n" +
+                        "   },\n" +
+                        "   \"fuel\": {\n" +
+                        "    \"Contents\": []\n" +
+                        "   }\n" +
+                        "  },\n" +
+                        "  \"x\": 23,\n" +
+                        "  \"y\": 64,\n" +
+                        "  \"facing\": 2,\n" +
+                        "  \"active\": 0,\n" +
+                        "  \"z\": 179,\n" +
+                        "  \"id\": \"ic2:generator\",\n" +
+                        "  \"totalFuel\": 0\n" +
+                        " }\n" +
+                        "}"
+            )
+
+            "working" - {
+                "$[?$.tag.id == 'ic2:geo_generator' || $.tag.id == 'ic2:generator']" {
+                    val nodeList = JsonPath(this.testScope.testCase.name.originalName)
+                        .query(jsonElement).map { it.value }
+                    nodeList shouldHaveSize 5
+                }
+
+                "\$[?(\$.tag.id == 'ic2:geo_generator' || \$.tag.id == 'ic2:generator')]" {
+                    val nodeList = JsonPath(this.testScope.testCase.name.originalName)
+                        .query(jsonElement).map { it.value }
+                    nodeList shouldHaveSize 5
+                }
+
+                "\$.tag[?(\$.tag.id == 'ic2:geo_generator' || \$.tag.id == 'ic2:generator')]" {
+                    val nodeList = JsonPath(this.testScope.testCase.name.originalName)
+                        .query(jsonElement).map { it.value }
+                    nodeList shouldHaveSize 10
+                }
+            }
+
+            "not working" - {
+                "\$.tag.id[?(\$.tag.id == 'ic2:geo_generator' || \$.tag.id == 'ic2:generator')]" {
+                    val nodeList = JsonPath(this.testScope.testCase.name.originalName)
+                        .query(jsonElement).map { it.value }
+                    nodeList shouldHaveSize 0
+                }
+
+                "\$[?(@.tag.id == 'ic2:geo_generator' || @.tag.id == 'ic2:generator')]" {
+                    val nodeList = JsonPath(this.testScope.testCase.name.originalName)
+                        .query(jsonElement).map { it.value }
+                    nodeList shouldHaveSize 0
+                }
+
+                "\$.tag[?(@.id == 'ic2:geo_generator' || @.id == 'ic2:generator')]" {
+                    val nodeList = JsonPath(this.testScope.testCase.name.originalName)
+                        .query(jsonElement).map { it.value }
+                    nodeList shouldHaveSize 0
+                }
+            }
+        }
+    }
 })
