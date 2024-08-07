@@ -55,7 +55,7 @@ kotlin {
     iosSimulatorArm64()
     iosX64()
 
-    jvmToolchain(17)
+    jvmToolchain(8)
 
     sourceSets {
         commonMain {
@@ -63,7 +63,7 @@ kotlin {
             dependencies {
                 implementation(libs.antlr.kotlin)
                 implementation(libs.jetbrains.kotlinx.serialization)
-                implementation(libs.napier)
+                implementation(libs.koltin.logging)
             }
         }
         commonTest {
@@ -86,7 +86,6 @@ kotlin {
     }
 }
 
-exportIosFramework("JsonPath4K")
 
 val javadocJar = setupDokka(
     baseUrl = "https://github.com/a-sit-plus/jsonpath4k/tree/main/",
@@ -98,7 +97,7 @@ publishing {
         withType<MavenPublication> {
             if (this.name != "relocation") artifact(javadocJar)
             pom {
-                name.set("JsonPath4K")
+                name.set("JsonPath4K - JDK8 compatible")
                 description.set("Kotlin Multiplatform library for using Json Paths as specified in [RFC9535](https://datatracker.ietf.org/doc/rfc9535/)")
                 url.set("https://github.com/a-sit-plus/jsonpath4k")
                 licenses {
@@ -153,41 +152,6 @@ signing {
     sign(publishing.publications)
 }
 
-
-/**
- * taken from vclib conventions plugin at https://github.com/a-sit-plus/gradle-conventions-plugin
- */
-fun Project.exportIosFramework(
-    name: String,
-    vararg additionalExports: Any
-) = exportIosFramework(name, bitcodeEmbeddingMode = BitcodeEmbeddingMode.BITCODE, additionalExports = additionalExports)
-
-fun Project.exportIosFramework(
-    name: String,
-    bitcodeEmbeddingMode: BitcodeEmbeddingMode,
-    vararg additionalExports: Any
-) {
-    val iosTargets = kotlinExtension.let {
-        if (it is KotlinMultiplatformExtension) {
-            it.targets.filterIsInstance<KotlinNativeTarget>().filter { it.name.startsWith("ios") }
-        } else throw StopExecutionException("No iOS Targets found! Declare them explicitly before calling exportIosFramework!")
-    }
-
-    extensions.getByType<KotlinMultiplatformExtension>().apply {
-        XCFrameworkConfig(project, name).also { xcf ->
-            logger.lifecycle("  \u001B[1mXCFrameworks will be exported for the following iOS targets: ${iosTargets.joinToString { it.name }}\u001B[0m")
-            iosTargets.forEach {
-                it.binaries.framework {
-                    baseName = name
-                    embedBitcode(bitcodeEmbeddingMode)
-                    additionalExports.forEach { export(it) }
-                    xcf.add(this)
-                }
-            }
-        }
-    }
-}
-
 fun Project.setupDokka(
     outputDir: String = rootProject.layout.buildDirectory.dir("dokka").get().asFile.canonicalPath,
     baseUrl: String,
@@ -203,7 +167,7 @@ fun Project.setupDokka(
     sourceLinktToConfigure.dokkaSourceSets.configureEach {
         sourceLink {
             localDirectory.set(file("src/$name/kotlin"))
-            remoteUrl.set(uri("$baseUrl/${project.rootProject.name}/src/$name/kotlin").toURL())
+            remoteUrl.set(uri("$baseUrl/${project.rootProject.name}/src/$name/kotlin").toURL()) //TODO check if this works
             this@sourceLink.remoteLineSuffix.set(remoteLineSuffix)
         }
     }

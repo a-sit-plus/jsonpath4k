@@ -10,3 +10,4 @@ pluginManagement {
 }
 
 include(":jsonpath4k")
+include(":jsonpath4k-jdk8")
