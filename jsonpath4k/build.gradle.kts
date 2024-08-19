@@ -22,11 +22,25 @@ val artifactVersion: String by extra
 group = "at.asitplus"
 version = artifactVersion
 
+
 repositories {
     mavenCentral()
 }
 
+//HACK THE PLANET (i.e. regenerate every time)
+val SKIP_GEN = "GRDLE_SKIP_ANTLR_GENT_JSONPATH"
+if (System.getenv(SKIP_GEN) != "true") {
+    println("> Manually invoking generateKotlinGrammarSource ")
+    Runtime.getRuntime().exec(
+        arrayOf("./gradlew", "generateKotlinGrammarSource"),
+        arrayOf("$SKIP_GEN=true")
+    ).also { proc ->
+        proc.errorStream.bufferedReader().forEachLine { System.err.println(it) }
+        proc.inputStream.bufferedReader().forEachLine { println(it) }
+    }.waitFor()
+}
 
+val SRCDIR_ANTRL="src/gen/kotlin"
 val generateKotlinGrammarSource = tasks.register<AntlrKotlinTask>("generateKotlinGrammarSource") {
     dependsOn("cleanGenerateKotlinGrammarSource")
 
@@ -43,8 +57,9 @@ val generateKotlinGrammarSource = tasks.register<AntlrKotlinTask>("generateKotli
     arguments = listOf("-visitor")
 
     // Generated files are output inside build/generatedAntlr/{package-name}
-    val outDir = "generatedAntlr/${packageName!!.replace(".", "/")}"
-    outputDirectory = layout.buildDirectory.dir(outDir).get().asFile
+    val outDir = "$SRCDIR_ANTRL/${packageName!!.replace(".", "/")}"
+    outputDirectory = layout.projectDirectory.dir(outDir).asFile
+
 }
 
 
@@ -58,7 +73,8 @@ kotlin {
     jvmToolchain(17)
 
     sourceSets {
-        commonMain {
+        commonMain{
+            kotlin.srcDir(SRCDIR_ANTRL)
             dependencies {
                 implementation(libs.antlr.kotlin)
                 implementation(libs.jetbrains.kotlinx.serialization)
