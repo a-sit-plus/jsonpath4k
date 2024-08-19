@@ -1,4 +1,5 @@
 import com.strumenta.antlrkotlin.gradle.AntlrKotlinTask
+import org.apache.tools.ant.taskdefs.condition.Os
 import org.jetbrains.dokka.gradle.DokkaTask
 import org.jetbrains.dokka.gradle.DokkaTaskPartial
 import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
@@ -27,12 +28,16 @@ repositories {
     mavenCentral()
 }
 
+
+val SRCDIR_ANTRL = "src/gen/kotlin"
+
 //HACK THE PLANET (i.e. regenerate every time)
 val SKIP_GEN = "GRDLE_SKIP_ANTLR_GENT_JSONPATH"
 if (System.getenv(SKIP_GEN) != "true") {
+    layout.projectDirectory.dir(SRCDIR_ANTRL).asFile.deleteRecursively()
     println("> Manually invoking generateKotlinGrammarSource ")
     Runtime.getRuntime().exec(
-        arrayOf("./gradlew", "generateKotlinGrammarSource"),
+        arrayOf(if (!Os.isFamily(Os.FAMILY_WINDOWS)) "./gradlew" else "./gradlew.bat", "generateKotlinGrammarSource"),
         arrayOf("$SKIP_GEN=true")
     ).also { proc ->
         proc.errorStream.bufferedReader().forEachLine { System.err.println(it) }
@@ -40,7 +45,6 @@ if (System.getenv(SKIP_GEN) != "true") {
     }.waitFor()
 }
 
-val SRCDIR_ANTRL="src/gen/kotlin"
 val generateKotlinGrammarSource = tasks.register<AntlrKotlinTask>("generateKotlinGrammarSource") {
     dependsOn("cleanGenerateKotlinGrammarSource")
 
