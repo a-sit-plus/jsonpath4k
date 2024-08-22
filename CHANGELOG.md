@@ -1,5 +1,6 @@
 # UNRELEASED Release 2.3.0:
   * add tests
+  * auto-generate Kotlin sources from Antlr-files on every Gradle invocation
 
 Release 2.2.0:
 - Rebranding to JsonPath4K

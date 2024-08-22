@@ -1,3 +1,4 @@
+jsonpath4k/src/gen
 .kotlin
 *.iml
 .gradle
