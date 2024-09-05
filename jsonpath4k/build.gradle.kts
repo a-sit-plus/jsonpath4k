@@ -1,4 +1,5 @@
 import com.strumenta.antlrkotlin.gradle.AntlrKotlinTask
+import org.apache.tools.ant.taskdefs.condition.Os
 import org.jetbrains.dokka.gradle.DokkaTask
 import org.jetbrains.dokka.gradle.DokkaTaskPartial
 import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
@@ -22,10 +23,27 @@ val artifactVersion: String by extra
 group = "at.asitplus"
 version = artifactVersion
 
+
 repositories {
     mavenCentral()
 }
 
+
+val SRCDIR_ANTRL = "src/gen/kotlin"
+
+//HACK THE PLANET (i.e. regenerate every time)
+val SKIP_GEN = "GRADLE_SKIP_ANTLR_GENT_JSONPATH"
+if (System.getenv(SKIP_GEN) != "true") {
+    layout.projectDirectory.dir(SRCDIR_ANTRL).asFile.deleteRecursively()
+    println("> Manually invoking generateKotlinGrammarSource ")
+    Runtime.getRuntime().exec(
+        arrayOf(if (!Os.isFamily(Os.FAMILY_WINDOWS)) "./gradlew" else "./gradlew.bat", "generateKotlinGrammarSource"),
+        arrayOf("$SKIP_GEN=true")
+    ).also { proc ->
+        proc.errorStream.bufferedReader().forEachLine { System.err.println(it) }
+        proc.inputStream.bufferedReader().forEachLine { println(it) }
+    }.waitFor()
+}
 
 val generateKotlinGrammarSource = tasks.register<AntlrKotlinTask>("generateKotlinGrammarSource") {
     dependsOn("cleanGenerateKotlinGrammarSource")
@@ -42,9 +60,10 @@ val generateKotlinGrammarSource = tasks.register<AntlrKotlinTask>("generateKotli
     // The Kotlin target language is implicit, as is the file encoding (UTF-8)
     arguments = listOf("-visitor")
 
-    // Generated files are output inside build/generatedAntlr/{package-name}
-    val outDir = "generatedAntlr/${packageName!!.replace(".", "/")}"
-    outputDirectory = layout.buildDirectory.dir(outDir).get().asFile
+    // Generated files are output inside generatedAntlr/{package-name}
+    val outDir = "$SRCDIR_ANTRL/${packageName!!.replace(".", "/")}"
+    outputDirectory = layout.projectDirectory.dir(outDir).asFile
+
 }
 
 
@@ -58,7 +77,8 @@ kotlin {
     jvmToolchain(17)
 
     sourceSets {
-        commonMain {
+        commonMain{
+            kotlin.srcDir(SRCDIR_ANTRL)
             dependencies {
                 implementation(libs.antlr.kotlin)
                 implementation(libs.jetbrains.kotlinx.serialization)
@@ -126,25 +146,6 @@ publishing {
                     connection.set("scm:git:git@github.com:a-sit-plus/jsonpath4k.git")
                     developerConnection.set("scm:git:git@github.com:a-sit-plus/jsonpath4k.git")
                     url.set("https://github.com/a-sit-plus/jsonpath4k")
-                }
-            }
-        }
-
-        //REMOVE ME AFTER REBRANDED ARTIFACT HAS BEEN PUBLISHED
-        create<MavenPublication>("relocation") {
-            pom {
-                // Old artifact coordinates
-                groupId = "at.asitplus"
-                artifactId = "jsonpath"
-                version = artifactVersion
-
-                distributionManagement {
-                    relocation {
-                        // New artifact coordinates
-                        artifactId = "jsonpath4k"
-                        version = artifactVersion
-                        message = "artifactId has been changed"
-                    }
                 }
             }
         }
