@@ -32,7 +32,7 @@ repositories {
 val SRCDIR_ANTRL = "src/gen/kotlin"
 
 //HACK THE PLANET (i.e. regenerate every time)
-val SKIP_GEN = "GRDLE_SKIP_ANTLR_GENT_JSONPATH"
+val SKIP_GEN = "GRADLE_SKIP_ANTLR_GENT_JSONPATH"
 if (System.getenv(SKIP_GEN) != "true") {
     layout.projectDirectory.dir(SRCDIR_ANTRL).asFile.deleteRecursively()
     println("> Manually invoking generateKotlinGrammarSource ")
@@ -60,7 +60,7 @@ val generateKotlinGrammarSource = tasks.register<AntlrKotlinTask>("generateKotli
     // The Kotlin target language is implicit, as is the file encoding (UTF-8)
     arguments = listOf("-visitor")
 
-    // Generated files are output inside build/generatedAntlr/{package-name}
+    // Generated files are output inside generatedAntlr/{package-name}
     val outDir = "$SRCDIR_ANTRL/${packageName!!.replace(".", "/")}"
     outputDirectory = layout.projectDirectory.dir(outDir).asFile
 
