@@ -25,6 +25,7 @@ version = artifactVersion
 
 
 repositories {
+    maven("https://s01.oss.sonatype.org/content/repositories/snapshots") //KOTEST snapshot
     mavenCentral()
 }
 
@@ -60,7 +61,7 @@ val generateKotlinGrammarSource = tasks.register<AntlrKotlinTask>("generateKotli
     // The Kotlin target language is implicit, as is the file encoding (UTF-8)
     arguments = listOf("-visitor")
 
-    // Generated files are output inside generatedAntlr/{package-name}
+    // Generated files are output inside src/gen/kotlin/{package-name}
     val outDir = "$SRCDIR_ANTRL/${packageName!!.replace(".", "/")}"
     outputDirectory = layout.projectDirectory.dir(outDir).asFile
 
