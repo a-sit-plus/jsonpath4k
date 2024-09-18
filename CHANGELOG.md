@@ -1,3 +1,7 @@
+# Release NEXT
+* ANTLR 1.0.0 Stable
+* Kotest Snapshot to get iOS tests working again
+
 # Release 2.3.0:
   * Kotlin 2.0.20 (binary-incompatible change, makes iOS Tests fail too)
   * Serialization 1.7.2
