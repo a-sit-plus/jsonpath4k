@@ -1,6 +1,7 @@
 [versions]
-antlr-kotlin = "1.0.0-RC5"
+antlr-kotlin = "1.0.0"
 kotest = "5.9.1"
+kotest-plugin = "6.0.0-20240905.065253-61"
 jetbrains-kotlin = "2.0.20"
 jetbrains-kotlinx-serialization = "1.7.2"
 jetbrains-dokka = "1.9.20"
@@ -23,7 +24,7 @@ jetbrains-kotlinx-serialization = { module = "org.jetbrains.kotlinx:kotlinx-seri
 
 [plugins]
 antlr-kotlin-plugin = { id = "com.strumenta.antlr-kotlin", version.ref = "antlr-kotlin" }
-kotest-multiplatform = { id = "io.kotest.multiplatform", version.ref = "kotest" }
+kotest-multiplatform = { id = "io.kotest.multiplatform", version.ref = "kotest-plugin" }
 jetbrains-kotlin-multiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "jetbrains-kotlin" }
 jetbrains-kotlinx-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "jetbrains-kotlin" }
 jetbrains-dokka = { id = "org.jetbrains.dokka", version.ref = "jetbrains-dokka" }
