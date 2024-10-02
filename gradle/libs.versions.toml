@@ -1,7 +1,7 @@
 [versions]
 antlr-kotlin = "1.0.0"
 kotest = "5.9.1"
-kotest-plugin = "6.0.0-20240905.065253-61"
+kotest-plugin = "6.0.0.M1"
 jetbrains-kotlin = "2.0.20"
 jetbrains-kotlinx-serialization = "1.7.2"
 jetbrains-dokka = "1.9.20"
