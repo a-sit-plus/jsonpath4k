@@ -147,7 +147,7 @@ internal class AntlrJsonPathSemanticAnalyzerVisitor(
             context = ctx,
             value = JsonPathExpression.SelectorExpression(
                 JsonPathSelector.IndexSelector(
-                    ctx.int().INT().text.toInt()
+                    ctx.int_expression().INT_TOKEN().text.toInt()
                 )
             )
         )
@@ -777,29 +777,29 @@ internal class AntlrJsonPathSemanticAnalyzerVisitor(
         )
     }
 
-    override fun visitNumber(ctx: JsonPathParser.NumberContext): AbstractSyntaxTree<out JsonPathExpression> {
+    override fun visitNumber_expression(ctx: JsonPathParser.Number_expressionContext): AbstractSyntaxTree<out JsonPathExpression> {
         return AbstractSyntaxTree(
             context = ctx,
             value = JsonPathExpression.FilterExpression.ValueExpression {
                 JsonPathFilterExpressionValue.ValueTypeValue.JsonValue(
-                    JsonPrimitive(ctx.NUMBER().text.toDouble())
+                    JsonPrimitive(ctx.NUMBER_TOKEN().text.toDouble())
                 )
             },
         )
     }
 
-    override fun visitInt(ctx: JsonPathParser.IntContext): AbstractSyntaxTree<out JsonPathExpression> {
+    override fun visitInt_expression(ctx: JsonPathParser.Int_expressionContext): AbstractSyntaxTree<out JsonPathExpression> {
         return AbstractSyntaxTree(
             context = ctx,
             value = JsonPathExpression.FilterExpression.ValueExpression {
                 JsonPathFilterExpressionValue.ValueTypeValue.JsonValue(
-                    JsonPrimitive(ctx.INT().text.toInt())
+                    JsonPrimitive(ctx.INT_TOKEN().text.toInt())
                 )
             },
         )
     }
 
-    override fun visitTrue(ctx: JsonPathParser.TrueContext): AbstractSyntaxTree<out JsonPathExpression> {
+    override fun visitTrue_expression(ctx: JsonPathParser.True_expressionContext): AbstractSyntaxTree<out JsonPathExpression> {
         return AbstractSyntaxTree(
             context = ctx,
             value = JsonPathExpression.FilterExpression.ValueExpression {
@@ -810,7 +810,7 @@ internal class AntlrJsonPathSemanticAnalyzerVisitor(
         )
     }
 
-    override fun visitFalse(ctx: JsonPathParser.FalseContext): AbstractSyntaxTree<out JsonPathExpression> {
+    override fun visitFalse_expression(ctx: JsonPathParser.False_expressionContext): AbstractSyntaxTree<out JsonPathExpression> {
         return AbstractSyntaxTree(
             context = ctx,
             value = JsonPathExpression.FilterExpression.ValueExpression {
@@ -821,7 +821,7 @@ internal class AntlrJsonPathSemanticAnalyzerVisitor(
         )
     }
 
-    override fun visitNull(ctx: JsonPathParser.NullContext): AbstractSyntaxTree<out JsonPathExpression> {
+    override fun visitNull_expression(ctx: JsonPathParser.Null_expressionContext): AbstractSyntaxTree<out JsonPathExpression> {
         return AbstractSyntaxTree(
             context = ctx,
             value = JsonPathExpression.FilterExpression.ValueExpression {

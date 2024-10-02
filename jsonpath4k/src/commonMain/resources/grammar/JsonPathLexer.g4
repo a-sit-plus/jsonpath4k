@@ -35,11 +35,11 @@ COMPARISON_OP_GREATER_THAN_OR_EQUALS    : '>=';
 
 STRING_LITERAL: STRING_LITERAL_FRAGMENT;
 
-NULL                : 'null';
-TRUE                : 'true';
-FALSE               : 'false';
-INT: INT_FRAGMENT;      // match before number, and just accept both for the number literal
-NUMBER: (INT_FRAGMENT | NEGATIVE_ZERO) DECIMAL_FRACTION? EXPONENT?;
+NULL_TOKEN                : 'null';
+TRUE_TOKEN                : 'true';
+FALSE_TOKEN               : 'false';
+INT_TOKEN: INT_FRAGMENT;      // match before number, and just accept both for the number literal
+NUMBER_TOKEN: (INT_FRAGMENT | NEGATIVE_ZERO) DECIMAL_FRACTION? EXPONENT?;
 
 FUNCTION_NAME: FUNCTION_NAME_FRAGMENT;
 
