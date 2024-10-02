@@ -22,13 +22,13 @@ selector            : name_selector |
 name_selector       : stringLiteral;
 
 
-index_selector      : int;                        // decimal integer
+index_selector      : int_expression;                        // decimal integer
 
 slice_selector      : (start ws)? COLON ws (end ws)? (COLON (ws step )?)?;
 
-start               : int;       // included in selection
-end                 : int;       // not included in selection
-step                : int;       // default: 1
+start               : int_expression;       // included in selection
+end                 : int_expression;       // not included in selection
+step                : int_expression;       // default: 1
 
 // used in filter, but executed in normal mode
 filter_query        : rel_query | jsonpath_query;
@@ -65,8 +65,8 @@ test_expr           : (LOGICAL_NOT_OP ws)?
 comparison_expr     : firstComparable ws comparisonOp ws secondComparable;
 firstComparable: comparable;
 secondComparable: comparable;
-literal             : int | number | stringLiteral |
-                      true | false | null;
+literal             : int_expression | number_expression | stringLiteral |
+                      true_expression | false_expression | null_expression;
 comparable          : literal |
                       singular_query | // singular query value
                       function_expr;    // ValueType
@@ -88,11 +88,11 @@ wildcardSelector: WILDCARD_SELECTOR;
 memberNameShorthand: MEMBER_NAME_SHORTHAND;
 
 stringLiteral: STRING_LITERAL;
-number: NUMBER; // integer is matched before number, but it is also a valid number literal
-int: INT; // integer is matched before number, but it is also a valid number literal
-true: TRUE;
-false: FALSE;
-null: NULL;
+number_expression: NUMBER_TOKEN; // integer is matched before number, but it is also a valid number literal
+int_expression: INT_TOKEN; // integer is matched before number, but it is also a valid number literal
+true_expression: TRUE_TOKEN;
+false_expression: FALSE_TOKEN;
+null_expression: NULL_TOKEN;
 
 comparisonOp
     : COMPARISON_OP_EQUALS | COMPARISON_OP_NOT_EQUALS
