@@ -26,7 +26,7 @@ Notable features for multiplatform are:
 - Use of [kotlinx-serialization](https://github.com/Kotlin/kotlinx.serialization) for serialization from/to JSON and to have JsonElement as evaluation target for JsonPathQuery
 
 ## Using the Library
-1. Add JsonPath4K as a dependency in your project (`at.situplus:jsonpath4k:$version`)
+1. Add JsonPath4K as a dependency in your project (`at.asitplus:jsonpath4k:$version`)
 2. Use the `JsonPath` constructor for compiling JSONPath query expressions.
 3. Invoke the method `JsonPath.query` to select nodes satisfying the JsonPath query expression from a `JsonElement`.
 4. A `nodeList` containing both the selected values and their normalized paths is returned.

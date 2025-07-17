@@ -1,3 +1,6 @@
+# Release 3.1.0-SNAPSHOT 
+ * TODO
+
 # Release 3.0.0
  * BREAKING CHANGES:
    * Removed template type from `JsonPathFunctionExtension`
