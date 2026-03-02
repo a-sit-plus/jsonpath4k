@@ -2,6 +2,7 @@ package at.asitplus.jsonpath
 
 import at.asitplus.jsonpath.core.JsonPathFilterExpressionType
 import at.asitplus.jsonpath.core.JsonPathFunctionExtension
+import at.asitplus.jsonpath.implementation.JsonPathParserException
 import at.asitplus.jsonpath.implementation.JsonPathTypeCheckerException
 import io.kotest.assertions.throwables.shouldNotThrowAny
 import io.kotest.assertions.throwables.shouldThrow
@@ -1241,6 +1242,14 @@ class JsonPathUnitTest : FreeSpec({
                     val nodeList = JsonPath(this.testScope.testCase.name.originalName)
                         .query(jsonElement).map { it.value }
                     nodeList shouldHaveSize 0
+                }
+            }
+        }
+
+        "RMLTC0002g-JSON" - {
+            "$.students[*]]" {
+                shouldThrow<JsonPathParserException> {
+                    JsonPath(this.testScope.testCase.name.originalName)
                 }
             }
         }

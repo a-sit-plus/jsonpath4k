@@ -5,7 +5,7 @@ parser grammar JsonPathParser;
 
 options { tokenVocab=JsonPathLexer; }
 
-jsonpath_query      : rootIdentifier segments;
+jsonpath_query      : rootIdentifier segments EOF;
 segments            : (ws segment)*;
 segment             : bracketed_selection | SHORTHAND_SELECTOR shorthand_segment | DESCENDANT_SELECTOR descendant_segment;
 shorthand_segment   : wildcardSelector | memberNameShorthand;
