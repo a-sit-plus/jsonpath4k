@@ -1,0 +1,34 @@
+name: Test implementations
+on: [push]
+jobs:
+  test:
+    strategy:
+      matrix:
+        include:
+          - target: JVM
+            runs-on: ubuntu-latest
+            test-task: jvmTest
+            pre-test-task: ''
+          - target: iOS
+            runs-on: macos-latest
+            test-task: iosSimulatorArm64Test
+            pre-test-task: iosArm64MainKlibrary iosX64MainKlibrary
+    runs-on: ${{ matrix.runs-on }}
+    steps:
+      - name: Common setup
+        uses: a-sit-plus/internal-workflows/.github/actions/common-setup@v2
+        with:
+          java-version: '17'
+          submodules: recursive
+      - name: Prepare test target
+        if: matrix.pre-test-task != ''
+        run: ./gradlew ${{ matrix.pre-test-task }}
+      - name: Run tests
+        run: ./gradlew ${{ matrix.test-task }}
+      - name: Common reporting
+        if: success() || failure()
+        uses: a-sit-plus/internal-workflows/.github/actions/common-reporting@v2
+        with:
+          name: jsonpath4k ${{ matrix.target }} Tests
+          path: jsonpath4k/build/test-results/**/TEST*.xml
+          reporter: java-junit

@@ -1,0 +1,38 @@
+name: Build artifacts
+on: workflow_dispatch
+jobs:
+  build:
+    strategy:
+      matrix:
+        include:
+          - target: JVM
+            runs-on: ubuntu-latest
+            pre-build-task: ''
+            build-task: assemble
+            artifact-name: jsonpath4k
+            artifact-path: jsonpath4k/build/libs/*jar
+          - target: iOS
+            runs-on: macos-latest
+            pre-build-task: iosArm64MainKlibrary iosX64MainKlibrary
+            build-task: assembleJsonPath4KXCFramework
+            artifact-name: JsonPath4K.xcframework
+            artifact-path: |
+              jsonpath4k/build/XCFrameworks/debug/
+              jsonpath4k/build/XCFrameworks/release/
+    runs-on: ${{ matrix.runs-on }}
+    steps:
+      - name: Common setup
+        uses: a-sit-plus/internal-workflows/.github/actions/common-setup@v2
+        with:
+          java-version: '17'
+          submodules: recursive
+      - name: Prepare build target
+        if: matrix.pre-build-task != ''
+        run: ./gradlew ${{ matrix.pre-build-task }}
+      - name: Build artifacts
+        run: ./gradlew ${{ matrix.build-task }}
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.artifact-name }}
+          path: ${{ matrix.artifact-path }}

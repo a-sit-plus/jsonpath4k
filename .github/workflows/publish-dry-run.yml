@@ -7,15 +7,15 @@ permissions:
 jobs:
   build:
     runs-on: macos-latest
+    strategy:
+      matrix:
+        java-version: ['17']
     steps:
-      - name: Checkout
-        uses: actions/checkout@v3
+      - name: Common setup
+        uses: a-sit-plus/internal-workflows/.github/actions/common-setup@v2
         with:
+          java-version: ${{ matrix.java-version }}
           submodules: recursive
-      - uses: actions/setup-java@v3
-        with:
-          distribution: 'temurin'
-          java-version: '17'
       - name: Publish to Maven Local
         run: ./gradlew -Dpublishing.excludeIncludedBuilds=true clean publishToMavenLocal
         env:
@@ -28,9 +28,10 @@ jobs:
     needs: build
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v3
+      - name: Common setup
+        uses: a-sit-plus/internal-workflows/.github/actions/common-setup@v2
         with:
+          java-version: '17'
           submodules: recursive
       - name: Build Dokka HTML
         run: ./gradlew dokkaHtml
