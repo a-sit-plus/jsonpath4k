@@ -17,7 +17,7 @@ sealed interface NormalizedJsonPathSegment {
     fun toNormalizedJsonPathSegmentString(): String
 
     @Serializable
-    class NameSegment(val memberName: String) : NormalizedJsonPathSegment {
+    data class NameSegment(val memberName: String) : NormalizedJsonPathSegment {
         override fun toNormalizedJsonPathSegmentString() = toString()
 
         override fun toString(): String {
@@ -48,7 +48,13 @@ sealed interface NormalizedJsonPathSegment {
     }
 
     @Serializable
-    class IndexSegment(val index: UInt) : NormalizedJsonPathSegment {
+    data class IndexSegment(val index: UInt) : NormalizedJsonPathSegment {
+        companion object {
+            operator fun invoke(int: Int) = IndexSegment(int.also {
+                require(int >= 0)
+            }.toUInt())
+        }
+
         override fun toNormalizedJsonPathSegmentString() = toString()
 
         override fun toString(): String {

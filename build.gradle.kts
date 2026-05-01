@@ -11,6 +11,7 @@ repositories {
     google()
     gradlePluginPortal()
 }
+
 nexusPublishing {
     nexusPublishing {
         repositories {
