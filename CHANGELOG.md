@@ -1,6 +1,6 @@
 # CHANGELOG
 
-# Release 3.1.0-SNAPSHOT 
+# Release 3.1.0
  * Add: structural equality check for `NormalizedJsonPath` and `NormalizedJsonPathSegment` 
 
 # Release 3.0.1
