@@ -92,6 +92,7 @@ kotlin {
         }
         commonTest {
             dependencies {
+                implementation(kotlin("test"))
                 implementation(libs.kotest.common)
                 implementation(libs.kotest.property)
                 implementation(libs.kotest.assertions.core)
