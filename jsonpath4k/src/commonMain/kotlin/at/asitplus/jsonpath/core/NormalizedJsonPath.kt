@@ -1,6 +1,7 @@
 package at.asitplus.jsonpath.core
 
 import kotlinx.serialization.Serializable
+import kotlin.jvm.JvmInline
 
 /**
  * specification: https://datatracker.ietf.org/doc/rfc9535/
@@ -8,47 +9,75 @@ import kotlinx.serialization.Serializable
  * section: 2.7.  Normalized Paths
  */
 @Serializable
-class NormalizedJsonPath(
+@JvmInline
+value class NormalizedJsonPath(
+    @Deprecated("Access to this variable will be removed in the future, please use the path itself as list.")
     val segments: List<NormalizedJsonPathSegment> = listOf(),
-) {
+) : List<NormalizedJsonPathSegment> by segments {
     constructor(vararg segments: NormalizedJsonPathSegment) : this(segments = segments.asList())
 
-    operator fun plus(other: NormalizedJsonPath): NormalizedJsonPath {
-        return NormalizedJsonPath(this.segments + other.segments)
+    @ExperimentalUnsignedTypes
+    constructor(vararg segments: UInt) : this(
+        segments.map {
+            NormalizedJsonPathSegment.IndexSegment(it)
+        }
+    )
+
+    constructor(vararg segments: String) : this(
+        segments.map {
+            NormalizedJsonPathSegment.NameSegment(it)
+        }
+    )
+
+    companion object {
+        operator fun invoke(vararg segments: Int) = NormalizedJsonPath(segments.map {
+            require(it >= 0) {
+                "Expected index segments to be non-negative, but got $it"
+            }
+            NormalizedJsonPathSegment.IndexSegment(it)
+        })
     }
 
-    operator fun plus(segment: NormalizedJsonPathSegment) = this + NormalizedJsonPath(segment)
+    operator fun plus(
+        other: List<NormalizedJsonPathSegment>
+    ) = NormalizedJsonPath(this.segments + other)
+
+    operator fun plus(segment: NormalizedJsonPathSegment) = this + listOf(segment)
 
     operator fun plus(memberName: String) = this + NormalizedJsonPathSegment.NameSegment(memberName)
 
     operator fun plus(index: UInt) = this + NormalizedJsonPathSegment.IndexSegment(index)
 
     override fun toString(): String {
-        return "$${segments.joinToString("")}"
+        return "$${joinToString("")}"
     }
 
     fun toNormalizedJsonPathString() = toString()
 
     @Throws(Throwable::class)
     fun toShorthandNameSegmentNotation(): String {
-        return "$${segments.joinToString("") {
-            when(it) {
-                is NormalizedJsonPathSegment.IndexSegment -> it.toString()
-                is NormalizedJsonPathSegment.NameSegment -> it.toShorthandNotation()
+        return "$${
+            joinToString("") {
+                when (it) {
+                    is NormalizedJsonPathSegment.IndexSegment -> it.toString()
+                    is NormalizedJsonPathSegment.NameSegment -> it.toShorthandNotation()
+                }
             }
-        }}"
+        }"
     }
 
     fun toShorthandNameSegmentNotationWherePossible(): String {
-        return "$${segments.joinToString("") {
-            when(it) {
-                is NormalizedJsonPathSegment.IndexSegment -> it.toNormalizedJsonPathSegmentString()
-                is NormalizedJsonPathSegment.NameSegment -> try {
-                    it.toShorthandNotation()
-                } catch (_: Throwable) {
-                    it.toNormalizedJsonPathSegmentString()
+        return "$${
+            joinToString("") {
+                when (it) {
+                    is NormalizedJsonPathSegment.IndexSegment -> it.toNormalizedJsonPathSegmentString()
+                    is NormalizedJsonPathSegment.NameSegment -> try {
+                        it.toShorthandNotation()
+                    } catch (_: Throwable) {
+                        it.toNormalizedJsonPathSegmentString()
+                    }
                 }
             }
-        }}"
+        }"
     }
 }
