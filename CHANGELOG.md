@@ -1,5 +1,8 @@
 # CHANGELOG
 
+# Release 3.2.0
+ * Change: Lower Android `minSdk` from 30 to 21
+
 # Release 3.1.0
  * Add: structural equality check for `NormalizedJsonPath` and `NormalizedJsonPathSegment` 
 

@@ -136,7 +136,7 @@ android {
         targetCompatibility = JavaVersion.VERSION_1_8
     }
     defaultConfig {
-        minSdk = 30
+        minSdk = 21
     }
 }
 
