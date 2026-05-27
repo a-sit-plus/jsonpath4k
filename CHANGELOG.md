@@ -1,6 +1,6 @@
 # CHANGELOG
 
-# Release 3.2.0
+# Release 3.1.1
  * Change: Lower Android `minSdk` from 30 to 21
 
 # Release 3.1.0
