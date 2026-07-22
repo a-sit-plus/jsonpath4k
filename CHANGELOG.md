@@ -13,6 +13,7 @@
 * Kotlin 2.4.0
 * Fix race condition thanks to latest ANTLR 1.0.13
 * Remove deprecations
+* Change Serializer names to work on web targets too
 
 # Release 3.1.0
  * Add: structural equality check for `NormalizedJsonPath` and `NormalizedJsonPathSegment` 
