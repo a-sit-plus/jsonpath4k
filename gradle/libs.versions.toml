@@ -1,33 +1,16 @@
 [versions]
-antlr-kotlin = "1.0.3"
+kotlin = "2.4.0"
+asp-conventions = "20260701"
+agp = "8.12.3"
+antlr-kotlin = "1.0.12"
 kotest = "5.9.1"
-kotest-plugin = "6.0.0.M1"
-jetbrains-kotlin = "2.1.0"
-jetbrains-kotlinx-serialization = "1.8.0"
-jetbrains-dokka = "1.9.20"
-napier = "2.7.1"
-gradle-nexus-publish = "2.0.0"
-agp = "8.2.2"
+testballoon = "1.0.1-K2.4.0"
 
 [libraries]
 antlr-kotlin = { group = "com.strumenta", name = "antlr-kotlin-runtime", version.ref = "antlr-kotlin" }
-napier = { module = "io.github.aakira:napier", version.ref = "napier" }
-
-kotest-common = { module = "io.kotest:kotest-common", version.ref = "kotest" }
-kotest-property = { module = "io.kotest:kotest-property", version.ref = "kotest" }
-kotest-assertions-core = { module = "io.kotest:kotest-assertions-core", version.ref = "kotest" }
-kotest-framework-engine = { module = "io.kotest:kotest-framework-engine", version.ref = "kotest" }
-kotest-framework-datatest = { module = "io.kotest:kotest-framework-datatest", version.ref = "kotest" }
-kotest-runner-junit5 = { module = "io.kotest:kotest-runner-junit5", version.ref = "kotest" }
-
-jetbrains-kotlinx-serialization = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "jetbrains-kotlinx-serialization" }
-
 
 [plugins]
+asp-conventions = { id = "at.asitplus.gradle.conventions", version.ref = "asp-conventions" }
+android-kmp-library = { id = "com.android.kotlin.multiplatform.library", version.ref = "agp" }
 antlr-kotlin-plugin = { id = "com.strumenta.antlr-kotlin", version.ref = "antlr-kotlin" }
-kotest-multiplatform = { id = "io.kotest.multiplatform", version.ref = "kotest-plugin" }
-jetbrains-kotlin-multiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "jetbrains-kotlin" }
-jetbrains-kotlinx-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "jetbrains-kotlin" }
-jetbrains-dokka = { id = "org.jetbrains.dokka", version.ref = "jetbrains-dokka" }
-gradle-nexus-publish = { id = "io.github.gradle-nexus.publish-plugin", version.ref = "gradle-nexus-publish" }
-android-library = {id = "com.android.library", version.ref = "agp"}
+testballoon = { id = "de.infix.testBalloon", version.ref = "testballoon" }

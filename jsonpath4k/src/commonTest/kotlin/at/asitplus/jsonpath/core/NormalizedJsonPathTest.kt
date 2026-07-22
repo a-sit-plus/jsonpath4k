@@ -1,15 +1,12 @@
 package at.asitplus.jsonpath.core
 
+import at.asitplus.testballoon.matrix.matrixSuite
 import io.kotest.matchers.maps.shouldHaveSize
 import io.kotest.matchers.shouldBe
-import io.kotest.matchers.shouldNot
 import io.kotest.matchers.shouldNotBe
-import kotlin.test.Test
 
-@Suppress("unused")
-class NormalizedJsonPathTest {
-    @Test
-    fun equality() {
+val NormalizedJsonPathTest by matrixSuite {
+    "equality" {
         NormalizedJsonPath() shouldBe NormalizedJsonPath()
         NormalizedJsonPath("name") shouldBe NormalizedJsonPath() + "name"
         NormalizedJsonPath(1) shouldBe NormalizedJsonPath() + 1u
@@ -19,8 +16,7 @@ class NormalizedJsonPathTest {
             NormalizedJsonPath() to "2",
         ) shouldHaveSize 1
     }
-    @Test
-    fun inequality() {
+    "inequality" {
         NormalizedJsonPath(1) shouldNotBe NormalizedJsonPath()
         NormalizedJsonPath(1) shouldNotBe NormalizedJsonPath() + "1"
         NormalizedJsonPath(1) shouldNotBe NormalizedJsonPath() + 2

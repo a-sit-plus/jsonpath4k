@@ -1,36 +1,27 @@
+import at.asitplus.gradle.Logger
+import at.asitplus.gradle.coroutines
+import at.asitplus.gradle.exportXCFramework
+import at.asitplus.gradle.napier
+import at.asitplus.gradle.serialization
+import at.asitplus.gradle.setupDokka
 import com.strumenta.antlrkotlin.gradle.AntlrKotlinTask
-import org.jetbrains.dokka.gradle.DokkaTask
-import org.jetbrains.dokka.gradle.DokkaTaskPartial
-import org.jetbrains.kotlin.gradle.dsl.JvmTarget
-import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
-import org.jetbrains.kotlin.gradle.dsl.kotlinExtension
-import org.jetbrains.kotlin.gradle.plugin.mpp.BitcodeEmbeddingMode
-import org.jetbrains.kotlin.gradle.plugin.mpp.KotlinNativeTarget
-import org.jetbrains.kotlin.gradle.plugin.mpp.apple.XCFrameworkConfig
-import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
+import org.jetbrains.kotlin.gradle.plugin.extraProperties
+import java.util.Properties
+import kotlin.apply
 
 plugins {
-    alias(libs.plugins.android.library)
-    alias(libs.plugins.jetbrains.kotlin.multiplatform)
-    alias(libs.plugins.jetbrains.kotlinx.serialization)
-    alias(libs.plugins.kotest.multiplatform)
+    alias(libs.plugins.android.kmp.library)
+    kotlin("multiplatform")
+    kotlin("plugin.serialization")
     alias(libs.plugins.antlr.kotlin.plugin)
-    alias(libs.plugins.jetbrains.dokka)
-    id("maven-publish")
+    alias(libs.plugins.testballoon)
     id("signing")
+    alias(libs.plugins.asp.conventions)
 }
 
-/* required for maven publication */
-val artifactVersion: String by extra
-group = "at.asitplus"
-version = artifactVersion
-
-repositories {
-    google()
-    maven("https://s01.oss.sonatype.org/content/repositories/snapshots") //KOTEST snapshot
-    mavenCentral()
-}
-
+group = rootProject.group
+version = rootProject.version
 
 val SRCDIR_ANTRL = "generated/antlr"
 val generateKotlinGrammarSource = tasks.register<AntlrKotlinTask>("generateKotlinGrammarSource") {
@@ -53,97 +44,101 @@ val generateKotlinGrammarSource = tasks.register<AntlrKotlinTask>("generateKotli
     outputDirectory = layout.buildDirectory.dir(outDir).get().asFile
 }
 
+val Project.disableNdkTargets
+    get() = ("true" == (System.getenv("disableNdkTargets")
+        ?.also { Logger.lifecycle("  > Property disableNdkTargets set to $it from environment") }
+        ?: runCatching {
+            (project.extraProperties["disableNdkTargets"] as String).also {
+                Logger.lifecycle("  > Property disableNdkTargets set to $it from extra properties")
+            }
+        }.getOrNull()))
+
 
 kotlin {
-    jvmToolchain(17)
-
-    jvm {
-        compilations.all {
-            kotlinOptions {
-                jvmTarget = "17"
-                freeCompilerArgs = listOf(
-                    "-Xjsr305=strict"
-                )
-            }
-        }
+    androidLibrary {
+        namespace = "at.asitplus.jsonpath4k"
     }
-
-    androidTarget {
-        compilerOptions {
-            publishLibraryVariants("release")
-            jvmTarget = JvmTarget.JVM_1_8
-        }
-    }
-
-
+    jvm()
+    macosArm64()
+    tvosArm64()
+    tvosSimulatorArm64()
     iosArm64()
     iosSimulatorArm64()
-    iosX64()
+    watchosSimulatorArm64()
+    watchosArm32()
+    watchosArm64()
+    tvosSimulatorArm64()
+    tvosArm64()
 
+    if (project.hasAndroidSdk()) {
+        if (project.hasAndroidNdk() && !project.disableNdkTargets) {
+            androidNativeX64()
+            androidNativeX86()
+            androidNativeArm32()
+            androidNativeArm64()
+        } else {
+            Logger.lifecycle("  > Skipping Android native targets (NDK missing or disableNdkTargets=true)")
+        }
+    }
+
+    listOf(
+        js().apply { browser { testTask { enabled = false } } },
+        @OptIn(ExperimentalWasmDsl::class)
+        wasmJs().apply { browser { testTask { enabled = false } } },
+        // wasmWasi()
+    ).forEach {
+        it.nodejs()
+    }
+
+    linuxX64()
+    linuxArm64()
+    mingwX64()
 
     sourceSets {
         commonMain {
             kotlin.srcDir(layout.buildDirectory.dir(SRCDIR_ANTRL))
             dependencies {
                 implementation(libs.antlr.kotlin)
-                implementation(libs.jetbrains.kotlinx.serialization)
-                implementation(libs.napier)
+                implementation(serialization("json"))
+                implementation(napier())
             }
         }
         commonTest {
             dependencies {
-                implementation(kotlin("test"))
-                implementation(libs.kotest.common)
-                implementation(libs.kotest.property)
-                implementation(libs.kotest.assertions.core)
-                implementation(libs.kotest.framework.engine)
-                implementation(libs.kotest.framework.datatest)
-                implementation(libs.jetbrains.kotlinx.serialization)
-            }
-        }
-
-        jvmTest {
-            dependencies {
-                implementation(libs.kotest.runner.junit5)
+                // TestBalloon, the matrix addon, Kotest assertions and Kotest property are wired in
+                // automatically by the asp-conventions plugin (unless TESTBALLOON_NO_ASP_HELPER is set).
+                implementation(serialization("json"))
+                // Needed by the highly-concurrent native ANTLR stress test in nativeTest.
+                implementation(coroutines())
             }
         }
     }
 }
 
-tasks.withType<org.jetbrains.kotlin.gradle.dsl.KotlinCompile<*>> {
-    dependsOn(generateKotlinGrammarSource)
-}
-tasks.withType<KotlinCompile> {
+tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompilationTask<*>>().configureEach {
     dependsOn(generateKotlinGrammarSource)
 }
 tasks.withType<org.gradle.jvm.tasks.Jar> {
     dependsOn(generateKotlinGrammarSource)
 }
+// Note: the JVM test task (JUnit Platform + launcher) is configured by the TestBalloon Gradle plugin,
+// which the asp-conventions plugin applies; do not call useJUnitPlatform() manually.
 
-exportIosFramework("JsonPath4K")
+exportXCFramework("JsonPath4K", transitiveExports = false)
 
 val javadocJar = setupDokka(
-    baseUrl = "https://github.com/a-sit-plus/jsonpath4k/tree/main/",
-    multiModuleDoc = false
+    baseUrl = "https://github.com/a-sit-plus/jsonpath4k/tree/main"
 )
 
-
-android {
-    namespace = "at.asitplus.jsonpath4k"
-    compileSdk = 34
-    compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_1_8
-        targetCompatibility = JavaVersion.VERSION_1_8
-    }
-    defaultConfig {
-        minSdk = 30
-    }
+val javadocRedirectJar = tasks.register<Jar>("javadocRedirectJar") {
+    archiveClassifier.set("javadoc")
+    from(project.rootDir.absolutePath+"/javadoc")
 }
 
 publishing {
     publications {
         withType<MavenPublication> {
-            if (this.name != "relocation") artifact(javadocJar)
+            if (this.name != "relocation") artifact(javadocRedirectJar)
             pom {
                 name.set("JsonPath4K")
                 description.set("Kotlin Multiplatform library for using Json Paths as specified in [RFC9535](https://datatracker.ietf.org/doc/rfc9535/)")
@@ -201,86 +196,88 @@ signing {
 }
 
 
-/**
- * taken from vclib conventions plugin at https://github.com/a-sit-plus/gradle-conventions-plugin
- */
-fun Project.exportIosFramework(
-    name: String,
-    vararg additionalExports: Any
-) = exportIosFramework(name, bitcodeEmbeddingMode = BitcodeEmbeddingMode.BITCODE, additionalExports = additionalExports)
 
-fun Project.exportIosFramework(
-    name: String,
-    bitcodeEmbeddingMode: BitcodeEmbeddingMode,
-    vararg additionalExports: Any
-) {
-    val iosTargets = kotlinExtension.let {
-        if (it is KotlinMultiplatformExtension) {
-            it.targets.filterIsInstance<KotlinNativeTarget>().filter { it.name.startsWith("ios") }
-        } else throw StopExecutionException("No iOS Targets found! Declare them explicitly before calling exportIosFramework!")
-    }
 
-    extensions.getByType<KotlinMultiplatformExtension>().apply {
-        XCFrameworkConfig(project, name).also { xcf ->
-            logger.lifecycle("  \u001B[1mXCFrameworks will be exported for the following iOS targets: ${iosTargets.joinToString { it.name }}\u001B[0m")
-            iosTargets.forEach {
-                it.binaries.framework {
-                    baseName = name
-                    embedBitcode(bitcodeEmbeddingMode)
-                    additionalExports.forEach { export(it) }
-                    xcf.add(this)
-                }
+fun Project.hasAndroidSdk() = resolveAndroidSdk(this)?.let { it -> isValidAndroidSdk(it) } == true
+
+fun Project.hasAndroidNdk() = resolveAndroidNdk(this)?.let { it -> isValidAndroidNdk(it) } == true
+
+private fun resolveAndroidSdk(project: Project): File? {
+    // Highest precedence: ANDROID_SDK_ROOT (preferred), then ANDROID_HOME (legacy)
+    val env = System.getenv()
+    val fromEnv = listOf("ANDROID_SDK_ROOT", "ANDROID_HOME")
+        .asSequence()
+        .mapNotNull { env[it]?.takeIf { it.isNotBlank() } }
+        .map(::File)
+        .firstOrNull { it.exists() }
+
+    if (fromEnv != null) return fromEnv
+
+    // Fallback: local.properties (common on dev machines)
+    val localProps = File(project.rootDir, "local.properties")
+    if (localProps.exists()) {
+        Properties().apply {
+            localProps.inputStream().use(::load)
+            (getProperty("sdk.dir") ?: getProperty("android.sdk.path"))?.let {
+                val f = File(it)
+                if (f.exists()) return f
             }
         }
     }
+    return null
 }
 
-fun Project.setupDokka(
-    outputDir: String = rootProject.layout.buildDirectory.dir("dokka").get().asFile.canonicalPath,
-    baseUrl: String,
-    multiModuleDoc: Boolean = false,
-    remoteLineSuffix: String = "#L"
-): TaskProvider<Jar> {
-    val dokkaHtml = (tasks["dokkaHtml"] as DokkaTask).apply { outputDirectory.set(file(outputDir)) }
+private fun resolveAndroidNdk(project: Project): File? {
+    val env = System.getenv()
+    val fromEnv = listOf("ANDROID_NDK_ROOT", "ANDROID_NDK_HOME", "ANDROID_NDK", "NDK_HOME")
+        .asSequence()
+        .mapNotNull { env[it]?.takeIf { it.isNotBlank() } }
+        .map(::File)
+        .firstOrNull { it.exists() }
+    if (fromEnv != null) return fromEnv
 
-    val deleteDokkaOutput = tasks.register<Delete>("deleteDokkaOutputDirectory") {
-        delete(outputDir)
-    }
-    val sourceLinktToConfigure = if (multiModuleDoc) (tasks["dokkaHtmlPartial"] as DokkaTaskPartial) else dokkaHtml
-    sourceLinktToConfigure.dokkaSourceSets.configureEach {
-        sourceLink {
-            localDirectory.set(file("src/$name/kotlin"))
-            remoteUrl.set(uri("$baseUrl/${project.name}/src/$name/kotlin").toURL())
-            this@sourceLink.remoteLineSuffix.set(remoteLineSuffix)
-        }
-    }
-
-    return tasks.register<Jar>("javadocJar") {
-        dependsOn(deleteDokkaOutput, dokkaHtml)
-        archiveClassifier.set("javadoc")
-        from(outputDir)
-    }
-}
-
-
-afterEvaluate {
-    tasks.withType<Test> {
-        useJUnitPlatform()
-    }
-
-    /**
-     * Makes all publishing tasks depend on all signing tasks. Hampers parallelization, but works around dodgy task dependencies
-     * which (more often than anticipated) makes the build process stumble over its own feet.
-     */
-
-    tasks.withType<Sign>().also { signingTasks ->
-        if (signingTasks.isNotEmpty()) {
-            logger.lifecycle("> Making signing tasks of project \u001B[1m$name\u001B[0m run after publish tasks")
-            tasks.withType<AbstractPublishToMaven>().configureEach {
-                mustRunAfter(*signingTasks.toTypedArray())
-                logger.lifecycle("  * $name must now run after ${signingTasks.joinToString { it.name }}")
+    val localProps = File(project.rootDir, "local.properties")
+    if (localProps.exists()) {
+        Properties().apply {
+            localProps.inputStream().use(::load)
+            (getProperty("ndk.dir") ?: getProperty("ndkDirectory"))?.let {
+                val f = File(it)
+                if (f.exists()) return f
             }
-            logger.lifecycle("")
         }
     }
+
+    val sdk = resolveAndroidSdk(project) ?: return null
+    val bundled = listOf(File(sdk, "ndk-bundle"), File(sdk, "ndk"))
+        .firstOrNull { it.exists() }
+
+    // $SDK/ndk is a folder containing versioned subfolders; pick the "latest" directory.
+    if (bundled?.name == "ndk") {
+        val candidates = bundled.listFiles()?.filter { it.isDirectory } ?: emptyList()
+        return candidates.maxWithOrNull { a, b ->
+            val ta = a.name.toVersionTuple()
+            val tb = b.name.toVersionTuple()
+            val n = maxOf(ta.size, tb.size)
+            (0 until n).asSequence()
+                .map { i -> (ta.getOrNull(i) ?: 0).compareTo(tb.getOrNull(i) ?: 0) }
+                .firstOrNull { it != 0 } ?: 0
+        } ?: bundled
+    }
+
+    return bundled
+}
+
+private fun String.toVersionTuple(): List<Int> =
+    split('.', '-', '_').mapNotNull { it.toIntOrNull() }.ifEmpty { listOf(0) }
+
+private fun isValidAndroidNdk(ndk: File): Boolean {
+    val prebuilt = File(ndk, "toolchains/llvm/prebuilt")
+    return prebuilt.isDirectory && (prebuilt.listFiles()?.any { it.isDirectory } == true)
+}
+
+
+private fun isValidAndroidSdk(sdk: File): Boolean {
+    val platformsOk = File(sdk, "platforms").listFiles()?.any { it.isDirectory } == true
+    val buildToolsOk = File(sdk, "build-tools").listFiles()?.any { it.isDirectory } == true
+    return platformsOk && buildToolsOk
 }

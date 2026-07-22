@@ -2,32 +2,35 @@ package at.asitplus.jsonpath
 
 import at.asitplus.jsonpath.core.NormalizedJsonPath
 import at.asitplus.jsonpath.core.NormalizedJsonPathSegment
+import at.asitplus.testballoon.matrix.matrixSuite
 import io.kotest.assertions.throwables.shouldNotThrowAny
 import io.kotest.assertions.throwables.shouldThrowAny
-import io.kotest.core.spec.style.FreeSpec
-import io.kotest.datatest.withData
 import io.kotest.matchers.shouldBe
 
-class NormalizedJsonPathSerializationTest : FreeSpec({
+val NormalizedJsonPathSerializationTest by matrixSuite {
     "normalized json path string" - {
-        withData(
-            "test" to "$['test']",
-            "test_123" to "$['test_123']",
-            "t1" to "$['t1']",
-        ) { (it, expected) ->
+        data(
+            listOf(
+                "test" to "$['test']",
+                "test_123" to "$['test_123']",
+                "t1" to "$['t1']",
+            )
+        ) test { (input, expected) ->
             shouldNotThrowAny {
-                val path = NormalizedJsonPath() + NormalizedJsonPathSegment.NameSegment(it)
+                val path = NormalizedJsonPath() + NormalizedJsonPathSegment.NameSegment(input)
                 path.toNormalizedJsonPathString() shouldBe expected
             }
         }
     }
     "shorthand serialization" - {
         "should be serializable as member name shorthand" - {
-            withData(
-                "test",
-                "test_123",
-                "t1",
-            ) {
+            data(
+                listOf(
+                    "test",
+                    "test_123",
+                    "t1",
+                )
+            ) test {
                 shouldNotThrowAny {
                     val path = NormalizedJsonPath() + NormalizedJsonPathSegment.NameSegment(it)
                     path.toShorthandNameSegmentNotation() shouldBe "$.$it"
@@ -36,13 +39,15 @@ class NormalizedJsonPathSerializationTest : FreeSpec({
             }
         }
         "should not be serializable as member name shorthand" - {
-            withData(
-                "1",
-                "*",
-                "'",
-                "\"",
-                "test-data",
-            ) {
+            data(
+                listOf(
+                    "1",
+                    "*",
+                    "'",
+                    "\"",
+                    "test-data",
+                )
+            ) test {
                 val path = NormalizedJsonPath() + NormalizedJsonPathSegment.NameSegment(it)
                 shouldThrowAny {
                     path.toShorthandNameSegmentNotation()
@@ -51,4 +56,4 @@ class NormalizedJsonPathSerializationTest : FreeSpec({
             }
         }
     }
-})
+}

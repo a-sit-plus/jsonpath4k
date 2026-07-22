@@ -3,7 +3,7 @@ package at.asitplus.jsonpath
 import at.asitplus.jsonpath.core.NodeListEntry
 import at.asitplus.jsonpath.core.NormalizedJsonPath
 import at.asitplus.jsonpath.core.NormalizedJsonPathSegment
-import io.kotest.core.spec.style.FreeSpec
+import at.asitplus.testballoon.matrix.matrixSuite
 import io.kotest.matchers.shouldBe
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
@@ -11,8 +11,7 @@ import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.buildJsonArray
 import kotlinx.serialization.json.buildJsonObject
 
-@Suppress("unused")
-class NodeListSerializationTest : FreeSpec({
+val NodeListSerializationTest by matrixSuite {
     "NormalizedJsonPathSegment" - {
         "NameSegment" {
             val segment: NormalizedJsonPathSegment = NormalizedJsonPathSegment.NameSegment("test")
@@ -93,7 +92,5 @@ class NodeListSerializationTest : FreeSpec({
             reconstructed.normalizedJsonPath.toString() shouldBe entry.normalizedJsonPath.toString()
         }
     }
-    "NodeList" - {
-        // trusting the default serializer for list for this one
-    }
-})
+    // "NodeList": trusting the default serializer for list for this one (no test)
+}
