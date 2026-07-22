@@ -3,7 +3,6 @@ kotlin = "2.4.0"
 asp-conventions = "20260722"
 agp = "9.0.1"
 antlr-kotlin = "1.0.12"
-kotest = "5.9.1"
 testballoon = "1.0.1-K2.4.0"
 
 [libraries]

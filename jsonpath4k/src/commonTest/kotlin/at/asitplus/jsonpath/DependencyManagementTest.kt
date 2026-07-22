@@ -3,6 +3,7 @@ package at.asitplus.jsonpath
 import at.asitplus.jsonpath.core.JsonPathCompiler
 import at.asitplus.jsonpath.core.JsonPathFunctionExtension
 import at.asitplus.jsonpath.core.JsonPathQuery
+import at.asitplus.testballoon.matrix.ExecutionMode
 import at.asitplus.testballoon.matrix.matrixConfig
 import at.asitplus.testballoon.matrix.matrixSuite
 import de.infix.testBalloon.framework.core.TestConfig
@@ -21,6 +22,7 @@ private val defaultFunctionExtensionRepositoryBackup =
 
 val DependencyManagementTest by matrixSuite(
     matrixConfig {
+        execution = ExecutionMode.Sequential
         // Reset the global dependencies to their defaults around every test (was beforeEach/afterEach).
         testConfig = TestConfig.aroundEachTest { action ->
             // prepare a dummy repository to be modified by the tests

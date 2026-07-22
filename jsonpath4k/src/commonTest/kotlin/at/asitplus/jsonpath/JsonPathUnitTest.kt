@@ -4,7 +4,9 @@ import at.asitplus.jsonpath.core.JsonPathFilterExpressionType
 import at.asitplus.jsonpath.core.JsonPathFunctionExtension
 import at.asitplus.jsonpath.implementation.JsonPathParserException
 import at.asitplus.jsonpath.implementation.JsonPathTypeCheckerException
+import at.asitplus.testballoon.matrix.ExecutionMode
 import at.asitplus.testballoon.matrix.MatrixSuiteScope
+import at.asitplus.testballoon.matrix.matrixConfig
 import at.asitplus.testballoon.matrix.matrixSuite
 import de.infix.testBalloon.framework.core.TestConfig
 import de.infix.testBalloon.framework.core.aroundEachTest
@@ -51,7 +53,7 @@ private val defaultCompilerBuilderBackup = JsonPath.defaultCompiler
 private val defaultFunctionExtensionRepositoryBackup =
     JsonPath.defaultFunctionExtensionRepository.export()
 
-val JsonPathUnitTest by matrixSuite {
+val JsonPathUnitTest by matrixSuite(matrixConfig { execution= ExecutionMode.Sequential }) {
     "Examples from https://datatracker.ietf.org/doc/rfc9535/" - {
         "1.5.  JSONPath Examples" - {
             val bookStore = Json.decodeFromString<JsonElement>(

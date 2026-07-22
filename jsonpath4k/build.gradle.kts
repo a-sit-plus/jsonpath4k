@@ -1,14 +1,16 @@
 import at.asitplus.gradle.Logger
+import at.asitplus.gradle.androidJvmMain
 import at.asitplus.gradle.coroutines
 import at.asitplus.gradle.exportXCFramework
 import at.asitplus.gradle.napier
 import at.asitplus.gradle.serialization
 import at.asitplus.gradle.setupDokka
+import at.asitplus.gradle.tbAddons
 import com.strumenta.antlrkotlin.gradle.AntlrKotlinTask
+import org.gradle.kotlin.dsl.dokka
 import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
 import org.jetbrains.kotlin.gradle.plugin.extraProperties
-import java.util.Properties
-import kotlin.apply
+import java.util.*
 
 plugins {
     alias(libs.plugins.android.kmp.library)
@@ -100,7 +102,6 @@ kotlin {
             dependencies {
                 implementation(libs.antlr.kotlin)
                 implementation(serialization("json"))
-      //          implementation(napier())
             }
         }
         commonTest {
@@ -110,8 +111,23 @@ kotlin {
                 implementation(serialization("json"))
                 // Needed by the highly-concurrent native ANTLR stress test in nativeTest.
                 implementation(coroutines())
+                implementation(tbAddons("matrix"))
             }
         }
+        androidJvmMain {
+            dependencies { implementation(napier()) }
+        }
+        iosMain.dependencies {
+            implementation(napier())
+        }
+        webMain.dependencies {
+            implementation(napier())
+        }
+        macosMain.dependencies {
+            implementation(napier())
+        }
+        tvosMain.dependencies {implementation(napier())}
+
     }
 }
 
@@ -131,7 +147,7 @@ setupDokka(
 )
 
 val moduleDesc = rootProject.file("dokka-tmp.md").apply {
-    writeText("# Module jsonpath4k\n${rootProject.file("README.md").readText().replaceFirst("# ", "")}")
+    writeText("# Module \n${rootProject.file("README.md").readText().replaceFirst("# ", "")}")
 }
 dokka {
     moduleName.set("jsonpath4k")
@@ -142,7 +158,7 @@ dokka {
 
 val javadocRedirectJar = tasks.register<Jar>("javadocRedirectJar") {
     archiveClassifier.set("javadoc")
-    from(project.rootDir.absolutePath+"/javadoc")
+    from(project.rootDir.absolutePath + "/javadoc")
 }
 
 publishing {
