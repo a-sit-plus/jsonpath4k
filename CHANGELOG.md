@@ -1,6 +1,6 @@
 # CHANGELOG
 
-# Release 3.2.0-SNAPSHOT
+# Release 4.0.0-SNAPSHOT
 * Support all KMP targets
     * Logging through Napier is only supported on
         * Android (ART)
@@ -12,6 +12,7 @@
     * Logging on other targets defaults to NOOP
 * Kotlin 2.4.0
 * Fix race condition thanks to latest ANTLR 1.0.13
+* Remove deprecations
 
 # Release 3.1.0
  * Add: structural equality check for `NormalizedJsonPath` and `NormalizedJsonPathSegment` 

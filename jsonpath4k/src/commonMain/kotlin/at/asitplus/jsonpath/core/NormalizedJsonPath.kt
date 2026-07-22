@@ -11,8 +11,7 @@ import kotlin.jvm.JvmInline
 @Serializable
 @JvmInline
 value class NormalizedJsonPath(
-    @Deprecated("Access to this variable will be removed in the future, please use the path itself as list.")
-    val segments: List<NormalizedJsonPathSegment> = listOf(),
+    private val segments: List<NormalizedJsonPathSegment> = listOf(),
 ) : List<NormalizedJsonPathSegment> by segments {
     constructor(vararg segments: NormalizedJsonPathSegment) : this(segments = segments.asList())
 
