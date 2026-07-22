@@ -12,7 +12,7 @@ import at.asitplus.jsonpath.core.functionExtensions.valueFunctionExtension
 import at.asitplus.jsonpath.implementation.AntlrJsonPathCompiler
 import at.asitplus.jsonpath.implementation.AntlrJsonPathCompilerErrorListener
 import com.strumenta.antlrkotlin.runtime.BitSet
-import io.github.aakira.napier.Napier
+//import io.github.aakira.napier.Napier
 import kotlinx.serialization.json.JsonElement
 import org.antlr.v4.kotlinruntime.Parser
 import org.antlr.v4.kotlinruntime.RecognitionException
@@ -39,7 +39,76 @@ class JsonPath(
          * Default json path compiler used when no compiler is explicitly chosen
          */
         var defaultCompiler: JsonPathCompiler = AntlrJsonPathCompiler(
-            errorListener = napierAntlrJsonPathCompilerErrorListener,
+            errorListener = object : AntlrJsonPathCompilerErrorListener {
+                override fun unknownFunctionExtension(functionExtensionName: String) {
+               //     TODO("Not yet implemented")
+                }
+
+                override fun invalidFunctionExtensionForTestExpression(functionExtensionName: String) {
+               //     TODO("Not yet implemented")
+                }
+
+                override fun invalidFunctionExtensionForComparable(functionExtensionName: String) {
+                    //TODO("Not yet implemented")
+                }
+
+                override fun invalidArglistForFunctionExtension(
+                    functionExtensionName: String,
+                    functionExtensionImplementation: JsonPathFunctionExtension,
+                    coercedArgumentTypes: List<Pair<JsonPathFilterExpressionType?, String>>
+                ) {
+                   // TODO("Not yet implemented")
+                }
+
+                override fun invalidTestExpression(testContextString: String) {
+                  //  TODO("Not yet implemented")
+                }
+
+                override fun syntaxError(
+                    recognizer: Recognizer<*, *>,
+                    offendingSymbol: Any?,
+                    line: Int,
+                    charPositionInLine: Int,
+                    msg: String,
+                    e: RecognitionException?
+                ) {
+                    //TODO("Not yet implemented")
+                }
+
+                override fun reportAmbiguity(
+                    recognizer: Parser,
+                    dfa: DFA,
+                    startIndex: Int,
+                    stopIndex: Int,
+                    exact: Boolean,
+                    ambigAlts: BitSet,
+                    configs: ATNConfigSet
+                ) {
+                 //   TODO("Not yet implemented")
+                }
+
+                override fun reportAttemptingFullContext(
+                    recognizer: Parser,
+                    dfa: DFA,
+                    startIndex: Int,
+                    stopIndex: Int,
+                    conflictingAlts: BitSet,
+                    configs: ATNConfigSet
+                ) {
+                   // TODO("Not yet implemented")
+                }
+
+                override fun reportContextSensitivity(
+                    recognizer: Parser,
+                    dfa: DFA,
+                    startIndex: Int,
+                    stopIndex: Int,
+                    prediction: Int,
+                    configs: ATNConfigSet
+                ) {
+                   // TODO("Not yet implemented")
+                }
+            },
         )
 
         /**
@@ -56,7 +125,7 @@ class JsonPath(
         )
     }
 }
-
+/*
 private val napierAntlrJsonPathCompilerErrorListener by lazy {
     object : AntlrJsonPathCompilerErrorListener {
         override fun unknownFunctionExtension(functionExtensionName: String) {
@@ -147,3 +216,4 @@ private val napierAntlrJsonPathCompilerErrorListener by lazy {
         }
     }
 }
+*/

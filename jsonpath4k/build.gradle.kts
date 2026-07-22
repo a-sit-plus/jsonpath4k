@@ -100,7 +100,7 @@ kotlin {
             dependencies {
                 implementation(libs.antlr.kotlin)
                 implementation(serialization("json"))
-                implementation(napier())
+      //          implementation(napier())
             }
         }
         commonTest {
@@ -126,9 +126,19 @@ tasks.withType<org.gradle.jvm.tasks.Jar> {
 
 exportXCFramework("JsonPath4K", transitiveExports = false)
 
-val javadocJar = setupDokka(
+setupDokka(
     baseUrl = "https://github.com/a-sit-plus/jsonpath4k/tree/main"
 )
+
+val moduleDesc = rootProject.file("dokka-tmp.md").apply {
+    writeText("# Module jsonpath4k\n${rootProject.file("README.md").readText().replaceFirst("# ", "")}")
+}
+dokka {
+    moduleName.set("jsonpath4k")
+    dokkaSourceSets.configureEach {
+        includes.from(moduleDesc)
+    }
+}
 
 val javadocRedirectJar = tasks.register<Jar>("javadocRedirectJar") {
     archiveClassifier.set("javadoc")
