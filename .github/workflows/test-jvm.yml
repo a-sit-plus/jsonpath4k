@@ -1,4 +1,4 @@
-name: Test JVM implementation
+name: Test all non-Apple implementations
 on: [push]
 jobs:
   build:
@@ -13,7 +13,7 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
       - name: Run tests
-        run: ./gradlew jvmTest
+        run: ./gradlew allTests
       - name: Test Report
         uses: dorny/test-reporter@v1
         if: success() || failure()

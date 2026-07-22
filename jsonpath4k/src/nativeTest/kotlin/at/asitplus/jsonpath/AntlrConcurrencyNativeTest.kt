@@ -21,9 +21,12 @@ import kotlin.native.concurrent.Worker
  * the defect and to measure how far a thread-safety patch gets us.
  */
 
-private const val WORKERS = 64
-private const val ITERATIONS = 250
-private const val ROUNDS = 8
+// Sized per target (see threadStress). The race triggers by *oversubscription* — many more threads than cores
+// forces heavy interleaving — so it reproduces regardless of a runner's core count; the ~8 MB stack per Worker
+// is the memory ceiling that caps the fan-out on constrained runners.
+private val WORKERS = threadStress.fanOut
+private val ITERATIONS = threadStress.iterations
+private val ROUNDS = threadStress.rounds
 
 /** Everything a worker thread needs, handed over via the [Worker.execute] producer (no captured state). */
 private class WorkerInput(

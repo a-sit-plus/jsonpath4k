@@ -25,9 +25,12 @@ import kotlin.time.Duration.Companion.seconds
  * `TestScope` (virtual time) is disabled per test: real concurrency cannot run under virtual time.
  */
 
-private const val COROUTINES = 500
-private const val ITERATIONS = 40
-private const val ROUNDS = 8
+// Sized per target (see coroutineStressProfile). Coroutines are cheap, but true parallelism is capped at
+// Dispatchers.Default's size (~CPU cores), so this is a strong reproducer only on many-core hosts and a light
+// smoke test on constrained simulators — the thread-based suite is the reliable gate.
+private val COROUTINES = coroutineStressProfile.fanOut
+private val ITERATIONS = coroutineStressProfile.iterations
+private val ROUNDS = coroutineStressProfile.rounds
 
 /**
  * Launches [COROUTINES] coroutines on [Dispatchers.Default], each running [block] [ITERATIONS] times, and lets
@@ -69,8 +72,8 @@ private suspend fun coroutineStress(
 
 val AntlrCoroutineConcurrencyNativeTest by matrixSuite {
 
-    // 1) COLD DFA, SAME EXPRESSION: 500 coroutines compile the identical complex expression with no warmup.
-    test("500 coroutines compiling the same expression on a cold parser", testConfig = realConcurrency) {
+    // 1) COLD DFA, SAME EXPRESSION: many coroutines compile the identical complex expression with no warmup.
+    test("$COROUTINES coroutines compiling the same expression on a cold parser", testConfig = realConcurrency) {
         withTimeout(120.seconds) {
             repeat(ROUNDS) {
                 val expr = "$.store.book[?@.price < 10 && @.category == 'fiction'].title"
@@ -81,8 +84,8 @@ val AntlrCoroutineConcurrencyNativeTest by matrixSuite {
         }
     }
 
-    // 2) MANY DISTINCT EXPRESSIONS: 500 coroutines spread across many expressions -> churn across many decisions.
-    test("500 coroutines compiling many distinct expressions", testConfig = realConcurrency) {
+    // 2) MANY DISTINCT EXPRESSIONS: coroutines spread across many expressions -> churn across many decisions.
+    test("$COROUTINES coroutines compiling many distinct expressions", testConfig = realConcurrency) {
         withTimeout(120.seconds) {
             repeat(ROUNDS) {
                 coroutineStress("distinct-expr") { worker, iteration ->
@@ -95,7 +98,7 @@ val AntlrCoroutineConcurrencyNativeTest by matrixSuite {
 
     // 3) CORRECTNESS UNDER CONCURRENCY: compile + query in parallel, compare against a single-threaded baseline
     //    to catch silent corruption (no exception, but a wrong/incomplete parse -> wrong node list).
-    test("500 coroutines produce results consistent with a single-threaded baseline", testConfig = realConcurrency) {
+    test("$COROUTINES coroutines produce results consistent with a single-threaded baseline", testConfig = realConcurrency) {
         val baseline: Map<String, String> = bookstoreExpressions.associateWith { expr ->
             JsonPath(expr).query(bookStore).map { it.value }.toString()
         }
