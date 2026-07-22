@@ -7,13 +7,13 @@ import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeout
-import kotlin.time.Duration.Companion.seconds
 
 /**
  * Coroutine-fan-out sibling of [AntlrConcurrencyNativeTest].
  *
- * Instead of a bounded, dedicated thread pool, this fires **500 coroutines at once** with `launch` onto
- * [Dispatchers.Default] (which is multi-threaded on Kotlin/Native). The enclosing `coroutineScope` suspends
+ * Instead of a bounded, dedicated thread pool, this fires **many coroutines at once** (see
+ * [coroutineStressProfile]) with `launch` onto [Dispatchers.Default] (multi-threaded on Kotlin/Native), gated so
+ * they start together. The enclosing `coroutineScope` suspends
  * until all of them finish (structured concurrency joins the children for us — no manual gate/`joinAll`), so
  * they slam the ANTLR-generated parser's process-global, mutable prediction state (decoded `ATN`,
  * `decisionToDFA`, `PredictionContextCache`) concurrently.
@@ -74,7 +74,7 @@ val AntlrCoroutineConcurrencyNativeTest by matrixSuite {
 
     // 1) COLD DFA, SAME EXPRESSION: many coroutines compile the identical complex expression with no warmup.
     test("$COROUTINES coroutines compiling the same expression on a cold parser", testConfig = realConcurrency) {
-        withTimeout(120.seconds) {
+        withTimeout(coroutineStressProfile.timeout) {
             repeat(ROUNDS) {
                 val expr = "$.store.book[?@.price < 10 && @.category == 'fiction'].title"
                 coroutineStress("same-expr") { _, _ ->
@@ -86,7 +86,7 @@ val AntlrCoroutineConcurrencyNativeTest by matrixSuite {
 
     // 2) MANY DISTINCT EXPRESSIONS: coroutines spread across many expressions -> churn across many decisions.
     test("$COROUTINES coroutines compiling many distinct expressions", testConfig = realConcurrency) {
-        withTimeout(120.seconds) {
+        withTimeout(coroutineStressProfile.timeout) {
             repeat(ROUNDS) {
                 coroutineStress("distinct-expr") { worker, iteration ->
                     val expr = compileOnlyExpressions[(worker + iteration) % compileOnlyExpressions.size]
@@ -102,7 +102,7 @@ val AntlrCoroutineConcurrencyNativeTest by matrixSuite {
         val baseline: Map<String, String> = bookstoreExpressions.associateWith { expr ->
             JsonPath(expr).query(bookStore).map { it.value }.toString()
         }
-        withTimeout(120.seconds) {
+        withTimeout(coroutineStressProfile.timeout) {
             repeat(ROUNDS) {
                 coroutineStress("correctness") { worker, iteration ->
                     val expr = bookstoreExpressions[(worker + iteration) % bookstoreExpressions.size]

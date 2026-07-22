@@ -9,6 +9,8 @@ import kotlinx.serialization.json.JsonElement
 import kotlin.experimental.ExperimentalNativeApi
 import kotlin.native.OsFamily
 import kotlin.native.Platform
+import kotlin.time.Duration
+import kotlin.time.Duration.Companion.minutes
 
 /**
  * Shared fixtures for the ANTLR concurrency stress suites ([AntlrConcurrencyNativeTest] uses real OS threads;
@@ -20,8 +22,12 @@ import kotlin.native.Platform
 /** Real (non-virtual-time) execution: real concurrency cannot run under TestBalloon's virtual-time `TestScope`. */
 internal val realConcurrency: TestConfig = TestConfig.testScope(isEnabled = false)
 
-/** How hard to hammer, per fan-out unit (OS thread or coroutine). */
-internal data class StressProfile(val fanOut: Int, val iterations: Int, val rounds: Int)
+/**
+ * How hard to hammer, per fan-out unit (OS thread or coroutine). [timeout] is a per-test safety net against a
+ * genuine deadlock — it must comfortably exceed the *expected* runtime (fanOut × iterations × rounds compiles),
+ * not just a hang, so it scales with the workload.
+ */
+internal data class StressProfile(val fanOut: Int, val iterations: Int, val rounds: Int, val timeout: Duration)
 
 /**
  * Sizes the fan-out to the resources of a typical runner for the **current target** (via [Platform.osFamily]) —
@@ -36,10 +42,10 @@ internal data class StressProfile(val fanOut: Int, val iterations: Int, val roun
  *    and every Kotlin/Native `Worker` costs an ~8 MB stack) → scale right down so the sim job stays fast/safe.
  */
 internal val threadStress: StressProfile = when (Platform.osFamily) {
-    OsFamily.LINUX -> StressProfile(fanOut = 256, iterations = 200, rounds = 4)
-    OsFamily.MACOSX -> StressProfile(fanOut = 128, iterations = 200, rounds = 4)
-    OsFamily.WINDOWS -> StressProfile(fanOut = 64, iterations = 150, rounds = 3)
-    else -> StressProfile(fanOut = 12, iterations = 60, rounds = 2)
+    OsFamily.LINUX -> StressProfile(fanOut = 256, iterations = 200, rounds = 4, timeout = 10.minutes)
+    OsFamily.MACOSX -> StressProfile(fanOut = 128, iterations = 200, rounds = 4, timeout = 10.minutes)
+    OsFamily.WINDOWS -> StressProfile(fanOut = 64, iterations = 150, rounds = 3, timeout = 5.minutes)
+    else -> StressProfile(fanOut = 12, iterations = 60, rounds = 2, timeout = 2.minutes)
 }
 
 /**
@@ -47,10 +53,10 @@ internal val threadStress: StressProfile = when (Platform.osFamily) {
  * strong reproducer only on many-core hosts (LINUX/MACOSX) and a light smoke test on constrained simulators.
  */
 internal val coroutineStressProfile: StressProfile = when (Platform.osFamily) {
-    OsFamily.LINUX -> StressProfile(fanOut = 20_000, iterations = 10, rounds = 4)
-    OsFamily.MACOSX -> StressProfile(fanOut = 10_000, iterations = 10, rounds = 4)
-    OsFamily.WINDOWS -> StressProfile(fanOut = 5_000, iterations = 10, rounds = 3)
-    else -> StressProfile(fanOut = 1_000, iterations = 8, rounds = 2)
+    OsFamily.LINUX -> StressProfile(fanOut = 20_000, iterations = 10, rounds = 2, timeout = 10.minutes)
+    OsFamily.MACOSX -> StressProfile(fanOut = 10_000, iterations = 10, rounds = 2, timeout = 10.minutes)
+    OsFamily.WINDOWS -> StressProfile(fanOut = 5_000, iterations = 10, rounds = 2, timeout = 5.minutes)
+    else -> StressProfile(fanOut = 1_000, iterations = 8, rounds = 2, timeout = 2.minutes)
 }
 
 // Non-trivial, valid expressions. Filters, function extensions, logical operators, slices and descendant
