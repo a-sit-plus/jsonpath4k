@@ -4,9 +4,14 @@ import at.asitplus.jsonpath.core.JsonPathFilterExpressionType
 import at.asitplus.jsonpath.core.JsonPathFunctionExtension
 import at.asitplus.jsonpath.implementation.JsonPathParserException
 import at.asitplus.jsonpath.implementation.JsonPathTypeCheckerException
+import at.asitplus.testballoon.matrix.ExecutionMode
+import at.asitplus.testballoon.matrix.MatrixSuiteScope
+import at.asitplus.testballoon.matrix.matrixConfig
+import at.asitplus.testballoon.matrix.matrixSuite
+import de.infix.testBalloon.framework.core.TestConfig
+import de.infix.testBalloon.framework.core.aroundEachTest
 import io.kotest.assertions.throwables.shouldNotThrowAny
 import io.kotest.assertions.throwables.shouldThrow
-import io.kotest.core.spec.style.FreeSpec
 import io.kotest.matchers.collections.shouldBeIn
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.nulls.shouldNotBeNull
@@ -20,8 +25,35 @@ import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
 
-@Suppress("unused")
-class JsonPathUnitTest : FreeSpec({
+/**
+ * Registers a FreeSpec-style test whose name IS the JSONPath expression, compiles that exact expression,
+ * queries [json] and hands the resulting value list to [assertions]. Mirrors the original Kotest idiom that
+ * recovered the expression from `testCase.name.originalName`.
+ */
+private fun MatrixSuiteScope.query(
+    path: String,
+    json: JsonElement,
+    assertions: (nodeList: List<JsonElement>) -> Unit,
+) = path { assertions(JsonPath(path).query(json).map { it.value }) }
+
+/** Test named after [path] asserting that compiling it succeeds. */
+private fun MatrixSuiteScope.compiles(path: String) =
+    path { shouldNotThrowAny { JsonPath(path) } }
+
+/** Test named after [path] asserting that compiling it fails type checking. */
+private fun MatrixSuiteScope.failsTypeCheck(path: String) =
+    path { shouldThrow<JsonPathTypeCheckerException> { JsonPath(path) } }
+
+/** Test named after [path] asserting that compiling it fails parsing. */
+private fun MatrixSuiteScope.failsParsing(path: String) =
+    path { shouldThrow<JsonPathParserException> { JsonPath(path) } }
+
+// Captured once, before any test in section 2.4 mutates the process-global JsonPath dependencies.
+private val defaultCompilerBuilderBackup = JsonPath.defaultCompiler
+private val defaultFunctionExtensionRepositoryBackup =
+    JsonPath.defaultFunctionExtensionRepository.export()
+
+val JsonPathUnitTest by matrixSuite(matrixConfig { execution= ExecutionMode.Sequential }) {
     "Examples from https://datatracker.ietf.org/doc/rfc9535/" - {
         "1.5.  JSONPath Examples" - {
             val bookStore = Json.decodeFromString<JsonElement>(
@@ -58,9 +90,7 @@ class JsonPathUnitTest : FreeSpec({
                         "   }"
             )
 
-            "$.store.book[*].author" {
-                val nodeList = JsonPath(this.testScope.testCase.name.originalName)
-                    .query(bookStore).map { it.value }
+            query("$.store.book[*].author", bookStore) { nodeList ->
                 nodeList shouldHaveSize 4
                 val bookArray =
                     bookStore.jsonObject["store"].shouldNotBeNull().jsonObject["book"].shouldNotBeNull().jsonArray
@@ -70,9 +100,7 @@ class JsonPathUnitTest : FreeSpec({
                 }
             }
 
-            "$..author" {
-                val nodeList = JsonPath(this.testScope.testCase.name.originalName)
-                    .query(bookStore).map { it.value }
+            query("$..author", bookStore) { nodeList ->
                 nodeList shouldHaveSize 4
                 val bookArray =
                     bookStore.jsonObject["store"].shouldNotBeNull().jsonObject["book"].shouldNotBeNull().jsonArray
@@ -82,9 +110,7 @@ class JsonPathUnitTest : FreeSpec({
                 }
             }
 
-            "\$.store.*" {
-                val nodeList = JsonPath(this.testScope.testCase.name.originalName)
-                    .query(bookStore).map { it.value }
+            query("\$.store.*", bookStore) { nodeList ->
                 nodeList shouldHaveSize 2
                 val store =
                     bookStore.jsonObject["store"].shouldNotBeNull().jsonObject
@@ -92,9 +118,7 @@ class JsonPathUnitTest : FreeSpec({
                 store.get("bicycle").shouldNotBeNull().shouldBeIn(nodeList)
             }
 
-            "\$.store..price" {
-                val nodeList = JsonPath(this.testScope.testCase.name.originalName)
-                    .query(bookStore).map { it.value }
+            query("\$.store..price", bookStore) { nodeList ->
                 nodeList shouldHaveSize 5
                 val store =
                     bookStore.jsonObject["store"].shouldNotBeNull().jsonObject
@@ -105,9 +129,7 @@ class JsonPathUnitTest : FreeSpec({
                     .shouldBeIn(nodeList)
             }
 
-            "\$..book[2]" {
-                val nodeList = JsonPath(this.testScope.testCase.name.originalName)
-                    .query(bookStore).map { it.value }
+            query("\$..book[2]", bookStore) { nodeList ->
                 nodeList shouldHaveSize 1
                 bookStore.jsonObject["store"]
                     .shouldNotBeNull().jsonObject["book"]
@@ -115,9 +137,7 @@ class JsonPathUnitTest : FreeSpec({
                     .shouldNotBeNull().shouldBeIn(nodeList)
             }
 
-            "\$..book[2].author" {
-                val nodeList = JsonPath(this.testScope.testCase.name.originalName)
-                    .query(bookStore).map { it.value }
+            query("\$..book[2].author", bookStore) { nodeList ->
                 nodeList shouldHaveSize 1
                 bookStore.jsonObject["store"]
                     .shouldNotBeNull().jsonObject["book"]
@@ -126,15 +146,11 @@ class JsonPathUnitTest : FreeSpec({
                     .shouldNotBeNull().shouldBeIn(nodeList)
             }
 
-            "\$..book[2].publisher" {
-                val nodeList = JsonPath(this.testScope.testCase.name.originalName)
-                    .query(bookStore).map { it.value }
+            query("\$..book[2].publisher", bookStore) { nodeList ->
                 nodeList shouldHaveSize 0
             }
 
-            "\$..book[-1]" {
-                val nodeList = JsonPath(this.testScope.testCase.name.originalName)
-                    .query(bookStore).map { it.value }
+            query("\$..book[-1]", bookStore) { nodeList ->
                 nodeList shouldHaveSize 1
                 bookStore.jsonObject["store"]
                     .shouldNotBeNull().jsonObject["book"]
@@ -142,9 +158,7 @@ class JsonPathUnitTest : FreeSpec({
                     .shouldNotBeNull().shouldBeIn(nodeList)
             }
 
-            "\$..book[0,1]" {
-                val nodeList = JsonPath(this.testScope.testCase.name.originalName)
-                    .query(bookStore).map { it.value }
+            query("\$..book[0,1]", bookStore) { nodeList ->
                 nodeList shouldHaveSize 2
                 bookStore.jsonObject["store"]
                     .shouldNotBeNull().jsonObject["book"]
@@ -155,9 +169,7 @@ class JsonPathUnitTest : FreeSpec({
                     }
             }
 
-            "\$..book[:2]" {
-                val nodeList = JsonPath(this.testScope.testCase.name.originalName)
-                    .query(bookStore).map { it.value }
+            query("\$..book[:2]", bookStore) { nodeList ->
                 nodeList shouldHaveSize 2
                 bookStore.jsonObject["store"]
                     .shouldNotBeNull().jsonObject["book"]
@@ -168,9 +180,7 @@ class JsonPathUnitTest : FreeSpec({
                     }
             }
 
-            "\$..book[?@.isbn]" {
-                val nodeList = JsonPath(this.testScope.testCase.name.originalName)
-                    .query(bookStore).map { it.value }
+            query("\$..book[?@.isbn]", bookStore) { nodeList ->
                 nodeList shouldHaveSize 2
                 bookStore.jsonObject["store"]
                     .shouldNotBeNull().jsonObject["book"]
@@ -181,9 +191,7 @@ class JsonPathUnitTest : FreeSpec({
                     }
             }
 
-            "\$..book[?@.price<10]" {
-                val nodeList = JsonPath(this.testScope.testCase.name.originalName)
-                    .query(bookStore).map { it.value }
+            query("\$..book[?@.price<10]", bookStore) { nodeList ->
                 nodeList shouldHaveSize 2
                 bookStore.jsonObject["store"]
                     .shouldNotBeNull().jsonObject["book"]
@@ -194,9 +202,7 @@ class JsonPathUnitTest : FreeSpec({
                     }
             }
 
-            "\$..*" {
-                val nodeList = JsonPath(this.testScope.testCase.name.originalName)
-                    .query(bookStore).map { it.value }
+            query("\$..*", bookStore) { nodeList ->
                 bookStore.jsonObject["store"]
                     .shouldNotBeNull().shouldBeIn(nodeList).jsonObject.let { store ->
                         store["book"].shouldNotBeNull()
@@ -216,29 +222,21 @@ class JsonPathUnitTest : FreeSpec({
         "2.1. Overview" - {
             val jsonElement =
                 Json.decodeFromString<JsonElement>("{\"a\":[{\"b\":0},{\"b\":1},{\"c\":2}]}")
-            "\$" {
-                val nodeList = JsonPath(this.testScope.testCase.name.originalName)
-                    .query(jsonElement).map { it.value }
+            query("\$", jsonElement) { nodeList ->
                 nodeList shouldHaveSize 1
                 jsonElement.shouldBeIn(nodeList)
             }
-            "\$.a" {
-                val nodeList = JsonPath(this.testScope.testCase.name.originalName)
-                    .query(jsonElement).map { it.value }
+            query("\$.a", jsonElement) { nodeList ->
                 nodeList shouldHaveSize 1
                 jsonElement.jsonObject["a"].shouldNotBeNull().shouldBeIn(nodeList)
             }
-            "\$.a[*]" {
-                val nodeList = JsonPath(this.testScope.testCase.name.originalName)
-                    .query(jsonElement).map { it.value }
+            query("\$.a[*]", jsonElement) { nodeList ->
                 nodeList shouldHaveSize 3
                 jsonElement.jsonObject["a"].shouldNotBeNull().jsonArray.forEach {
                     it.shouldBeIn(nodeList)
                 }
             }
-            "\$.a[*].b" {
-                val nodeList = JsonPath(this.testScope.testCase.name.originalName)
-                    .query(jsonElement).map { it.value }
+            query("\$.a[*].b", jsonElement) { nodeList ->
                 nodeList shouldHaveSize 2
                 jsonElement.jsonObject["a"].shouldNotBeNull().jsonArray.forEach {
                     it.shouldBeInstanceOf<JsonObject>()["b"]?.jsonPrimitive?.shouldBeIn(nodeList)
@@ -248,9 +246,7 @@ class JsonPathUnitTest : FreeSpec({
 
         "2.2. Root Identifier" - {
             val jsonElement = Json.decodeFromString<JsonElement>("{\"k\": \"v\"}")
-            "$" {
-                val nodeList = JsonPath(this.testScope.testCase.name.originalName)
-                    .query(jsonElement).map { it.value }
+            query("$", jsonElement) { nodeList ->
                 nodeList shouldHaveSize 1
                 jsonElement.shouldBeIn(nodeList)
             }
@@ -263,35 +259,27 @@ class JsonPathUnitTest : FreeSpec({
                         "                \"'\": {\"@\": 2}\n" +
                         "            }"
             )
-            "\$.o['j j']" {
-                val nodeList = JsonPath(this.testScope.testCase.name.originalName)
-                    .query(jsonElement).map { it.value }
+            query("\$.o['j j']", jsonElement) { nodeList ->
                 nodeList shouldHaveSize 1
                 jsonElement.jsonObject.get("o")
                     .shouldNotBeNull().jsonObject["j j"]
                     .shouldNotBeNull().shouldBeIn(nodeList)
             }
-            "\$.o['j j']['k.k']" {
-                val nodeList = JsonPath(this.testScope.testCase.name.originalName)
-                    .query(jsonElement).map { it.value }
+            query("\$.o['j j']['k.k']", jsonElement) { nodeList ->
                 nodeList shouldHaveSize 1
                 jsonElement.jsonObject.get("o")
                     .shouldNotBeNull().jsonObject["j j"]
                     .shouldNotBeNull().jsonObject["k.k"]
                     .shouldNotBeNull().shouldBeIn(nodeList)
             }
-            "\$.o[\"j j\"][\"k.k\"]" {
-                val nodeList = JsonPath(this.testScope.testCase.name.originalName)
-                    .query(jsonElement).map { it.value }
+            query("\$.o[\"j j\"][\"k.k\"]", jsonElement) { nodeList ->
                 nodeList shouldHaveSize 1
                 jsonElement.jsonObject.get("o")
                     .shouldNotBeNull().jsonObject["j j"]
                     .shouldNotBeNull().jsonObject["k.k"]
                     .shouldNotBeNull().shouldBeIn(nodeList)
             }
-            "\$[\"'\"][\"@\"]" {
-                val nodeList = JsonPath(this.testScope.testCase.name.originalName)
-                    .query(jsonElement).map { it.value }
+            query("\$[\"'\"][\"@\"]", jsonElement) { nodeList ->
                 nodeList shouldHaveSize 1
                 jsonElement.jsonObject.get("'")
                     .shouldNotBeNull().jsonObject["@"]
@@ -306,18 +294,14 @@ class JsonPathUnitTest : FreeSpec({
                         "     \"a\": [5, 3]\n" +
                         "   }"
             )
-            "\$[*]" {
-                val nodeList = JsonPath(this.testScope.testCase.name.originalName)
-                    .query(jsonElement).map { it.value }
+            query("\$[*]", jsonElement) { nodeList ->
                 nodeList shouldHaveSize 2
                 jsonElement.jsonObject.get("o")
                     .shouldNotBeNull().shouldBeIn(nodeList)
                 jsonElement.jsonObject.get("a")
                     .shouldNotBeNull().shouldBeIn(nodeList)
             }
-            "\$.o[*]" {
-                val nodeList = JsonPath(this.testScope.testCase.name.originalName)
-                    .query(jsonElement).map { it.value }
+            query("\$.o[*]", jsonElement) { nodeList ->
                 nodeList shouldHaveSize 2
                 jsonElement.jsonObject["o"].shouldNotBeNull().let {
                     it.jsonObject["j"]
@@ -326,9 +310,7 @@ class JsonPathUnitTest : FreeSpec({
                         .shouldNotBeNull().shouldBeIn(nodeList)
                 }
             }
-            "\$.o[*, *]" {
-                val nodeList = JsonPath(this.testScope.testCase.name.originalName)
-                    .query(jsonElement).map { it.value }
+            query("\$.o[*, *]", jsonElement) { nodeList ->
                 nodeList shouldHaveSize 4
                 jsonElement.jsonObject["o"].shouldNotBeNull().let {
                     it.jsonObject["j"]
@@ -345,9 +327,7 @@ class JsonPathUnitTest : FreeSpec({
                         }
                 }
             }
-            "\$.a[*]" {
-                val nodeList = JsonPath(this.testScope.testCase.name.originalName)
-                    .query(jsonElement).map { it.value }
+            query("\$.a[*]", jsonElement) { nodeList ->
                 nodeList shouldHaveSize 2
                 jsonElement.jsonObject["a"].shouldNotBeNull().let {
                     it.jsonArray[0]
@@ -369,15 +349,11 @@ class JsonPathUnitTest : FreeSpec({
         "2.3.3.  Index Selector" - {
             val jsonElement = Json.decodeFromString<JsonElement>("[\"a\",\"b\"]")
 
-            "\$[1]" {
-                val nodeList = JsonPath(this.testScope.testCase.name.originalName)
-                    .query(jsonElement).map { it.value }
+            query("\$[1]", jsonElement) { nodeList ->
                 nodeList shouldHaveSize 1
                 jsonElement.jsonArray[1].shouldNotBeNull().shouldBeIn(nodeList)
             }
-            "\$[-2]" {
-                val nodeList = JsonPath(this.testScope.testCase.name.originalName)
-                    .query(jsonElement).map { it.value }
+            query("\$[-2]", jsonElement) { nodeList ->
                 nodeList shouldHaveSize 1
                 jsonElement.jsonArray[0].shouldNotBeNull().shouldBeIn(nodeList)
             }
@@ -387,9 +363,7 @@ class JsonPathUnitTest : FreeSpec({
             val jsonElement =
                 Json.decodeFromString<JsonElement>("[\"a\", \"b\", \"c\", \"d\", \"e\", \"f\", \"g\"]")
 
-            "\$[1:3]" {
-                val nodeList = JsonPath(this.testScope.testCase.name.originalName)
-                    .query(jsonElement).map { it.value }
+            query("\$[1:3]", jsonElement) { nodeList ->
                 nodeList shouldHaveSize 2
                 jsonElement.jsonArray[1].shouldNotBeNull().shouldBeIn(nodeList).let {
                     nodeList[0].shouldBe(it)
@@ -398,9 +372,7 @@ class JsonPathUnitTest : FreeSpec({
                     nodeList[1].shouldBe(it)
                 }
             }
-            "\$[5:]" {
-                val nodeList = JsonPath(this.testScope.testCase.name.originalName)
-                    .query(jsonElement).map { it.value }
+            query("\$[5:]", jsonElement) { nodeList ->
                 nodeList shouldHaveSize 2
                 jsonElement.jsonArray[5].shouldNotBeNull().shouldBeIn(nodeList).let {
                     nodeList[0].shouldBe(it)
@@ -409,9 +381,7 @@ class JsonPathUnitTest : FreeSpec({
                     nodeList[1].shouldBe(it)
                 }
             }
-            "\$[1:5:2]" {
-                val nodeList = JsonPath(this.testScope.testCase.name.originalName)
-                    .query(jsonElement).map { it.value }
+            query("\$[1:5:2]", jsonElement) { nodeList ->
                 nodeList shouldHaveSize 2
                 jsonElement.jsonArray[1].shouldNotBeNull().shouldBeIn(nodeList).let {
                     nodeList[0].shouldBe(it)
@@ -420,9 +390,7 @@ class JsonPathUnitTest : FreeSpec({
                     nodeList[1].shouldBe(it)
                 }
             }
-            "\$[5:1:-2]" {
-                val nodeList = JsonPath(this.testScope.testCase.name.originalName)
-                    .query(jsonElement).map { it.value }
+            query("\$[5:1:-2]", jsonElement) { nodeList ->
                 nodeList shouldHaveSize 2
                 jsonElement.jsonArray[5].shouldNotBeNull().shouldBeIn(nodeList).let {
                     nodeList[0].shouldBe(it)
@@ -431,9 +399,7 @@ class JsonPathUnitTest : FreeSpec({
                     nodeList[1].shouldBe(it)
                 }
             }
-            "\$[::-1]" {
-                val nodeList = JsonPath(this.testScope.testCase.name.originalName)
-                    .query(jsonElement).map { it.value }
+            query("\$[::-1]", jsonElement) { nodeList ->
                 nodeList shouldHaveSize 7
                 for (i in 6.downTo(0)) {
                     jsonElement.jsonArray[i].shouldNotBeNull().shouldBeIn(nodeList).let {
@@ -455,144 +421,88 @@ class JsonPathUnitTest : FreeSpec({
                             "   }"
                 ).jsonObject
 
-                "\$[?\$.absent1 == \$.absent2]" {
-                    val nodeList = JsonPath(this.testScope.testCase.name.originalName)
-                        .query(jsonElement).map { it.value }
+                query("\$[?\$.absent1 == \$.absent2]", jsonElement) { nodeList ->
                     nodeList shouldHaveSize jsonElement.size
                 }
-                "\$[?\$.absent1 <= \$.absent2 ]" {
-                    val nodeList = JsonPath(this.testScope.testCase.name.originalName)
-                        .query(jsonElement).map { it.value }
+                query("\$[?\$.absent1 <= \$.absent2 ]", jsonElement) { nodeList ->
                     nodeList shouldHaveSize jsonElement.size
                 }
-                "\$[?\$.absent == 'g']" {
-                    val nodeList = JsonPath(this.testScope.testCase.name.originalName)
-                        .query(jsonElement).map { it.value }
+                query("\$[?\$.absent == 'g']", jsonElement) { nodeList ->
                     nodeList shouldHaveSize 0
                 }
-                "\$[?\$.absent1 != \$.absent2]" {
-                    val nodeList = JsonPath(this.testScope.testCase.name.originalName)
-                        .query(jsonElement).map { it.value }
+                query("\$[?\$.absent1 != \$.absent2]", jsonElement) { nodeList ->
                     nodeList shouldHaveSize 0
                 }
-                "\$[?\$.absent != 'g']" {
-                    val nodeList = JsonPath(this.testScope.testCase.name.originalName)
-                        .query(jsonElement).map { it.value }
+                query("\$[?\$.absent != 'g']", jsonElement) { nodeList ->
                     nodeList shouldHaveSize jsonElement.size
                 }
-                "\$[?1 <= 2]" {
-                    val nodeList = JsonPath(this.testScope.testCase.name.originalName)
-                        .query(jsonElement).map { it.value }
+                query("\$[?1 <= 2]", jsonElement) { nodeList ->
                     nodeList shouldHaveSize jsonElement.size
                 }
-                "\$[?1 > 2]" {
-                    val nodeList = JsonPath(this.testScope.testCase.name.originalName)
-                        .query(jsonElement).map { it.value }
+                query("\$[?1 > 2]", jsonElement) { nodeList ->
                     nodeList shouldHaveSize 0
                 }
-                "\$[?13 == '13']" {
-                    val nodeList = JsonPath(this.testScope.testCase.name.originalName)
-                        .query(jsonElement).map { it.value }
+                query("\$[?13 == '13']", jsonElement) { nodeList ->
                     nodeList shouldHaveSize 0
                 }
-                "\$[?'a' <= 'b']" {
-                    val nodeList = JsonPath(this.testScope.testCase.name.originalName)
-                        .query(jsonElement).map { it.value }
+                query("\$[?'a' <= 'b']", jsonElement) { nodeList ->
                     nodeList shouldHaveSize jsonElement.size
                 }
-                "\$[?'a' > 'b']" {
-                    val nodeList = JsonPath(this.testScope.testCase.name.originalName)
-                        .query(jsonElement).map { it.value }
+                query("\$[?'a' > 'b']", jsonElement) { nodeList ->
                     nodeList shouldHaveSize 0
                 }
-                "\$[?\$.obj == \$.arr]" {
-                    val nodeList = JsonPath(this.testScope.testCase.name.originalName)
-                        .query(jsonElement).map { it.value }
+                query("\$[?\$.obj == \$.arr]", jsonElement) { nodeList ->
                     nodeList shouldHaveSize 0
                 }
-                "\$[?\$.obj != \$.arr]" {
-                    val nodeList = JsonPath(this.testScope.testCase.name.originalName)
-                        .query(jsonElement).map { it.value }
+                query("\$[?\$.obj != \$.arr]", jsonElement) { nodeList ->
                     nodeList shouldHaveSize jsonElement.size
                 }
-                "\$[?\$.obj == \$.obj]" {
-                    val nodeList = JsonPath(this.testScope.testCase.name.originalName)
-                        .query(jsonElement).map { it.value }
+                query("\$[?\$.obj == \$.obj]", jsonElement) { nodeList ->
                     nodeList shouldHaveSize jsonElement.size
                 }
-                "\$[?\$.obj != \$.obj]" {
-                    val nodeList = JsonPath(this.testScope.testCase.name.originalName)
-                        .query(jsonElement).map { it.value }
+                query("\$[?\$.obj != \$.obj]", jsonElement) { nodeList ->
                     nodeList shouldHaveSize 0
                 }
-                "\$[?\$.arr == \$.arr]" {
-                    val nodeList = JsonPath(this.testScope.testCase.name.originalName)
-                        .query(jsonElement).map { it.value }
+                query("\$[?\$.arr == \$.arr]", jsonElement) { nodeList ->
                     nodeList shouldHaveSize jsonElement.size
                 }
-                "\$[?\$.arr != \$.arr]" {
-                    val nodeList = JsonPath(this.testScope.testCase.name.originalName)
-                        .query(jsonElement).map { it.value }
+                query("\$[?\$.arr != \$.arr]", jsonElement) { nodeList ->
                     nodeList shouldHaveSize 0
                 }
-                "\$[?\$.obj == 17]" {
-                    val nodeList = JsonPath(this.testScope.testCase.name.originalName)
-                        .query(jsonElement).map { it.value }
+                query("\$[?\$.obj == 17]", jsonElement) { nodeList ->
                     nodeList shouldHaveSize 0
                 }
-                "\$[?\$.obj != 17]" {
-                    val nodeList = JsonPath(this.testScope.testCase.name.originalName)
-                        .query(jsonElement).map { it.value }
+                query("\$[?\$.obj != 17]", jsonElement) { nodeList ->
                     nodeList shouldHaveSize jsonElement.size
                 }
-                "\$[?\$.obj <= \$.arr]" {
-                    val nodeList = JsonPath(this.testScope.testCase.name.originalName)
-                        .query(jsonElement).map { it.value }
+                query("\$[?\$.obj <= \$.arr]", jsonElement) { nodeList ->
                     nodeList shouldHaveSize 0
                 }
-                "\$[?\$.obj < \$.arr]" {
-                    val nodeList = JsonPath(this.testScope.testCase.name.originalName)
-                        .query(jsonElement).map { it.value }
+                query("\$[?\$.obj < \$.arr]", jsonElement) { nodeList ->
                     nodeList shouldHaveSize 0
                 }
-                "\$[?\$.obj <= \$.obj]" {
-                    val nodeList = JsonPath(this.testScope.testCase.name.originalName)
-                        .query(jsonElement).map { it.value }
+                query("\$[?\$.obj <= \$.obj]", jsonElement) { nodeList ->
                     nodeList shouldHaveSize jsonElement.size
                 }
-                "\$[?\$.arr <= \$.arr]" {
-                    val nodeList = JsonPath(this.testScope.testCase.name.originalName)
-                        .query(jsonElement).map { it.value }
+                query("\$[?\$.arr <= \$.arr]", jsonElement) { nodeList ->
                     nodeList shouldHaveSize jsonElement.size
                 }
-                "\$[?1 <= \$.arr]" {
-                    val nodeList = JsonPath(this.testScope.testCase.name.originalName)
-                        .query(jsonElement).map { it.value }
+                query("\$[?1 <= \$.arr]", jsonElement) { nodeList ->
                     nodeList shouldHaveSize 0
                 }
-                "\$[?1 >= \$.arr]" {
-                    val nodeList = JsonPath(this.testScope.testCase.name.originalName)
-                        .query(jsonElement).map { it.value }
+                query("\$[?1 >= \$.arr]", jsonElement) { nodeList ->
                     nodeList shouldHaveSize 0
                 }
-                "\$[?1 > \$.arr]" {
-                    val nodeList = JsonPath(this.testScope.testCase.name.originalName)
-                        .query(jsonElement).map { it.value }
+                query("\$[?1 > \$.arr]", jsonElement) { nodeList ->
                     nodeList shouldHaveSize 0
                 }
-                "\$[?1 < \$.arr]" {
-                    val nodeList = JsonPath(this.testScope.testCase.name.originalName)
-                        .query(jsonElement).map { it.value }
+                query("\$[?1 < \$.arr]", jsonElement) { nodeList ->
                     nodeList shouldHaveSize 0
                 }
-                "\$[?true <= true]" {
-                    val nodeList = JsonPath(this.testScope.testCase.name.originalName)
-                        .query(jsonElement).map { it.value }
+                query("\$[?true <= true]", jsonElement) { nodeList ->
                     nodeList shouldHaveSize jsonElement.size
                 }
-                "\$[?true > true]" {
-                    val nodeList = JsonPath(this.testScope.testCase.name.originalName)
-                        .query(jsonElement).map { it.value }
+                query("\$[?true > true]", jsonElement) { nodeList ->
                     nodeList shouldHaveSize 0
                 }
             }
@@ -610,27 +520,17 @@ class JsonPathUnitTest : FreeSpec({
                             "   }"
                 ).jsonObject
 
-
-                "\$.a[?@.b == 'kilo']" {
-                    val nodeList = JsonPath(this.testScope.testCase.name.originalName)
-                        .query(jsonElement).map { it.value }
-
+                query("\$.a[?@.b == 'kilo']", jsonElement) { nodeList ->
                     nodeList shouldHaveSize 1
                     jsonElement.jsonObject["a"].shouldNotBeNull()
                         .jsonArray.get(9).shouldNotBeNull().shouldBeIn(nodeList)
                 }
-                "\$.a[?(@.b == 'kilo')]" {
-                    val nodeList = JsonPath(this.testScope.testCase.name.originalName)
-                        .query(jsonElement).map { it.value }
-
+                query("\$.a[?(@.b == 'kilo')]", jsonElement) { nodeList ->
                     nodeList shouldHaveSize 1
                     jsonElement.jsonObject["a"].shouldNotBeNull()
                         .jsonArray.get(9).shouldNotBeNull().shouldBeIn(nodeList)
                 }
-                "\$.a[?@>3.5]" {
-                    val nodeList = JsonPath(this.testScope.testCase.name.originalName)
-                        .query(jsonElement).map { it.value }
-
+                query("\$.a[?@>3.5]", jsonElement) { nodeList ->
                     nodeList shouldHaveSize 3
                     jsonElement.jsonObject["a"].shouldNotBeNull().let { a ->
                         a.jsonArray[1].shouldNotBeNull().shouldBeIn(nodeList)
@@ -638,10 +538,7 @@ class JsonPathUnitTest : FreeSpec({
                         a.jsonArray[5].shouldNotBeNull().shouldBeIn(nodeList)
                     }
                 }
-                "\$.a[?@.b]" {
-                    val nodeList = JsonPath(this.testScope.testCase.name.originalName)
-                        .query(jsonElement).map { it.value }
-
+                query("\$.a[?@.b]", jsonElement) { nodeList ->
                     nodeList shouldHaveSize 4
                     jsonElement.jsonObject["a"].shouldNotBeNull().let { a ->
                         a.jsonArray[6].shouldNotBeNull().shouldBeIn(nodeList)
@@ -650,25 +547,16 @@ class JsonPathUnitTest : FreeSpec({
                         a.jsonArray[9].shouldNotBeNull().shouldBeIn(nodeList)
                     }
                 }
-                "\$[?@.*]" {
-                    val nodeList = JsonPath(this.testScope.testCase.name.originalName)
-                        .query(jsonElement).map { it.value }
-
+                query("\$[?@.*]", jsonElement) { nodeList ->
                     nodeList shouldHaveSize 2
                     jsonElement.jsonObject["a"].shouldNotBeNull().shouldBeIn(nodeList)
                     jsonElement.jsonObject["o"].shouldNotBeNull().shouldBeIn(nodeList)
                 }
-                "\$[?@[?@.b]]" {
-                    val nodeList = JsonPath(this.testScope.testCase.name.originalName)
-                        .query(jsonElement).map { it.value }
-
+                query("\$[?@[?@.b]]", jsonElement) { nodeList ->
                     nodeList shouldHaveSize 1
                     jsonElement.jsonObject["a"].shouldNotBeNull().shouldBeIn(nodeList)
                 }
-                "\$.o[?@<3, ?@<3]" {
-                    val nodeList = JsonPath(this.testScope.testCase.name.originalName)
-                        .query(jsonElement).map { it.value }
-
+                query("\$.o[?@<3, ?@<3]", jsonElement) { nodeList ->
                     nodeList shouldHaveSize 4
                     jsonElement.jsonObject["o"].shouldNotBeNull().jsonObject.let { o ->
                         o["p"].shouldNotBeNull().shouldBeIn(nodeList).let { p ->
@@ -683,30 +571,21 @@ class JsonPathUnitTest : FreeSpec({
                         }
                     }
                 }
-                "\$.a[?@<2 || @.b == \"k\"]" {
-                    val nodeList = JsonPath(this.testScope.testCase.name.originalName)
-                        .query(jsonElement).map { it.value }
-
+                query("\$.a[?@<2 || @.b == \"k\"]", jsonElement) { nodeList ->
                     nodeList shouldHaveSize 2
                     jsonElement.jsonObject["a"].shouldNotBeNull().let { a ->
                         a.jsonArray.get(2).shouldNotBeNull().shouldBeIn(nodeList)
                         a.jsonArray.get(7).shouldNotBeNull().shouldBeIn(nodeList)
                     }
                 }
-                "\$.a[?match(@.b, \"[jk]\")]" {
-                    val nodeList = JsonPath(this.testScope.testCase.name.originalName)
-                        .query(jsonElement).map { it.value }
-
+                query("\$.a[?match(@.b, \"[jk]\")]", jsonElement) { nodeList ->
                     nodeList shouldHaveSize 2
                     jsonElement.jsonObject["a"].shouldNotBeNull().let { a ->
                         a.jsonArray.get(6).shouldNotBeNull().shouldBeIn(nodeList)
                         a.jsonArray.get(7).shouldNotBeNull().shouldBeIn(nodeList)
                     }
                 }
-                "\$.a[?search(@.b, \"[jk]\")]" {
-                    val nodeList = JsonPath(this.testScope.testCase.name.originalName)
-                        .query(jsonElement).map { it.value }
-
+                query("\$.a[?search(@.b, \"[jk]\")]", jsonElement) { nodeList ->
                     nodeList shouldHaveSize 3
                     jsonElement.jsonObject["a"].shouldNotBeNull().let { a ->
                         a.jsonArray.get(6).shouldNotBeNull().shouldBeIn(nodeList)
@@ -714,28 +593,19 @@ class JsonPathUnitTest : FreeSpec({
                         a.jsonArray.get(9).shouldNotBeNull().shouldBeIn(nodeList)
                     }
                 }
-                "\$.o[?@>1 && @<4]" {
-                    val nodeList = JsonPath(this.testScope.testCase.name.originalName)
-                        .query(jsonElement).map { it.value }
-
+                query("\$.o[?@>1 && @<4]", jsonElement) { nodeList ->
                     nodeList shouldHaveSize 2
                     jsonElement.jsonObject["o"].shouldNotBeNull().jsonObject.let { o ->
                         o["q"].shouldNotBeNull().shouldBeIn(nodeList)
                         o["r"].shouldNotBeNull().shouldBeIn(nodeList)
                     }
                 }
-                "\$.o[?@.u || @.x]" {
-                    val nodeList = JsonPath(this.testScope.testCase.name.originalName)
-                        .query(jsonElement).map { it.value }
-
+                query("\$.o[?@.u || @.x]", jsonElement) { nodeList ->
                     nodeList shouldHaveSize 1
                     jsonElement.jsonObject["o"].shouldNotBeNull().jsonObject
                         .get("t").shouldNotBeNull().shouldBeIn(nodeList)
                 }
-                "\$.a[?@.b == $.x]" {
-                    val nodeList = JsonPath(this.testScope.testCase.name.originalName)
-                        .query(jsonElement).map { it.value }
-
+                query("\$.a[?@.b == $.x]", jsonElement) { nodeList ->
                     nodeList shouldHaveSize 6
                     jsonElement.jsonObject["a"].shouldNotBeNull().jsonArray.let { a ->
                         nodeList[0].shouldBe(a[0])
@@ -746,10 +616,7 @@ class JsonPathUnitTest : FreeSpec({
                         nodeList[5].shouldBe(a[5])
                     }
                 }
-                "\$.a[?@ || @]" {
-                    val nodeList = JsonPath(this.testScope.testCase.name.originalName)
-                        .query(jsonElement).map { it.value }
-
+                query("\$.a[?@ || @]", jsonElement) { nodeList ->
                     nodeList shouldHaveSize 10
                     jsonElement.jsonObject["a"].shouldNotBeNull().jsonArray.let { a ->
                         for (index in 0..9) {
@@ -760,119 +627,133 @@ class JsonPathUnitTest : FreeSpec({
             }
         }
 
-        "2.4. Function Extensions" - {
-            // making sure that the dependencies are reset to their default for the next test
-            val defaultCompilerBuilderBackup = JsonPath.defaultCompiler
-            val defaultFunctionExtensionRepositoryBackup =
-                JsonPath.defaultFunctionExtensionRepository.export()
-            beforeEach {
+        "2.4. Function Extensions"(
+            TestConfig.aroundEachTest { action ->
                 // prepare a dummy repository to be modified by the tests
-                JsonPath.defaultFunctionExtensionRepository =
-                    JsonPathFunctionExtensionMapRepository(
+                JsonPath.defaultFunctionExtensionRepository = JsonPathFunctionExtensionMapRepository(
+                    defaultFunctionExtensionRepositoryBackup.toMutableMap()
+                )
+                try {
+                    action()
+                } finally {
+                    JsonPath.defaultCompiler = defaultCompilerBuilderBackup
+                    JsonPath.defaultFunctionExtensionRepository = JsonPathFunctionExtensionMapRepository(
                         defaultFunctionExtensionRepositoryBackup.toMutableMap()
                     )
-            }
-            afterEach {
-                JsonPath.Companion.apply {
-                    defaultCompiler = defaultCompilerBuilderBackup
-                    defaultFunctionExtensionRepository =
-                        JsonPathFunctionExtensionMapRepository(
-                            defaultFunctionExtensionRepositoryBackup.toMutableMap()
-                        )
                 }
             }
-            "\$[?length(@) < 3]" {
-                shouldNotThrowAny {
-                    JsonPath(this.testScope.testCase.name.originalName)
-                }
-            }
-            "\$[?length(@.*) < 3]" {
-                shouldThrow<JsonPathTypeCheckerException> {
-                    JsonPath(this.testScope.testCase.name.originalName)
-                }
-            }
-            "\$[?count(@.*) == 1]" {
-                shouldNotThrowAny {
-                    JsonPath(this.testScope.testCase.name.originalName)
-                }
-            }
-            "\$[?count(1) == 1]" {
-                shouldThrow<JsonPathTypeCheckerException> {
-                    JsonPath(this.testScope.testCase.name.originalName)
-                }
-            }
-            "\$[?count(foo(@.*)) == 1]" {
-                JsonPath.defaultFunctionExtensionRepository.addExtension("foo") {
-                    JsonPathFunctionExtension.NodesTypeFunctionExtension(
-                        JsonPathFilterExpressionType.NodesType,
-                    ) {
-                        listOf()
-                    }
-                }
-
-                shouldNotThrowAny {
-                    JsonPath(this.testScope.testCase.name.originalName)
-                }
-            }
-            "\$[?match(@.timezone, 'Europe/.*') == true]" {
-                shouldThrow<JsonPathTypeCheckerException> {
-                    JsonPath(this.testScope.testCase.name.originalName)
-                }
-            }
-            "\$[?value(@..color) == 'red']" {
-                shouldNotThrowAny {
-                    JsonPath(this.testScope.testCase.name.originalName)
-                }
-            }
-            "\$[?value(@..color)]" {
-                shouldThrow<JsonPathTypeCheckerException> {
-                    JsonPath(this.testScope.testCase.name.originalName)
-                }
-            }
-            "\$[?bar(@.a)]" - {
-                "logical type argument" {
-                    JsonPath.defaultFunctionExtensionRepository.addExtension("bar") {
-                        JsonPathFunctionExtension.LogicalTypeFunctionExtension(
-                            JsonPathFilterExpressionType.LogicalType,
-                        ) {
-                            true
-                        }
-                    }
-
-                    shouldNotThrowAny {
-                        JsonPath(this.testScope.testCase.parent!!.name.originalName)
-                    }
-                }
-                "value type argument" {
-                    JsonPath.defaultFunctionExtensionRepository.addExtension("bar") {
-                        JsonPathFunctionExtension.LogicalTypeFunctionExtension(
-                            JsonPathFilterExpressionType.ValueType,
-                        ) {
-                            true
-                        }
-                    }
-
-                    shouldNotThrowAny {
-                        JsonPath(this.testScope.testCase.parent!!.name.originalName)
-                    }
-                }
-                "nodes type argument" {
-                    JsonPath.defaultFunctionExtensionRepository.addExtension("bar") {
-                        JsonPathFunctionExtension.LogicalTypeFunctionExtension(
+        ) - {
+            compiles("\$[?length(@) < 3]")
+            failsTypeCheck("\$[?length(@.*) < 3]")
+            compiles("\$[?count(@.*) == 1]")
+            failsTypeCheck("\$[?count(1) == 1]")
+            "\$[?count(foo(@.*)) == 1]".let { path ->
+                path {
+                    JsonPath.defaultFunctionExtensionRepository.addExtension("foo") {
+                        JsonPathFunctionExtension.NodesTypeFunctionExtension(
                             JsonPathFilterExpressionType.NodesType,
                         ) {
-                            true
+                            listOf()
                         }
                     }
 
                     shouldNotThrowAny {
-                        JsonPath(this.testScope.testCase.parent!!.name.originalName)
+                        JsonPath(path)
                     }
                 }
             }
-            "\$[?bnl(@.*)]" - {
-                "logical type argument" {
-                    JsonPath.defaultFunctionExtensionRepository.addExtension("bnl") {
+            failsTypeCheck("\$[?match(@.timezone, 'Europe/.*') == true]")
+            compiles("\$[?value(@..color) == 'red']")
+            failsTypeCheck("\$[?value(@..color)]")
+            "\$[?bar(@.a)]".let { path ->
+                path - {
+                    "logical type argument" {
+                        JsonPath.defaultFunctionExtensionRepository.addExtension("bar") {
+                            JsonPathFunctionExtension.LogicalTypeFunctionExtension(
+                                JsonPathFilterExpressionType.LogicalType,
+                            ) {
+                                true
+                            }
+                        }
+
+                        shouldNotThrowAny {
+                            JsonPath(path)
+                        }
+                    }
+                    "value type argument" {
+                        JsonPath.defaultFunctionExtensionRepository.addExtension("bar") {
+                            JsonPathFunctionExtension.LogicalTypeFunctionExtension(
+                                JsonPathFilterExpressionType.ValueType,
+                            ) {
+                                true
+                            }
+                        }
+
+                        shouldNotThrowAny {
+                            JsonPath(path)
+                        }
+                    }
+                    "nodes type argument" {
+                        JsonPath.defaultFunctionExtensionRepository.addExtension("bar") {
+                            JsonPathFunctionExtension.LogicalTypeFunctionExtension(
+                                JsonPathFilterExpressionType.NodesType,
+                            ) {
+                                true
+                            }
+                        }
+
+                        shouldNotThrowAny {
+                            JsonPath(path)
+                        }
+                    }
+                }
+            }
+            "\$[?bnl(@.*)]".let { path ->
+                path - {
+                    "logical type argument" {
+                        JsonPath.defaultFunctionExtensionRepository.addExtension("bnl") {
+                            JsonPathFunctionExtension.LogicalTypeFunctionExtension(
+                                JsonPathFilterExpressionType.LogicalType,
+                            ) {
+                                true
+                            }
+                        }
+
+                        shouldNotThrowAny {
+                            JsonPath(path)
+                        }
+                    }
+                    "value type argument" {
+                        JsonPath.defaultFunctionExtensionRepository.addExtension("bnl") {
+                            JsonPathFunctionExtension.LogicalTypeFunctionExtension(
+                                JsonPathFilterExpressionType.ValueType,
+                            ) {
+                                true
+                            }
+                        }
+
+                        shouldThrow<JsonPathTypeCheckerException> {
+                            JsonPath(path)
+                        }
+                    }
+                    "nodes type argument" {
+                        JsonPath.defaultFunctionExtensionRepository.addExtension("bnl") {
+                            JsonPathFunctionExtension.LogicalTypeFunctionExtension(
+                                JsonPathFilterExpressionType.NodesType
+                            ) {
+                                true
+                            }
+                        }
+
+                        shouldNotThrowAny {
+                            JsonPath(path)
+                        }
+                    }
+                }
+            }
+            "\$[?blt(1==1)]".let { path ->
+                path {
+                    JsonPath.defaultFunctionExtensionRepository.addExtension("blt") {
                         JsonPathFunctionExtension.LogicalTypeFunctionExtension(
                             JsonPathFilterExpressionType.LogicalType,
                         ) {
@@ -881,73 +762,38 @@ class JsonPathUnitTest : FreeSpec({
                     }
 
                     shouldNotThrowAny {
-                        JsonPath(this.testScope.testCase.parent!!.name.originalName)
+                        JsonPath(path)
                     }
                 }
-                "value type argument" {
-                    JsonPath.defaultFunctionExtensionRepository.addExtension("bnl") {
+            }
+            "\$[?blt(1)]".let { path ->
+                path {
+                    JsonPath.defaultFunctionExtensionRepository.addExtension("blt") {
                         JsonPathFunctionExtension.LogicalTypeFunctionExtension(
-                            JsonPathFilterExpressionType.ValueType,
+                            JsonPathFilterExpressionType.LogicalType,
                         ) {
                             true
                         }
                     }
 
                     shouldThrow<JsonPathTypeCheckerException> {
-                        JsonPath(this.testScope.testCase.parent!!.name.originalName)
+                        JsonPath(path)
                     }
                 }
-                "nodes type argument" {
-                    JsonPath.defaultFunctionExtensionRepository.addExtension("bnl") {
+            }
+            "\$[?bal(1)]".let { path ->
+                path {
+                    JsonPath.defaultFunctionExtensionRepository.addExtension("bal") {
                         JsonPathFunctionExtension.LogicalTypeFunctionExtension(
-                            JsonPathFilterExpressionType.NodesType
+                            JsonPathFilterExpressionType.ValueType,
                         ) {
                             true
                         }
                     }
 
                     shouldNotThrowAny {
-                        JsonPath(this.testScope.testCase.parent!!.name.originalName)
+                        JsonPath(path)
                     }
-                }
-            }
-            "\$[?blt(1==1)]" {
-                JsonPath.defaultFunctionExtensionRepository.addExtension("blt") {
-                    JsonPathFunctionExtension.LogicalTypeFunctionExtension(
-                        JsonPathFilterExpressionType.LogicalType,
-                    ) {
-                        true
-                    }
-                }
-
-                shouldNotThrowAny {
-                    JsonPath(this.testScope.testCase.name.originalName)
-                }
-            }
-            "\$[?blt(1)]" {
-                JsonPath.defaultFunctionExtensionRepository.addExtension("blt") {
-                    JsonPathFunctionExtension.LogicalTypeFunctionExtension(
-                        JsonPathFilterExpressionType.LogicalType,
-                    ) {
-                        true
-                    }
-                }
-
-                shouldThrow<JsonPathTypeCheckerException> {
-                    JsonPath(this.testScope.testCase.name.originalName)
-                }
-            }
-            "\$[?bal(1)]" {
-                JsonPath.defaultFunctionExtensionRepository.addExtension("bal") {
-                    JsonPathFunctionExtension.LogicalTypeFunctionExtension(
-                        JsonPathFilterExpressionType.ValueType,
-                    ) {
-                        true
-                    }
-                }
-
-                shouldNotThrowAny {
-                    JsonPath(this.testScope.testCase.name.originalName)
                 }
             }
         }
@@ -956,27 +802,18 @@ class JsonPathUnitTest : FreeSpec({
             val jsonElement = Json.decodeFromString<JsonElement>(
                 "[\"a\", \"b\", \"c\", \"d\", \"e\", \"f\", \"g\"]"
             ).jsonArray
-            "\$[0, 3]" {
-                val nodeList = JsonPath(this.testScope.testCase.name.originalName)
-                    .query(jsonElement).map { it.value }
-
+            query("\$[0, 3]", jsonElement) { nodeList ->
                 nodeList shouldHaveSize 2
                 nodeList[0].shouldBe(jsonElement[0])
                 nodeList[1].shouldBe(jsonElement[3])
             }
-            "\$[0:2,5]" {
-                val nodeList = JsonPath(this.testScope.testCase.name.originalName)
-                    .query(jsonElement).map { it.value }
-
+            query("\$[0:2,5]", jsonElement) { nodeList ->
                 nodeList shouldHaveSize 3
                 nodeList[0].shouldBe(jsonElement[0])
                 nodeList[1].shouldBe(jsonElement[1])
                 nodeList[2].shouldBe(jsonElement[5])
             }
-            "\$[0,0]" {
-                val nodeList = JsonPath(this.testScope.testCase.name.originalName)
-                    .query(jsonElement).map { it.value }
-
+            query("\$[0,0]", jsonElement) { nodeList ->
                 nodeList shouldHaveSize 2
                 nodeList[0].shouldBe(jsonElement[0])
                 nodeList[1].shouldBe(jsonElement[0])
@@ -990,10 +827,7 @@ class JsonPathUnitTest : FreeSpec({
                         "     \"a\": [5, 3, [{\"j\": 4}, {\"k\": 6}]]\n" +
                         "   }"
             ).jsonObject
-            "\$..j" {
-                val nodeList = JsonPath(this.testScope.testCase.name.originalName)
-                    .query(jsonElement).map { it.value }
-
+            query("\$..j", jsonElement) { nodeList ->
                 nodeList shouldHaveSize 2
                 jsonElement["o"].shouldNotBeNull().jsonObject["j"].shouldBeIn(nodeList)
                 jsonElement["a"].shouldNotBeNull()
@@ -1001,20 +835,14 @@ class JsonPathUnitTest : FreeSpec({
                     .jsonArray[0].shouldNotBeNull()
                     .jsonObject["j"].shouldNotBeNull().shouldBeIn(nodeList)
             }
-            "\$..[0]" {
-                val nodeList = JsonPath(this.testScope.testCase.name.originalName)
-                    .query(jsonElement).map { it.value }
-
+            query("\$..[0]", jsonElement) { nodeList ->
                 nodeList shouldHaveSize 2
                 jsonElement["a"].shouldNotBeNull().jsonArray.let { a ->
                     a.jsonArray[0].shouldNotBeNull().shouldBe(nodeList[0])
                     a.jsonArray[2].shouldNotBeNull().jsonArray[0].shouldBe(nodeList[1])
                 }
             }
-            "\$..[*]" {
-                val nodeList = JsonPath(this.testScope.testCase.name.originalName)
-                    .query(jsonElement).map { it.value }
-
+            query("\$..[*]", jsonElement) { nodeList ->
                 nodeList shouldHaveSize 11
                 jsonElement["a"].shouldNotBeNull().shouldBeIn(nodeList).jsonArray.let { a ->
                     a.forEach { item ->
@@ -1035,10 +863,7 @@ class JsonPathUnitTest : FreeSpec({
                     }
                 }
             }
-            "\$..*" { // same as the one before this
-                val nodeList = JsonPath(this.testScope.testCase.name.originalName)
-                    .query(jsonElement).map { it.value }
-
+            query("\$..*", jsonElement) { nodeList -> // same as the one before this
                 nodeList shouldHaveSize 11
                 jsonElement["a"].shouldNotBeNull().shouldBeIn(nodeList).jsonArray.let { a ->
                     a.forEach { item ->
@@ -1059,17 +884,11 @@ class JsonPathUnitTest : FreeSpec({
                     }
                 }
             }
-            "\$..o" {
-                val nodeList = JsonPath(this.testScope.testCase.name.originalName)
-                    .query(jsonElement).map { it.value }
-
+            query("\$..o", jsonElement) { nodeList ->
                 nodeList shouldHaveSize 1
                 jsonElement["o"].shouldNotBeNull().shouldBeIn(nodeList)
             }
-            "\$.o..[*, *]" {
-                val nodeList = JsonPath(this.testScope.testCase.name.originalName)
-                    .query(jsonElement).map { it.value }
-
+            query("\$.o..[*, *]", jsonElement) { nodeList ->
                 nodeList shouldHaveSize 4
                 jsonElement["o"].shouldNotBeNull().jsonObject.let { o ->
                     o.forEach { oDescendant ->
@@ -1080,10 +899,7 @@ class JsonPathUnitTest : FreeSpec({
                     }
                 }
             }
-            "\$.a..[0, 1]" {
-                val nodeList = JsonPath(this.testScope.testCase.name.originalName)
-                    .query(jsonElement).map { it.value }
-
+            query("\$.a..[0, 1]", jsonElement) { nodeList ->
                 nodeList shouldHaveSize 4
                 jsonElement["a"].shouldNotBeNull().jsonArray.let { a ->
                     listOf(a, a[2]).forEach { descendant ->
@@ -1098,69 +914,42 @@ class JsonPathUnitTest : FreeSpec({
             val jsonElement = Json.decodeFromString<JsonElement>(
                 "   {\"a\": null, \"b\": [null], \"c\": [{}], \"null\": 1}"
             ).jsonObject
-            "\$.a" {
-                val nodeList = JsonPath(this.testScope.testCase.name.originalName)
-                    .query(jsonElement).map { it.value }
-
+            query("\$.a", jsonElement) { nodeList ->
                 nodeList shouldHaveSize 1
                 jsonElement["a"].shouldNotBeNull().shouldBeIn(nodeList)
             }
-            "\$.a[0]" {
-                val nodeList = JsonPath(this.testScope.testCase.name.originalName)
-                    .query(jsonElement).map { it.value }
-
+            query("\$.a[0]", jsonElement) { nodeList ->
                 nodeList shouldHaveSize 0
             }
-            "\$.a.d" {
-                val nodeList = JsonPath(this.testScope.testCase.name.originalName)
-                    .query(jsonElement).map { it.value }
-
+            query("\$.a.d", jsonElement) { nodeList ->
                 nodeList shouldHaveSize 0
             }
-            "\$.b[0]" {
-                val nodeList = JsonPath(this.testScope.testCase.name.originalName)
-                    .query(jsonElement).map { it.value }
-
+            query("\$.b[0]", jsonElement) { nodeList ->
                 nodeList shouldHaveSize 1
                 jsonElement["b"].shouldNotBeNull().jsonArray[0].shouldBeIn(nodeList)
             }
-            "\$.b[*]" {
-                val nodeList = JsonPath(this.testScope.testCase.name.originalName)
-                    .query(jsonElement).map { it.value }
-
+            query("\$.b[*]", jsonElement) { nodeList ->
                 nodeList shouldHaveSize 1
                 jsonElement["b"].shouldNotBeNull().jsonArray.mapIndexed { index, value ->
                     nodeList[index].shouldBe(value)
                 }
             }
-            "\$.b[?@]" {
-                val nodeList = JsonPath(this.testScope.testCase.name.originalName)
-                    .query(jsonElement).map { it.value }
-
+            query("\$.b[?@]", jsonElement) { nodeList ->
                 nodeList shouldHaveSize 1
                 jsonElement["b"].shouldNotBeNull().jsonArray.mapIndexed { index, value ->
                     nodeList[index].shouldBe(value)
                 }
             }
-            "\$.b[?@==null]" {
-                val nodeList = JsonPath(this.testScope.testCase.name.originalName)
-                    .query(jsonElement).map { it.value }
-
+            query("\$.b[?@==null]", jsonElement) { nodeList ->
                 nodeList shouldHaveSize 1
                 jsonElement["b"].shouldNotBeNull().jsonArray.mapIndexed { index, value ->
                     nodeList[index].shouldBe(value)
                 }
             }
-            "\$.c[?@.d==null]" {
-                val nodeList = JsonPath(this.testScope.testCase.name.originalName)
-                    .query(jsonElement).map { it.value }
-
+            query("\$.c[?@.d==null]", jsonElement) { nodeList ->
                 nodeList shouldHaveSize 0
             }
-            "\$.null" {
-                val nodeList = JsonPath(this.testScope.testCase.name.originalName)
-                    .query(jsonElement).map { it.value }
-
+            query("\$.null", jsonElement) { nodeList ->
                 nodeList shouldHaveSize 1
                 jsonElement["null"].shouldNotBeNull().shouldBeIn(nodeList)
             }
@@ -1206,52 +995,36 @@ class JsonPathUnitTest : FreeSpec({
             )
 
             "working" - {
-                "$[?$.tag.id == 'ic2:geo_generator' || $.tag.id == 'ic2:generator']" {
-                    val nodeList = JsonPath(this.testScope.testCase.name.originalName)
-                        .query(jsonElement).map { it.value }
+                query("$[?$.tag.id == 'ic2:geo_generator' || $.tag.id == 'ic2:generator']", jsonElement) { nodeList ->
                     nodeList shouldHaveSize 5
                 }
 
-                "\$[?(\$.tag.id == 'ic2:geo_generator' || \$.tag.id == 'ic2:generator')]" {
-                    val nodeList = JsonPath(this.testScope.testCase.name.originalName)
-                        .query(jsonElement).map { it.value }
+                query("\$[?(\$.tag.id == 'ic2:geo_generator' || \$.tag.id == 'ic2:generator')]", jsonElement) { nodeList ->
                     nodeList shouldHaveSize 5
                 }
 
-                "\$.tag[?(\$.tag.id == 'ic2:geo_generator' || \$.tag.id == 'ic2:generator')]" {
-                    val nodeList = JsonPath(this.testScope.testCase.name.originalName)
-                        .query(jsonElement).map { it.value }
+                query("\$.tag[?(\$.tag.id == 'ic2:geo_generator' || \$.tag.id == 'ic2:generator')]", jsonElement) { nodeList ->
                     nodeList shouldHaveSize 10
                 }
             }
 
             "not working" - {
-                "\$.tag.id[?(\$.tag.id == 'ic2:geo_generator' || \$.tag.id == 'ic2:generator')]" {
-                    val nodeList = JsonPath(this.testScope.testCase.name.originalName)
-                        .query(jsonElement).map { it.value }
+                query("\$.tag.id[?(\$.tag.id == 'ic2:geo_generator' || \$.tag.id == 'ic2:generator')]", jsonElement) { nodeList ->
                     nodeList shouldHaveSize 0
                 }
 
-                "\$[?(@.tag.id == 'ic2:geo_generator' || @.tag.id == 'ic2:generator')]" {
-                    val nodeList = JsonPath(this.testScope.testCase.name.originalName)
-                        .query(jsonElement).map { it.value }
+                query("\$[?(@.tag.id == 'ic2:geo_generator' || @.tag.id == 'ic2:generator')]", jsonElement) { nodeList ->
                     nodeList shouldHaveSize 0
                 }
 
-                "\$.tag[?(@.id == 'ic2:geo_generator' || @.id == 'ic2:generator')]" {
-                    val nodeList = JsonPath(this.testScope.testCase.name.originalName)
-                        .query(jsonElement).map { it.value }
+                query("\$.tag[?(@.id == 'ic2:geo_generator' || @.id == 'ic2:generator')]", jsonElement) { nodeList ->
                     nodeList shouldHaveSize 0
                 }
             }
         }
 
         "RMLTC0002g-JSON" - {
-            "$.students[*]]" {
-                shouldThrow<JsonPathParserException> {
-                    JsonPath(this.testScope.testCase.name.originalName)
-                }
-            }
+            failsParsing("$.students[*]]")
         }
     }
-})
+}

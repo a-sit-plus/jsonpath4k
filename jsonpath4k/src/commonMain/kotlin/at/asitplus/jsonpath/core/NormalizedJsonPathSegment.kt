@@ -77,7 +77,7 @@ sealed interface NormalizedJsonPathSegment {
         override val descriptor: SerialDescriptor
             get() = SerialDescriptor(
                 original = JsonElement.serializer().descriptor,
-                serialName = JsonDistinguishableSerializer::class.qualifiedName!!,
+                serialName = JsonDistinguishableSerializer::class.simpleName!!,
             )
 
         override fun serialize(
@@ -92,7 +92,7 @@ sealed interface NormalizedJsonPathSegment {
 
         override fun deserialize(decoder: Decoder): NormalizedJsonPathSegment {
             require(decoder is JsonDecoder) {
-                "Expected decoder to be ${JsonDecoder::class.qualifiedName!!}, but was `$decoder`."
+                "Expected decoder to be ${JsonDecoder::class.simpleName!!}, but was `$decoder`."
             }
             val jsonElement = decoder.decodeJsonElement().jsonPrimitive
             return if (jsonElement.isString) {

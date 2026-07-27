@@ -1,7 +1,19 @@
 # CHANGELOG
 
-# Release 3.2.0-SNAPSHOT
- * TODO
+# Release 4.0.0-SNAPSHOT
+* Support all KMP targets
+    * Logging through Napier is only supported on
+        * Android (ART)
+        * JVM
+        * iOS
+        * tvOS
+        * macOS
+        * JVM
+    * Logging on other targets defaults to NOOP
+* Kotlin 2.4.0
+* Fix race condition thanks to latest ANTLR 1.0.12
+* Remove deprecations
+* Change Serializer names to work on web targets too
 
 # Release 3.1.0
  * Add: structural equality check for `NormalizedJsonPath` and `NormalizedJsonPathSegment` 

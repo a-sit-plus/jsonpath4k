@@ -12,9 +12,6 @@ sealed class JsonPathFunctionExtension(
 ) {
     abstract operator fun invoke(arguments: List<JsonPathFilterExpressionValue>): JsonPathFilterExpressionValue
 
-    @Deprecated("To be removed in version 4. Replaced with `invoke`.", ReplaceWith("invoke"))
-    fun evaluate(arguments: List<JsonPathFilterExpressionValue>): JsonPathFilterExpressionValue = invoke(arguments)
-
     class ValueTypeFunctionExtension(
         vararg argumentTypes: JsonPathFilterExpressionType,
         private val evaluator: (arguments: List<JsonPathFilterExpressionValue>) -> JsonElement?,
