@@ -1,5 +1,7 @@
 # CHANGELOG
 
+# NEXT
+
 # Release 4.0.0
 * Support all KMP targets
     * Logging through Napier is only supported on
