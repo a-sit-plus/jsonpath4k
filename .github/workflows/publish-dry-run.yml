@@ -33,4 +33,4 @@ jobs:
         with:
           submodules: recursive
       - name: Build Dokka HTML
-        run: ./gradlew dokkaHtml
+        run: ./gradlew dokkaGenerateSite
