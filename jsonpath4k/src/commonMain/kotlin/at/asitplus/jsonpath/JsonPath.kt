@@ -1,6 +1,5 @@
 package at.asitplus.jsonpath
 
-//import io.github.aakira.napier.Napier
 import at.asitplus.jsonpath.core.JsonPathCompiler
 import at.asitplus.jsonpath.core.JsonPathFilterExpressionType
 import at.asitplus.jsonpath.core.JsonPathFunctionExtension

@@ -11,7 +11,7 @@
         * JVM
     * Logging on other targets defaults to NOOP
 * Kotlin 2.4.0
-* Fix race condition thanks to latest ANTLR 1.0.13
+* Fix race condition thanks to latest ANTLR 1.0.12
 * Remove deprecations
 * Change Serializer names to work on web targets too
 
